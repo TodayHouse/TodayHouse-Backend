@@ -1,7 +1,7 @@
 ---
 name: bug-template
 about: 버그와 관련된 이슈 템플릿입니다.
-title: ''
+title: "[branch_name] 버그를 명사형으로 작성"
 labels: "\U0001F41B 버그"
 assignees: ''
 
