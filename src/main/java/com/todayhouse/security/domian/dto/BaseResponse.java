@@ -1,10 +1,8 @@
-package com.todayhouse.security.domian.user.dto;
+package com.todayhouse.security.domian.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.Map;
 
 @AllArgsConstructor
 @Builder
