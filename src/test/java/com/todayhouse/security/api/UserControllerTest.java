@@ -13,15 +13,18 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mockStatic;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Transactional
 @AutoConfigureMockMvc
 @SpringBootTest
 class UserControllerTest {
@@ -33,6 +36,7 @@ class UserControllerTest {
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
+
 
     @BeforeEach
     void clearRepository(){
@@ -78,12 +82,12 @@ class UserControllerTest {
     @Test
     void jwtTest() throws Exception {
         userRepository.save(User.builder()
-                .email("test@.com")
-                .password("12345")
+                .email("b@a.com")
+                .password(new BCryptPasswordEncoder().encode("12345"))
                 .roles(Collections.singletonList("ROLE_USER"))
                 .build());
         String url = "http://localhost:8080/api/test";
-        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList("ROLE_USER"));
+        String jwt = jwtTokenProvider.createToken("b@a.com", Collections.singletonList("ROLE_USER"));
 
         mockMvc.perform(MockMvcRequestBuilders.get(url)
                         .header("X-AUTH-TOKEN",jwt)
@@ -97,6 +101,4 @@ class UserControllerTest {
                 .andExpect(status().is4xxClientError())
                 .andDo(print());
     }
-
-
 }
