@@ -1,6 +1,6 @@
-package com.todayhouse.security.application;
+package com.todayhouse.domain.user.application;
 
-import com.todayhouse.security.domian.user.UserRepository;
+import com.todayhouse.domain.user.dao.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,9 +1,9 @@
-package com.todayhouse.security.api;
+package com.todayhouse.domain.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.todayhouse.security.config.JwtTokenProvider;
-import com.todayhouse.security.domian.user.User;
-import com.todayhouse.security.domian.user.UserRepository;
+import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mockStatic;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -73,8 +72,8 @@ class UserControllerTest {
                 .build());
 
         mockMvc.perform(MockMvcRequestBuilders.post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(user)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(user)))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -90,13 +89,13 @@ class UserControllerTest {
         String jwt = jwtTokenProvider.createToken("b@a.com", Collections.singletonList("ROLE_USER"));
 
         mockMvc.perform(MockMvcRequestBuilders.get(url)
-                        .header("X-AUTH-TOKEN",jwt)
+                        .header("Authorization", "Bearer "+jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
 
         mockMvc.perform(MockMvcRequestBuilders.get(url)
-                        .header("X-AUTH-TOKEN",jwt.replace("1","2"))
+                        .header("Authorization","Bearer "+jwt.replace("1","2"))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError())
                 .andDo(print());

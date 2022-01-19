@@ -1,11 +1,11 @@
-package com.todayhouse.security.config;
+package com.todayhouse.global.config.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +23,8 @@ import java.util.List;
 @Component
 public class JwtTokenProvider {
 
-    private String secretKey = "todayzip";
+    @Value("${jwt.secret}")
+    private String secretKey;
 
     // 토큰 유효시간 30분
     private final long tokenValidTime = 30 * 60 * 1000L;
@@ -64,7 +65,7 @@ public class JwtTokenProvider {
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         //Authorization : Bearer {토큰} 방식으로 헤더를 받는다.
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer "))
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer "))
             return request.getHeader("Authorization").substring(7);
         else
             return null;
