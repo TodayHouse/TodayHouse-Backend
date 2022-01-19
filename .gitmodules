@@ -1,0 +1,3 @@
+[submodule "TodayHouse-Secret"]
+	path = TodayHouse-Secret
+	url = https://github.com/TodayHouse/TodayHouse-Secret.git
