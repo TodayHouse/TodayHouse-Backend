@@ -1,4 +1,4 @@
-package com.todayhouse.security.config;
+package com.todayhouse.global.config.jwt;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;

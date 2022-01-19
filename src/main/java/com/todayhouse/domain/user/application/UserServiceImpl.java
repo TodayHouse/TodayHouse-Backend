@@ -1,10 +1,10 @@
-package com.todayhouse.security.application;
+package com.todayhouse.domain.user.application;
 
-import com.todayhouse.security.config.JwtTokenProvider;
-import com.todayhouse.security.domian.dto.Login;
-import com.todayhouse.security.domian.dto.Save;
-import com.todayhouse.security.domian.user.User;
-import com.todayhouse.security.domian.user.UserRepository;
+import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.dto.request.UserLoginRequest;
+import com.todayhouse.domain.user.dto.request.UserSaveRequest;
+import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,13 +17,13 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
     @Override
-    public User save(Save.UserSaveRequest request) {
+    public User save(UserSaveRequest request) {
         return userRepository.save(User.builder()
                 .email(request.getEmail())
                 .password(new BCryptPasswordEncoder().encode(request.getPassword()))
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public String login(Login.UserLoginRequest request) {
+    public String login(UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()->new IllegalArgumentException("이메일을 찾을 수 없습니다."));
 
