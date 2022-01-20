@@ -21,7 +21,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -36,17 +36,26 @@ class UserControllerTest {
     @Autowired
     JwtTokenProvider jwtTokenProvider;
 
-
     @BeforeEach
-    void clearRepository(){
+    void clearRepository() {
         userRepository.deleteAll();
+        userRepository.save(User.builder()
+                .email("test")
+                .password(new BCryptPasswordEncoder().encode("12345"))
+                .roles(Collections.singletonList("ROLE_USER"))
+                .agreePICU(true)
+                .agreePromotion(true)
+                .agreeTOS(true)
+                .nickname("testname")
+                .build());
     }
 
     @Test
-    void 유저등록() throws Exception{
+    void 유저등록() throws Exception {
         Map<String, String> user = new HashMap<>();
-        user.put("email","test@t.com");
-        user.put("password","12345");
+        user.put("email", "test@t.com");
+        user.put("password", "12345");
+        user.put("nickname","abc");
         String url = "http://localhost:8080/api/join";
 
         mockMvc.perform(MockMvcRequestBuilders.post(url)
@@ -55,21 +64,15 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         String email = userRepository.findByEmail("test@t.com").get().getEmail();
-        assertEquals(email,user.get("email"));
+        assertEquals(email, user.get("email"));
     }
 
     @Test
-    void 로그인() throws Exception{
+    void 로그인() throws Exception {
         Map<String, String> user = new HashMap<>();
-        user.put("email","test@t.com");
-        user.put("password","12345");
+        user.put("email", "test");
+        user.put("password", "12345");
         String url = "http://localhost:8080/api/login";
-
-        userRepository.save(User.builder()
-                .email("test@t.com")
-                .password(new BCryptPasswordEncoder().encode("12345"))
-                .roles(Collections.singletonList("ROLE_USER"))
-                .build());
 
         mockMvc.perform(MockMvcRequestBuilders.post(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -80,24 +83,41 @@ class UserControllerTest {
 
     @Test
     void jwtTest() throws Exception {
-        userRepository.save(User.builder()
-                .email("b@a.com")
-                .password(new BCryptPasswordEncoder().encode("12345"))
-                .roles(Collections.singletonList("ROLE_USER"))
-                .build());
         String url = "http://localhost:8080/api/test";
-        String jwt = jwtTokenProvider.createToken("b@a.com", Collections.singletonList("ROLE_USER"));
+        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList("ROLE_USER"));
 
         mockMvc.perform(MockMvcRequestBuilders.get(url)
-                        .header("Authorization", "Bearer "+jwt)
+                        .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
 
         mockMvc.perform(MockMvcRequestBuilders.get(url)
-                        .header("Authorization","Bearer "+jwt.replace("1","2"))
+                        .header("Authorization", "Bearer " + jwt.replace("1", "2"))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError())
                 .andDo(print());
+    }
+
+    @Test
+    void 이메일_닉네임_중복() throws Exception {
+        String url = "http://localhost:8080/api/";
+        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList("ROLE_USER"));
+
+        //email
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "email/test/exist"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true));
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "email/fail/exist"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(false));
+
+        //nickname
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "nickname/testname/exist"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true));
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "nickname/testfail/exist"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(false));
     }
 }
