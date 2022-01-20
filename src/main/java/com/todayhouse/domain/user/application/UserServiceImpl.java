@@ -15,17 +15,13 @@ import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Optional;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
-
-    @Override
-    public User save(UserSaveRequest request) {
-        return userRepository.save(request.toEntity());
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -46,6 +42,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User save(UserSaveRequest request) {
+        saveRequestValidate(request);
+        return userRepository.save(request.toEntity());
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public String login(UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
@@ -56,6 +58,17 @@ public class UserServiceImpl implements UserService {
         }
 
         return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
+    }
+
+    private void saveRequestValidate(UserSaveRequest request){
+        if(userRepository.existsByEmail(request.getEmail()))
+            throw new IllegalArgumentException();
+
+        if(userRepository.existsByNickname(request.getNickname()))
+            throw new IllegalArgumentException();
+
+        if(!request.getPassword1().equals(request.getPassword2()))
+            throw new IllegalArgumentException();
     }
 
     //테스트 계정

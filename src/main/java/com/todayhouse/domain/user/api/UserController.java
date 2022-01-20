@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @Slf4j
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -32,15 +34,17 @@ public class UserController {
     }
 
     // 회원가입
-    @PostMapping("/join")
-    public BaseResponse join(@RequestBody UserSaveRequest request) {
+    @PostMapping("/signup")
+    public BaseResponse signup(@Valid @RequestBody UserSaveRequest request) {
+        log.info("이메일: {}, 닉네임: {}",
+                request.getEmail(), request.getNickname());
         UserSaveResponse response = new UserSaveResponse(userService.save(request));
         return new BaseResponse(response);
     }
 
     // 로그인
     @PostMapping("/login")
-    public BaseResponse login(@RequestBody UserLoginRequest request) {
+    public BaseResponse login(@Valid @RequestBody UserLoginRequest request) {
         UserLoginResponse response = new UserLoginResponse(userService.login(request));
         return new BaseResponse(response);
     }
