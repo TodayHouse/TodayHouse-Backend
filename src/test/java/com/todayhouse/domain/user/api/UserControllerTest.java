@@ -19,9 +19,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -41,7 +41,7 @@ class UserControllerTest {
         userRepository.deleteAll();
         userRepository.save(User.builder()
                 .email("test")
-                .password(new BCryptPasswordEncoder().encode("12345"))
+                .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList("ROLE_USER"))
                 .agreePICU(true)
                 .agreePromotion(true)
@@ -51,27 +51,10 @@ class UserControllerTest {
     }
 
     @Test
-    void 유저등록() throws Exception {
-        Map<String, String> user = new HashMap<>();
-        user.put("email", "test@t.com");
-        user.put("password", "12345");
-        user.put("nickname","abc");
-        String url = "http://localhost:8080/api/join";
-
-        mockMvc.perform(MockMvcRequestBuilders.post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(user)))
-                .andExpect(status().isOk());
-
-        String email = userRepository.findByEmail("test@t.com").get().getEmail();
-        assertEquals(email, user.get("email"));
-    }
-
-    @Test
     void 로그인() throws Exception {
         Map<String, String> user = new HashMap<>();
         user.put("email", "test");
-        user.put("password", "12345");
+        user.put("password", "12345678");
         String url = "http://localhost:8080/api/login";
 
         mockMvc.perform(MockMvcRequestBuilders.post(url)
