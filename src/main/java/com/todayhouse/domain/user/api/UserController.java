@@ -7,13 +7,29 @@ import com.todayhouse.domain.user.dto.response.UserLoginResponse;
 import com.todayhouse.domain.user.dto.response.UserSaveResponse;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @RestController
 public class UserController {
     private final UserService userService;
+
+    @GetMapping("/email/{email}/exist")
+    public BaseResponse existEmail(@PathVariable String email){
+        log.info("확인 이메일: {}",email);
+        boolean exist = userService.existByEmail(email);
+        return new BaseResponse(exist);
+    }
+
+    @GetMapping("/nickname/{nickname}/exist")
+    public BaseResponse existNickname(@PathVariable String nickname){
+        log.info("확인 닉네임: {}",nickname);
+        boolean exist = userService.existByNickname(nickname);
+        return new BaseResponse(exist);
+    }
 
     // 회원가입
     @PostMapping("/join")
