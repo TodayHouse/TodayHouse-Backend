@@ -40,15 +40,16 @@ public enum BaseResponseStatus {
 
     // user
     POST_USER_FAIL_JOIN(false, 3002, "회원가입에 실패하였습니다."),
-    POST_USER_FAIL_LOGIN(false, 3003, "로그인에 실패하였습니다.");
+    POST_USER_FAIL_LOGIN(false, 3003, "로그인에 실패하였습니다."),
 
     // product
 
     // story
-    
-
 
     // 4000, 5000...추가적인 에러코드 필요 시 자유롭게 작성해주세요.
+
+    // 그 밖의
+    OTHERS(false, 9999, "내부 오류가 발생했습니다.");
 
     private final boolean isSuccess;
     private final int code;
