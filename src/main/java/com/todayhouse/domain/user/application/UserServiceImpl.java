@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
     private void preMember() {
         userRepository.save(User.builder()
                 .email("admin")
-                .password(new BCryptPasswordEncoder().encode("12345"))
+                .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList("ROLE_ADMIN"))
                 .agreePICU(true)
                 .agreePromotion(true)
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(User.builder()
                 .email("a@a.com")
-                .password(new BCryptPasswordEncoder().encode("12345"))
+                .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList("ROLE_USER"))
                 .agreePICU(true)
                 .agreePromotion(true)
