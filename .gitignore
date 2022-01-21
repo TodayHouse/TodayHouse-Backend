@@ -4,9 +4,9 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-application-aws.yml
-application-jwt.yml
-
+**/resources/application-aws.yml
+**/resources/application-jwt.yml
+**/resources/application-email.yml
 
 ### STS ###
 .apt_generated
