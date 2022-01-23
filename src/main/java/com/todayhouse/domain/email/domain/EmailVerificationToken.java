@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class EmailConfirmToken {
+public class EmailVerificationToken {
     private static final long EMAIL_TOKEN_EXPIRATION_TIME_VALUE = 3L;    //토큰 만료 시간
 
     @Id
@@ -24,10 +24,7 @@ public class EmailConfirmToken {
     private String id;
 
     @Column
-    private LocalDateTime expirationDate;
-
-    @Column
-    private boolean expired;
+    private LocalDateTime expirationAt;
 
     @Column
     private String email;
@@ -37,29 +34,23 @@ public class EmailConfirmToken {
 
     @CreatedDate
     @Column(updatable = false)
-    private LocalDateTime createDate;
+    private LocalDateTime createAt;
 
     @LastModifiedDate
-    private LocalDateTime lastModifiedDate;
+    private LocalDateTime modifiedAt;
 
     // 인증 토큰 생성
-    public static EmailConfirmToken createEmailToken(String email, String token) {
-        EmailConfirmToken confirmationToken = new EmailConfirmToken();
-        confirmationToken.expirationDate = LocalDateTime.now().plusMinutes(EMAIL_TOKEN_EXPIRATION_TIME_VALUE); // 3분후 만료
-        confirmationToken.email = email;
-        confirmationToken.token = token;
-        confirmationToken.expired = false;
-        return confirmationToken;
+    public static EmailVerificationToken createEmailToken(String email, String token) {
+        EmailVerificationToken verificationToken = new EmailVerificationToken();
+        verificationToken.expirationAt = LocalDateTime.now().plusMinutes(EMAIL_TOKEN_EXPIRATION_TIME_VALUE); // 3분후 만료
+        verificationToken.email = email;
+        verificationToken.token = token;
+        return verificationToken;
     }
 
     // 토큰 재전송
     public String updateToken(String token) {
         this.token = token;
         return this.id;
-    }
-
-    // 토큰 기한 만료
-    public void useToken() {
-        expired = true;
     }
 }

@@ -1,7 +1,7 @@
 package com.todayhouse.domain.email.application;
 
-import com.todayhouse.domain.email.dao.EmailConfirmTokenRepository;
-import com.todayhouse.domain.email.domain.EmailConfirmToken;
+import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
+import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.email.dto.request.EmailSendRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @Transactional
@@ -22,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class EmailSenderService {
 
     private final JavaMailSender javaMailSender;
-    private final EmailConfirmTokenRepository repository;
+    private final EmailVerificationTokenRepository repository;
     private final UserRepository userRepository;
 
     @Async
@@ -74,6 +72,6 @@ public class EmailSenderService {
     // 토큰 재발급시 업데이트
     private String tokenSave(String email, String token) {
         return repository.findByEmail(email).map(unused -> unused.updateToken(token))
-                .orElseGet(()->repository.save(EmailConfirmToken.createEmailToken(email, token)).getId());
+                .orElseGet(()->repository.save(EmailVerificationToken.createEmailToken(email, token)).getId());
     }
 }
