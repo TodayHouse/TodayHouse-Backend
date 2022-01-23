@@ -13,11 +13,11 @@ import java.time.LocalDateTime;
 public class TokenVerificationResponse {
     private String email;
     private String token;
-    private LocalDateTime expirationAt;
+    private LocalDateTime expiredAt;
 
     public TokenVerificationResponse (EmailVerificationToken token){
         this.email = token.getEmail();
         this.token = token.getToken();
-        this.expirationAt = token.getExpirationAt();
+        this.expiredAt = token.getExpiredAt();
     }
 }

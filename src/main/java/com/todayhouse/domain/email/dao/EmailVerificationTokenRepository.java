@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface EmailVerificationTokenRepository extends JpaRepository<EmailVerificationToken,String> {
     Optional<EmailVerificationToken> findByEmail(String Email);
-    Optional<EmailVerificationToken> findByEmailAndTokenAndExpirationAtAfter(String email, String token, LocalDateTime now);
+    Optional<EmailVerificationToken> findByEmailAndTokenAndExpiredAtAfterAndExpired
+            (String email, String token, LocalDateTime now, boolean expired);
 }

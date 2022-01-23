@@ -24,13 +24,16 @@ public class EmailVerificationToken {
     private String id;
 
     @Column
-    private LocalDateTime expirationAt;
+    private LocalDateTime expiredAt;
 
     @Column
     private String email;
 
     @Column
     private String token;
+
+    @Column
+    private boolean expired;
 
     @CreatedDate
     @Column(updatable = false)
@@ -42,9 +45,10 @@ public class EmailVerificationToken {
     // 인증 토큰 생성
     public static EmailVerificationToken createEmailToken(String email, String token) {
         EmailVerificationToken verificationToken = new EmailVerificationToken();
-        verificationToken.expirationAt = LocalDateTime.now().plusMinutes(EMAIL_TOKEN_EXPIRATION_TIME_VALUE); // 3분후 만료
+        verificationToken.expiredAt = LocalDateTime.now().plusMinutes(EMAIL_TOKEN_EXPIRATION_TIME_VALUE); // 3분후 만료
         verificationToken.email = email;
         verificationToken.token = token;
+        verificationToken.expired = false;
         return verificationToken;
     }
 
@@ -52,5 +56,10 @@ public class EmailVerificationToken {
     public String updateToken(String token) {
         this.token = token;
         return this.id;
+    }
+
+    // 토큰 만료
+    public void expiredToken(){
+        this.expired = true;
     }
 }
