@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.application;
 
+import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
@@ -22,6 +23,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,7 +44,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User save(UserSaveRequest request) {
+    public User saveUser(UserSaveRequest request) {
+        emailVerificationTokenRepository.findByEmailAndExpired(request.getEmail(),true)
+                        .orElseThrow(()->new IllegalArgumentException("이메일 인증이 필요합니다."));
         saveRequestValidate(request);
         return userRepository.save(request.toEntity());
     }
@@ -62,13 +66,13 @@ public class UserServiceImpl implements UserService {
 
     private void saveRequestValidate(UserSaveRequest request){
         if(userRepository.existsByEmail(request.getEmail()))
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("중복된 이메일입니다.");
 
         if(userRepository.existsByNickname(request.getNickname()))
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("중복된 닉네임입니다.");
 
         if(!request.getPassword1().equals(request.getPassword2()))
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
     }
 
     //테스트 계정

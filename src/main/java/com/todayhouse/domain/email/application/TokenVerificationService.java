@@ -21,7 +21,7 @@ public class TokenVerificationService {
         EmailVerificationToken result = repository.findByEmailAndTokenAndExpiredAtAfterAndExpired(
                         request.getEmail(), request.getToken(), LocalDateTime.now(), false)
                 .orElseThrow(() -> new IllegalArgumentException("올바른 인증 코드가 아닙니다."));
-        result.expiredToken();
+        result.expireToken();
         return result;
     }
 }

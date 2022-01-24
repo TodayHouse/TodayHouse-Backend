@@ -59,7 +59,7 @@ public class EmailVerificationToken {
     }
 
     // 토큰 만료
-    public void expiredToken(){
+    public void expireToken(){
         this.expired = true;
     }
 }

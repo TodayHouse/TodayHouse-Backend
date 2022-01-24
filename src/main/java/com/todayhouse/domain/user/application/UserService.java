@@ -10,6 +10,6 @@ public interface UserService {
     Optional<User> findByEmail(String email);
     boolean existByEmail(String email);
     boolean existByNickname(String nickname);
-    User save(UserSaveRequest request);
+    User saveUser(UserSaveRequest request);
     String login(UserLoginRequest request);
 }

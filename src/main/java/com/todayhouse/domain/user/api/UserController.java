@@ -38,7 +38,7 @@ public class UserController {
     public BaseResponse signup(@Valid @RequestBody UserSaveRequest request) {
         log.info("이메일: {}, 닉네임: {}",
                 request.getEmail(), request.getNickname());
-        UserSaveResponse response = new UserSaveResponse(userService.save(request));
+        UserSaveResponse response = new UserSaveResponse(userService.saveUser(request));
         return new BaseResponse(response);
     }
 
