@@ -14,6 +14,7 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Transactional
 @SpringBootTest
 class EmailSenderServiceTest {
 
@@ -36,19 +37,26 @@ class EmailSenderServiceTest {
     }
 
     @Test
-    @Transactional
     void 토큰_추가_후_변경(){
-        EmailSendRequest request = EmailSendRequest.builder().email("today.house.clone@gmail.com")
-                .build();
-        String id = service.sendEmail(request);
-        Optional<EmailVerificationToken> token = repository.findById(id);
-        assertThat(token.map(t -> t.getId())).isEqualTo(Optional.of(id));
-        assertThat(token.map(t->t.getEmail())).isEqualTo(Optional.of("today.house.clone@gmail.com"));
+        String email = "today.house.clone@gmail.com";
+        String token = "123776";
+        String newToken = "0987621";
+        String id = repository.findByEmail(email).map(unused -> unused.updateToken(token))
+                .orElseGet(() -> repository.save(EmailVerificationToken.createEmailToken(email, token)).getId());
 
-        Optional<Object> prev = token.map(t -> t.getToken());
+        Optional<EmailVerificationToken> result = repository.findById(id);
+
+        assertThat(result.map(t -> t.getId())).isEqualTo(Optional.of(id));
+        assertThat(result.map(t->t.getEmail())).isEqualTo(Optional.of("today.house.clone@gmail.com"));
+
         //변경
-        id = service.sendEmail(request);
+        Optional<Object> prev = result.map(t -> t.getToken());
+
+        id = repository.findByEmail(email).map(unused -> unused.updateToken(newToken))
+                .orElseGet(() -> repository.save(EmailVerificationToken.createEmailToken(email, newToken)).getId());
         Optional<EmailVerificationToken> update = repository.findById(id);
+
+        //검증
         assertThat(repository.count()).isEqualTo(1);
         assertThat(prev).isNotEqualTo(update.map(t->t.getToken()));
     }
