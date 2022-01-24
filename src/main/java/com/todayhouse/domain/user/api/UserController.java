@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @Slf4j
-@RequestMapping("/api")
 @RequiredArgsConstructor
 @RestController
 public class UserController {
