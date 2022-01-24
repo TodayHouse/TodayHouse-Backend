@@ -1,8 +1,11 @@
 package com.todayhouse.domain.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
+import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.dto.request.UserSaveRequest;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,6 +40,9 @@ class UserControllerTest {
     @Autowired
     JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    EmailVerificationTokenRepository emailVerificationTokenRepository;
+
     @BeforeEach
     void clearRepository() {
         userRepository.deleteAll();
@@ -48,6 +55,30 @@ class UserControllerTest {
                 .agreeTOS(true)
                 .nickname("testname")
                 .build());
+    }
+
+    @Test
+    void 회원가입() throws Exception{
+        String email = "today.house.clone@gmail.com";
+        String token = "101010";
+        UserSaveRequest request = UserSaveRequest.builder()
+                .email(email)
+                .password1("09876543")
+                .password2("09876543")
+                .nickname("test")
+                .agreePICU(true)
+                .agreePromotion(true)
+                .agreeTOS(true).build();
+        String url = "http://localhost:8080/api/signup";
+        EmailVerificationToken emailToken = EmailVerificationToken.createEmailToken(email, token);
+        emailToken.expireToken();
+        emailVerificationTokenRepository.save(emailToken);
+
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
