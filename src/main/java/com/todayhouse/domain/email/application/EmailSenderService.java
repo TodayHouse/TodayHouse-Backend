@@ -5,6 +5,7 @@ import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.email.dto.request.EmailSendRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,9 @@ public class EmailSenderService {
     private final JavaMailSender javaMailSender;
     private final EmailVerificationTokenRepository repository;
     private final UserRepository userRepository;
+
+    @Value("${spring.mail.username}")
+    private String google;
 
     @Async
     public String sendEmail(EmailSendRequest request) {
@@ -62,7 +66,7 @@ public class EmailSenderService {
             message.addRecipients(MimeMessage.RecipientType.TO, email);//보내는 대상
             message.setSubject("[오늘의집] 인증코드");//제목
             message.setText(msg, "utf-8", "html");//내용
-            message.setFrom(new InternetAddress(email, "오늘의집"));//보내는 사람
+            message.setFrom(new InternetAddress(google, "오늘의집"));//보내는 사람
         } catch (Exception e) {
             throw new RuntimeException();
         }
