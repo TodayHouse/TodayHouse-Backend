@@ -7,7 +7,9 @@ import com.todayhouse.domain.user.dto.request.UserSaveRequest;
 import java.util.Optional;
 
 public interface UserService {
-    User save(UserSaveRequest request);
     Optional<User> findByEmail(String email);
+    boolean existByEmail(String email);
+    boolean existByNickname(String nickname);
+    User saveUser(UserSaveRequest request);
     String login(UserLoginRequest request);
 }

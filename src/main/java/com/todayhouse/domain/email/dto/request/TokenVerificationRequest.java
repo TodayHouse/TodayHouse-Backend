@@ -1,4 +1,4 @@
-package com.todayhouse.domain.user.dto.response;
+package com.todayhouse.domain.email.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserLoginResponse {
-    String accessToken;
+public class TokenVerificationRequest {
+    String email;
+    String token;
 }

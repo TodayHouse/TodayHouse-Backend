@@ -1,15 +1,54 @@
 package com.todayhouse.domain.user.dto.request;
 
+import com.todayhouse.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.Collections;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class UserSaveRequest {
+    @NotBlank
+    @Size(max=50)
     private String email;
-    private String password;
+
+    @NotBlank
+    @Size(min=8,max=200)
+    private String password1;
+
+    @NotBlank
+    @Size(min=8,max=200)
+    private String password2;
+
+    @NotBlank
+    @Size(min=2,max=15)
+    private String nickname;
+
+    @NotNull
+    private boolean agreeTOS;
+    @NotNull
+    private boolean agreePICU;
+    @NotNull
+    private boolean agreePromotion;
+
+    public User toEntity(){
+        return User.builder()
+                .email(this.email)
+                .password(new BCryptPasswordEncoder().encode(this.password1))
+                .roles(Collections.singletonList("ROLE_USER"))
+                .nickname(this.nickname)
+                .agreeTOS(this.agreeTOS)
+                .agreePICU(this.agreePICU)
+                .agreePromotion(this.agreePromotion)
+                .build();
+    }
 }

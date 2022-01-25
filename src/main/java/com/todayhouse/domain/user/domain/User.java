@@ -24,11 +24,26 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 100, nullable = false, unique = true)
+    @Column(length = 50, nullable = false, unique = true)
     private String email;
 
-    @Column(length = 300, nullable = false)
+    @Column(length = 200, nullable = false)
     private String password;
+
+    @Column(length = 10)
+    private String birth;
+
+    @Column(length = 15, nullable = false, unique = true)
+    private String nickname;
+
+    @Column(nullable = false)
+    private boolean agreeTOS;
+
+    @Column(nullable = false)
+    private boolean agreePICU;
+
+    @Column(nullable = false)
+    private boolean agreePromotion;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
