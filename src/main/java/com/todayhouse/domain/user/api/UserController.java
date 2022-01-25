@@ -13,19 +13,20 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @Slf4j
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @RestController
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/email/{email}/exist")
+    @GetMapping("/emails/{email}/exist")
     public BaseResponse existEmail(@PathVariable String email){
         log.info("확인 이메일: {}",email);
         boolean exist = userService.existByEmail(email);
         return new BaseResponse(exist);
     }
 
-    @GetMapping("/nickname/{nickname}/exist")
+    @GetMapping("/nicknames/{nickname}/exist")
     public BaseResponse existNickname(@PathVariable String nickname){
         log.info("확인 닉네임: {}",nickname);
         boolean exist = userService.existByNickname(nickname);

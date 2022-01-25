@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@RequestMapping("/email")
+@RequestMapping("/emails")
 @RestController
 @RequiredArgsConstructor
 public class EmailController {

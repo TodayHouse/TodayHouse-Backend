@@ -69,7 +69,7 @@ class UserControllerTest {
                 .agreePICU(true)
                 .agreePromotion(true)
                 .agreeTOS(true).build();
-        String url = "http://localhost:8080/api/signup";
+        String url = "http://localhost:8080/users/signup";
         EmailVerificationToken emailToken = EmailVerificationToken.createEmailToken(email, token);
         emailToken.expireToken();
         emailVerificationTokenRepository.save(emailToken);
@@ -86,7 +86,7 @@ class UserControllerTest {
         Map<String, String> user = new HashMap<>();
         user.put("email", "test");
         user.put("password", "12345678");
-        String url = "http://localhost:8080/api/login";
+        String url = "http://localhost:8080/users/login";
 
         mockMvc.perform(MockMvcRequestBuilders.post(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -97,7 +97,7 @@ class UserControllerTest {
 
     @Test
     void jwtTest() throws Exception {
-        String url = "http://localhost:8080/api/test";
+        String url = "http://localhost:8080/users/test";
         String jwt = jwtTokenProvider.createToken("test", Collections.singletonList("ROLE_USER"));
 
         mockMvc.perform(MockMvcRequestBuilders.get(url)
@@ -115,22 +115,22 @@ class UserControllerTest {
 
     @Test
     void 이메일_닉네임_중복() throws Exception {
-        String url = "http://localhost:8080/api/";
+        String url = "http://localhost:8080/users/";
         String jwt = jwtTokenProvider.createToken("test", Collections.singletonList("ROLE_USER"));
 
         //email
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "email/test/exist"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "emails/test/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(true));
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "email/fail/exist"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "emails/fail/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(false));
 
         //nickname
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "nickname/testname/exist"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "nicknames/testname/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(true));
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "nickname/testfail/exist"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "nicknames/testfail/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(false));
     }
