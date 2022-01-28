@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.dto.request;
 
+import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,7 +45,7 @@ public class UserSaveRequest {
         return User.builder()
                 .email(this.email)
                 .password(new BCryptPasswordEncoder().encode(this.password1))
-                .roles(Collections.singletonList("ROLE_USER"))
+                .roles(Collections.singletonList(Role.USER.getKey()))
                 .nickname(this.nickname)
                 .agreeTOS(this.agreeTOS)
                 .agreePICU(this.agreePICU)

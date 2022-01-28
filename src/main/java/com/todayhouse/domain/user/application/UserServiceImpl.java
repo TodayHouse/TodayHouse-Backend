@@ -2,6 +2,7 @@ package com.todayhouse.domain.user.application;
 
 import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSaveRequest;
@@ -81,7 +82,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(User.builder()
                 .email("admin")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
-                .roles(Collections.singletonList("ROLE_ADMIN"))
+                .roles(Collections.singletonList(Role.ADMIN.getKey()))
                 .agreePICU(true)
                 .agreePromotion(true)
                 .agreeTOS(true)
@@ -91,7 +92,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(User.builder()
                 .email("a@a.com")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
-                .roles(Collections.singletonList("ROLE_USER"))
+                .roles(Collections.singletonList(Role.USER.getKey()))
                 .agreePICU(true)
                 .agreePromotion(true)
                 .agreeTOS(true)

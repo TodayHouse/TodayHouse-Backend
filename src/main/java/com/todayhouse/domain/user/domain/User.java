@@ -24,14 +24,15 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider authProvider;
+
     @Column(length = 50, nullable = false, unique = true)
     private String email;
 
-    @Column(length = 200, nullable = false)
+    @Column(length = 200)
     private String password;
-
-    @Column(length = 10)
-    private String birth;
 
     @Column(length = 15, nullable = false, unique = true)
     private String nickname;
@@ -79,5 +80,15 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public User update(String name){
+        this.nickname = name;
+
+        return this;
+    }
+
+    public List<String> getRoleKey() {
+        return roles;
     }
 }
