@@ -46,7 +46,9 @@ public enum BaseResponseStatus {
 
     // story
 
-    // 4000, 5000...추가적인 에러코드 필요 시 자유롭게 작성해주세요.
+    // 4000 : AWS S3 관련 오류
+    IMAGE_FILE_IO_EXCEPTION(false, 4000, "이미지파일을 다루는 과정에서 오류가 발생하였습니다."),
+    AMAZON_CLIENT_EXCEPTION(false, 4001, "아마존 서버에 업로드하는 과정에서 오류가 발생했습니다."),
 
     // 그 밖의
     OTHERS(false, 9999, "내부 오류가 발생했습니다.");
