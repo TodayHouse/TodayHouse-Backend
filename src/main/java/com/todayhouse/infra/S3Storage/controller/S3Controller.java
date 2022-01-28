@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/images")
 public class S3Controller {
 
-    @Autowired
-    private S3Service s3Service;
+    private final S3Service s3Service;
 
     @PostMapping
     public ResponseEntity<String> uploadFile(@RequestParam(value = "file") MultipartFile file){
