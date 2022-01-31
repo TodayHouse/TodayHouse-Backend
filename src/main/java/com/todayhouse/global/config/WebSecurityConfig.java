@@ -31,6 +31,8 @@ import java.util.Arrays;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final HttpCookieOAuth2AuthorizationRequestRepository authorizationRequestRepository;
 
     // 정적 자원에 대해서는 Security 설정을 적용하지 않음.
@@ -62,7 +64,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizationRequestRepository(authorizationRequestRepository)
                 .and()
                 .userInfoEndpoint()
-                .userService(customOAuth2UserService);
+                .userService(customOAuth2UserService)
+                .and()
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+                .failureHandler(oAuth2AuthenticationFailureHandler);
     }
 
     @Bean
