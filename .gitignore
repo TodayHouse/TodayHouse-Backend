@@ -44,6 +44,7 @@ src/main/resources/application-oauth.yml
 src/main/resources/application-jwt.yml
 src/main/resources/application-aws.yml
 src/main/resources/application-email.yml
+src/main/resources/application-oauth.yml
 
 ### REST Docs ###
 src/main/resources/static/docs/
