@@ -1,17 +1,8 @@
 ---
 name: bug-template
 about: 버그와 관련된 이슈 템플릿입니다.
-title: "[branch_name] 버그를 명사형으로 작성"
+title: "[fix/{branch_name}] 버그를 명사형으로 작성"
 labels: "\U0001F41B 버그"
-assignees: ''
-
----
-
----
-name: Bug template
-about: 버그 발생 시 사용하는 템플릿입니다
-title: "[branch_name] 버그를 명사형으로 작성"
-labels: ":bug: bug"
 assignees: ''
 
 ---
