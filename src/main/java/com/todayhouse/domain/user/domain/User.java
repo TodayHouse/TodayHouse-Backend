@@ -28,22 +28,19 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private AuthProvider authProvider;
 
-    @Column(length = 50, nullable = false, unique = true)
+    @Column(length = 50, unique = true)
     private String email;
 
     @Column(length = 200)
     private String password;
 
-    @Column(length = 15, nullable = false, unique = true)
+    @Column(length = 15, unique = true)
     private String nickname;
 
     @Column(nullable = false)
+    private boolean signedUp;
     private boolean agreeTOS;
-
-    @Column(nullable = false)
     private boolean agreePICU;
-
-    @Column(nullable = false)
     private boolean agreePromotion;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -82,13 +79,27 @@ public class User implements UserDetails {
         return true;
     }
 
-    public User update(String name){
-        this.nickname = name;
-
+    public User update(String name) {
+        this.email = name;
         return this;
     }
 
     public List<String> getRoleKey() {
         return roles;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", authProvider=" + authProvider +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", agreeTOS=" + agreeTOS +
+                ", agreePICU=" + agreePICU +
+                ", agreePromotion=" + agreePromotion +
+                ", roles=" + roles +
+                '}';
     }
 }
