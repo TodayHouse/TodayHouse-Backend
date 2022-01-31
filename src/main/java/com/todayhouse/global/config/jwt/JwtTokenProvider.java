@@ -26,8 +26,8 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    // 토큰 유효기간 1주일
-    private final long ACCESS_TOKEN_VALID_TIME = 7 * 24 * 60 * 60 * 1000L;
+    @Value("${jwt.expiration}")
+    private int expirationTime;
 
     private final UserDetailsService userDetailsService;
 
@@ -45,7 +45,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_VALID_TIME)) // set Expire Time
+                .setExpiration(new Date(now.getTime() + expirationTime)) // set Expire Time
                 .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘, secret 값
                 .compact();
     }
