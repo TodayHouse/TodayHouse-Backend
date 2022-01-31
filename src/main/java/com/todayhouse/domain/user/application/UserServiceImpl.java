@@ -58,9 +58,7 @@ public class UserServiceImpl implements UserService {
     public String login(UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
-        System.out.println(user.toString());
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            System.out.println(request.getPassword() + " " + user.getPassword());
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
 
@@ -86,6 +84,7 @@ public class UserServiceImpl implements UserService {
                 .email("admin")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList(Role.ADMIN.getKey()))
+                .signedUp(true)
                 .agreePICU(true)
                 .agreePromotion(true)
                 .agreeTOS(true)
@@ -97,6 +96,7 @@ public class UserServiceImpl implements UserService {
                 .email("a@a.com")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList(Role.USER.getKey()))
+                .signedUp(true)
                 .agreePICU(true)
                 .agreePromotion(true)
                 .agreeTOS(true)

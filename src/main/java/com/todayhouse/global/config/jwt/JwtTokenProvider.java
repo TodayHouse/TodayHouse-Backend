@@ -19,17 +19,17 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret}")
+    private final UserDetailsService userDetailsService;
+
+    @Value("${jwt.tokenSecret}")
     private String secretKey;
 
-    @Value("${jwt.expiration}")
-    private int expirationTime;
-
-    private final UserDetailsService userDetailsService;
+    @Value("${jwt.tokenExpirationMsec}")
+    private Long expiration;
 
     // 객체 초기화, secretKey를 Base64로 인코딩한다.
     @PostConstruct
@@ -45,7 +45,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + expirationTime)) // set Expire Time
+                .setExpiration(new Date(now.getTime() + expiration)) // set Expire Time
                 .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘, secret 값
                 .compact();
     }
@@ -74,7 +74,8 @@ public class JwtTokenProvider {
     // 토큰의 유효성 + 만료일자 확인
     public boolean validateToken(String jwtToken) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey)
+                    .parseClaimsJws(jwtToken);
             return !claims.getBody().getExpiration().before(new Date());
         } catch (Exception e) {
             return false;
