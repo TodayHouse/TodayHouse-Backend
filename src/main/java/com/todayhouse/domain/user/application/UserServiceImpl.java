@@ -2,6 +2,7 @@ package com.todayhouse.domain.user.application;
 
 import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
@@ -46,8 +47,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User saveUser(UserSaveRequest request) {
-        emailVerificationTokenRepository.findByEmailAndExpired(request.getEmail(),true)
-                        .orElseThrow(()->new IllegalArgumentException("이메일 인증이 필요합니다."));
+        emailVerificationTokenRepository.findByEmailAndExpired(request.getEmail(), true)
+                .orElseThrow(() -> new IllegalArgumentException("이메일 인증이 필요합니다."));
         saveRequestValidate(request);
         return userRepository.save(request.toEntity());
     }
@@ -57,22 +58,23 @@ public class UserServiceImpl implements UserService {
     public String login(UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
-
+        System.out.println(user.toString());
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            System.out.println(request.getPassword() + " " + user.getPassword());
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
 
-        return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
+        return jwtTokenProvider.createToken(user.getEmail(), user.getRoles());
     }
 
-    private void saveRequestValidate(UserSaveRequest request){
-        if(userRepository.existsByEmail(request.getEmail()))
+    private void saveRequestValidate(UserSaveRequest request) {
+        if (userRepository.existsByEmail(request.getEmail()))
             throw new IllegalArgumentException("중복된 이메일입니다.");
 
-        if(userRepository.existsByNickname(request.getNickname()))
+        if (userRepository.existsByNickname(request.getNickname()))
             throw new IllegalArgumentException("중복된 닉네임입니다.");
 
-        if(!request.getPassword1().equals(request.getPassword2()))
+        if (!request.getPassword1().equals(request.getPassword2()))
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
     }
 
@@ -80,6 +82,7 @@ public class UserServiceImpl implements UserService {
     @PostConstruct
     private void preMember() {
         userRepository.save(User.builder()
+                .authProvider(AuthProvider.local)
                 .email("admin")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList(Role.ADMIN.getKey()))
@@ -90,6 +93,7 @@ public class UserServiceImpl implements UserService {
                 .build());
 
         userRepository.save(User.builder()
+                .authProvider(AuthProvider.local)
                 .email("a@a.com")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList(Role.USER.getKey()))

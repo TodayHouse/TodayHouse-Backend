@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
 public class UserSaveResponse {
     private Long id;
     private String email;
+    @JsonIgnore
     private String password;
     private String nickname;
     private List<String> role;

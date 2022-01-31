@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.AuthProvider;
+import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.UserSaveRequest;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
@@ -47,6 +49,7 @@ class UserControllerTest {
     void clearRepository() {
         userRepository.deleteAll();
         userRepository.save(User.builder()
+                .authProvider(AuthProvider.local)
                 .email("test")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList("ROLE_USER"))
@@ -58,10 +61,11 @@ class UserControllerTest {
     }
 
     @Test
-    void 회원가입() throws Exception{
+    void 회원가입() throws Exception {
         String email = "today.house.clone@gmail.com";
         String token = "101010";
         UserSaveRequest request = UserSaveRequest.builder()
+                .authProvider(AuthProvider.local)
                 .email(email)
                 .password1("09876543")
                 .password2("09876543")
@@ -98,18 +102,12 @@ class UserControllerTest {
     @Test
     void jwtTest() throws Exception {
         String url = "http://localhost:8080/users/test";
-        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList("ROLE_USER"));
+        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList(Role.USER.getKey()));
 
         mockMvc.perform(MockMvcRequestBuilders.get(url)
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(print());
-
-        mockMvc.perform(MockMvcRequestBuilders.get(url)
-                        .header("Authorization", "Bearer " + jwt.replace("1", "2"))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is4xxClientError())
                 .andDo(print());
     }
 

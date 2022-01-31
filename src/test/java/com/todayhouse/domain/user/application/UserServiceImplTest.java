@@ -1,6 +1,7 @@
 package com.todayhouse.domain.user.application;
 
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.dto.request.UserSaveRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ class UserServiceImplTest {
     @Test
     void 이메일_중복(){
         UserSaveRequest request1 = UserSaveRequest.builder()
+                .authProvider(AuthProvider.local)
                 .email("today.house.clone@gmail.com")
                 .password1("09876543")
                 .password2("09876543")
@@ -29,6 +31,7 @@ class UserServiceImplTest {
                 .agreeTOS(true).build();
 
         UserSaveRequest request2 = UserSaveRequest.builder()
+                .authProvider(AuthProvider.local)
                 .email("today.house.clone@gmail.com")
                 .password1("09876543")
                 .password2("09876543")
@@ -44,6 +47,7 @@ class UserServiceImplTest {
     @Test
     void 닉네임_중복(){
         UserSaveRequest request1 = UserSaveRequest.builder()
+                .authProvider(AuthProvider.local)
                 .email("today.house.clone@gmail.com")
                 .password1("09876543")
                 .password2("09876543")
@@ -53,6 +57,7 @@ class UserServiceImplTest {
                 .agreeTOS(true).build();
 
         UserSaveRequest request2 = UserSaveRequest.builder()
+                .authProvider(AuthProvider.local)
                 .email("pass@gmail.com")
                 .password1("09876543")
                 .password2("09876543")

@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.dto.request;
 
+import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,8 @@ import java.util.Collections;
 @AllArgsConstructor
 @Builder
 public class UserSaveRequest {
+    private AuthProvider authProvider;
+
     @NotBlank
     @Size(max=50)
     private String email;
@@ -43,13 +46,14 @@ public class UserSaveRequest {
 
     public User toEntity(){
         return User.builder()
-                .email(this.email)
-                .password(new BCryptPasswordEncoder().encode(this.password1))
+                .authProvider(authProvider)
+                .email(email)
+                .password(new BCryptPasswordEncoder().encode(password1))
                 .roles(Collections.singletonList(Role.USER.getKey()))
-                .nickname(this.nickname)
-                .agreeTOS(this.agreeTOS)
-                .agreePICU(this.agreePICU)
-                .agreePromotion(this.agreePromotion)
+                .nickname(nickname)
+                .agreeTOS(agreeTOS)
+                .agreePICU(agreePICU)
+                .agreePromotion(agreePromotion)
                 .build();
     }
 }
