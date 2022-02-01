@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserSaveResponse {
+public class UserSignupResponse {
     private Long id;
     private String email;
     @JsonIgnore
@@ -24,7 +24,7 @@ public class UserSaveResponse {
     private boolean agreePICU;
     private boolean agreePromotion;
 
-    public UserSaveResponse (User user){
+    public UserSignupResponse(User user){
         this.id = user.getId();
         this.email = user.getEmail();
         this.password = user.getPassword();

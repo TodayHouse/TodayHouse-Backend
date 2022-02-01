@@ -18,7 +18,7 @@ import java.util.Collections;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserSaveRequest {
+public class UserSignupRequest {
     private AuthProvider authProvider;
 
     @NotBlank
@@ -46,7 +46,7 @@ public class UserSaveRequest {
 
     public User toEntity(){
         return User.builder()
-                .authProvider(authProvider)
+                .authProvider(AuthProvider.local)
                 .email(email)
                 .password(new BCryptPasswordEncoder().encode(password1))
                 .roles(Collections.singletonList(Role.USER.getKey()))

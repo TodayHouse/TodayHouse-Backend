@@ -2,7 +2,7 @@ package com.todayhouse.domain.user.application;
 
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.AuthProvider;
-import com.todayhouse.domain.user.dto.request.UserSaveRequest;
+import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +20,7 @@ class UserServiceImplTest {
 
     @Test
     void 이메일_중복(){
-        UserSaveRequest request1 = UserSaveRequest.builder()
+        UserSignupRequest request1 = UserSignupRequest.builder()
                 .authProvider(AuthProvider.local)
                 .email("today.house.clone@gmail.com")
                 .password1("09876543")
@@ -30,7 +30,7 @@ class UserServiceImplTest {
                 .agreePromotion(true)
                 .agreeTOS(true).build();
 
-        UserSaveRequest request2 = UserSaveRequest.builder()
+        UserSignupRequest request2 = UserSignupRequest.builder()
                 .authProvider(AuthProvider.local)
                 .email("today.house.clone@gmail.com")
                 .password1("09876543")
@@ -46,7 +46,7 @@ class UserServiceImplTest {
 
     @Test
     void 닉네임_중복(){
-        UserSaveRequest request1 = UserSaveRequest.builder()
+        UserSignupRequest request1 = UserSignupRequest.builder()
                 .authProvider(AuthProvider.local)
                 .email("today.house.clone@gmail.com")
                 .password1("09876543")
@@ -56,7 +56,7 @@ class UserServiceImplTest {
                 .agreePromotion(true)
                 .agreeTOS(true).build();
 
-        UserSaveRequest request2 = UserSaveRequest.builder()
+        UserSignupRequest request2 = UserSignupRequest.builder()
                 .authProvider(AuthProvider.local)
                 .email("pass@gmail.com")
                 .password1("09876543")

@@ -7,7 +7,7 @@ import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
-import com.todayhouse.domain.user.dto.request.UserSaveRequest;
+import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,7 +64,7 @@ class UserControllerTest {
     void 회원가입() throws Exception {
         String email = "today.house.clone@gmail.com";
         String token = "101010";
-        UserSaveRequest request = UserSaveRequest.builder()
+        UserSignupRequest request = UserSignupRequest.builder()
                 .authProvider(AuthProvider.local)
                 .email(email)
                 .password1("09876543")

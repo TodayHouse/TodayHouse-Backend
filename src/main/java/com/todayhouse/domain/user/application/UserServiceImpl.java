@@ -6,7 +6,7 @@ import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
-import com.todayhouse.domain.user.dto.request.UserSaveRequest;
+import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User saveUser(UserSaveRequest request) {
+    public User saveUser(UserSignupRequest request) {
         emailVerificationTokenRepository.findByEmailAndExpired(request.getEmail(), true)
                 .orElseThrow(() -> new IllegalArgumentException("이메일 인증이 필요합니다."));
         saveRequestValidate(request);
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
         return jwtTokenProvider.createToken(user.getEmail(), user.getRoles());
     }
 
-    private void saveRequestValidate(UserSaveRequest request) {
+    private void saveRequestValidate(UserSignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail()))
             throw new IllegalArgumentException("중복된 이메일입니다.");
 
