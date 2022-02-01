@@ -1,3 +1,6 @@
 [submodule "TodayHouse-Secret"]
 	path = TodayHouse-Secret
 	url = https://github.com/TodayHouse/TodayHouse-Secret.git
+	branch = HEAD
+[submodule "lv-library"]
+	branch = HEAD
