@@ -37,14 +37,12 @@ out/
 .vscode/
 
 ### Submodule ###
-src/main/resources/application-dev.yml
-src/main/resources/application-prod.yml
-src/main/resources/application-db.yml
-src/main/resources/application-oauth.yml
 src/main/resources/application-jwt.yml
 src/main/resources/application-aws.yml
-src/main/resources/application-email.yml
+src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
 src/main/resources/application-oauth.yml
+src/main/resources/application-email.yml
 
 ### REST Docs ###
 src/main/resources/static/docs/
