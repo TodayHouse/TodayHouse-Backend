@@ -65,7 +65,6 @@ class UserControllerTest {
         String email = "today.house.clone@gmail.com";
         String token = "101010";
         UserSignupRequest request = UserSignupRequest.builder()
-                .authProvider(AuthProvider.local)
                 .email(email)
                 .password1("09876543")
                 .password2("09876543")

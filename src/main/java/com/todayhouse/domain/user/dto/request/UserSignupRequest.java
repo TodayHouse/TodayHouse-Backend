@@ -19,8 +19,6 @@ import java.util.Collections;
 @AllArgsConstructor
 @Builder
 public class UserSignupRequest {
-    private AuthProvider authProvider;
-
     @NotBlank
     @Size(max=50)
     private String email;

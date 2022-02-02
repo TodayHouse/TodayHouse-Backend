@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
 
@@ -16,8 +15,6 @@ import java.util.List;
 public class UserSignupResponse {
     private Long id;
     private String email;
-    @JsonIgnore
-    private String password;
     private String nickname;
     private List<String> role;
     private boolean agreeTOS;
@@ -27,7 +24,6 @@ public class UserSignupResponse {
     public UserSignupResponse(User user){
         this.id = user.getId();
         this.email = user.getEmail();
-        this.password = user.getPassword();
         this.nickname = user.getNickname();
         this.role = user.getRoles();
         this.agreeTOS = user.isAgreeTOS();

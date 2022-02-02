@@ -21,7 +21,6 @@ class UserServiceImplTest {
     @Test
     void 이메일_중복(){
         UserSignupRequest request1 = UserSignupRequest.builder()
-                .authProvider(AuthProvider.local)
                 .email("today.house.clone@gmail.com")
                 .password1("09876543")
                 .password2("09876543")
@@ -31,7 +30,6 @@ class UserServiceImplTest {
                 .agreeTOS(true).build();
 
         UserSignupRequest request2 = UserSignupRequest.builder()
-                .authProvider(AuthProvider.local)
                 .email("today.house.clone@gmail.com")
                 .password1("09876543")
                 .password2("09876543")
@@ -47,7 +45,6 @@ class UserServiceImplTest {
     @Test
     void 닉네임_중복(){
         UserSignupRequest request1 = UserSignupRequest.builder()
-                .authProvider(AuthProvider.local)
                 .email("today.house.clone@gmail.com")
                 .password1("09876543")
                 .password2("09876543")
@@ -57,7 +54,6 @@ class UserServiceImplTest {
                 .agreeTOS(true).build();
 
         UserSignupRequest request2 = UserSignupRequest.builder()
-                .authProvider(AuthProvider.local)
                 .email("pass@gmail.com")
                 .password1("09876543")
                 .password2("09876543")
