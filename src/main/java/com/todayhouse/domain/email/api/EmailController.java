@@ -21,16 +21,15 @@ public class EmailController {
     private final TokenVerificationService tokenVerificationService;
 
     @PostMapping("/token/send")
-    public BaseResponse sendTokenToEmail(@RequestBody EmailSendRequest request){
+    public BaseResponse sendTokenToEmail(@RequestBody EmailSendRequest request) {
         log.info("이메일 : {}", request.getEmail());
         EmailSendResponse response = new EmailSendResponse(emailSenderService.sendEmail(request));
         return new BaseResponse(response);
     }
 
     @PutMapping("/token/verify")
-    public BaseResponse verifyEmailToken(@RequestBody TokenVerificationRequest request){
-        log.info("이메일 : {}",request.getEmail());
-        log.info("토큰 : {}",request.getToken());
+    public BaseResponse verifyEmailToken(@RequestBody TokenVerificationRequest request) {
+        log.info("이메일 : {}, 토큰 : {}", request.getEmail(), request.getToken());
         EmailVerificationToken token = tokenVerificationService.verifyToken(request);
         return new BaseResponse(new TokenVerificationResponse(token));
     }

@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
     public User saveUser(UserSignupRequest request) {
         emailVerificationTokenRepository.findByEmailAndExpired(request.getEmail(), true)
                 .orElseThrow(() -> new IllegalArgumentException("이메일 인증이 필요합니다."));
-        saveRequestValidate(request);
+        signupRequestValidate(request);
         return userRepository.save(request.toEntity());
     }
 
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
         return jwtTokenProvider.createToken(user.getEmail(), user.getRoles());
     }
 
-    private void saveRequestValidate(UserSignupRequest request) {
+    private void signupRequestValidate(UserSignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail()))
             throw new IllegalArgumentException("중복된 이메일입니다.");
 

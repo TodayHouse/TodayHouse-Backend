@@ -24,7 +24,6 @@ public class CookieUtils {
 
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
-        System.out.println("생성 "+name);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(maxAge);
@@ -36,7 +35,6 @@ public class CookieUtils {
         if (cookies != null && cookies.length > 0) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(name)) {
-                    System.out.println("삭제 "+name);
                     cookie.setValue("");
                     cookie.setPath("/");
                     cookie.setMaxAge(0);
