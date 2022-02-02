@@ -1,5 +1,7 @@
 package com.todayhouse.global.config.jwt;
 
+import com.todayhouse.domain.user.domain.Role;
+import com.todayhouse.global.config.oauth.CookieUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -18,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -42,10 +45,11 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(userPk); // JWT payload 에 저장되는 정보단위
         claims.put("roles", roles); // 정보는 key / value 쌍으로 저장된다.
         Date now = new Date();
+        Optional<String> roleGuest = roles.stream().filter(r -> r.equals(Role.GUEST.getKey())).findFirst();
         return Jwts.builder()
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + expiration)) // set Expire Time
+                .setExpiration(new Date(now.getTime() + (roleGuest.isPresent() ? 5 * 60 * 1000 : expiration))) // set Expire Time, guest는 3분
                 .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘, secret 값
                 .compact();
     }
@@ -61,14 +65,16 @@ public class JwtTokenProvider {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
-    // Header에서 "Authorization" 추출3
+    // jwt 를 추출한다.
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         //Authorization : Bearer {토큰} 방식으로 헤더를 받는다.
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer "))
             return request.getHeader("Authorization").substring(7);
-        else
-            return null;
+        //auth_guest cookie 에서 토큰을 추출한다.
+        return CookieUtils.getCookie(request, "auth_guest")
+                .map(cookie -> CookieUtils.deserialize(cookie, String.class))
+                .orElse(null);
     }
 
     // 토큰의 유효성 + 만료일자 확인

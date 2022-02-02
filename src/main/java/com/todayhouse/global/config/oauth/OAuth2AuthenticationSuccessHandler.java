@@ -1,8 +1,6 @@
 package com.todayhouse.global.config.oauth;
 
-import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
-import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +28,6 @@ import static com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2Authorization
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final UserRepository userRepository;
     private final JwtTokenProvider tokenProvider;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
@@ -57,18 +54,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             throw new IllegalArgumentException("unauthorized Redirect URI");
 
         String email = (String) ((OAuth2User)authentication.getPrincipal()).getAttributes().get("email");
-
-        // 추가 회원가입(닉네임, 약관동의)
-        User findUser = userRepository.findByEmail(email).orElseThrow(()-> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
-        if(!findUser.isSignedUp()){
-            return UriComponentsBuilder.fromUriString(SNS_SIGNUP_URL)
-                    .queryParam("email", findUser.getEmail())
-                    .queryParam("nickname",findUser.getNickname())
-                    .build().toUriString();
-        }
-        String targetUri = redirectUri.orElse("/oauth/redirect");
-        System.out.println(targetUri);
         String token = tokenProvider.createToken(email, Collections.singletonList(Role.USER.getKey()));
+        // 임시 jwt 쿠키에 추가
+        CookieUtils.addCookie(response, "auth_guest", token,180);
+        String targetUri = redirectUri.orElse(SNS_SIGNUP_URL);
         return UriComponentsBuilder.fromUriString(targetUri)
                 .build().toUriString();
     }
