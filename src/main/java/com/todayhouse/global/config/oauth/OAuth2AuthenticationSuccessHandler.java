@@ -39,7 +39,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         String targetUrl = determineTargetUrl(request, response, authentication);
-        log.info("성공 요청 url : {}", targetUrl);
+        log.info("인증 성공 target url : {}", targetUrl);
         if (response.isCommitted()) {
             log.debug("요청이 이미 완료되었습니다. " + targetUrl + "로 리다이렉트할 수 없습니다.");
             return;
@@ -56,7 +56,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String email = (String) ((OAuth2User)authentication.getPrincipal()).getAttributes().get("email");
         String token = tokenProvider.createToken(email, Collections.singletonList(Role.USER.getKey()));
         // 임시 jwt 쿠키에 추가
-        CookieUtils.addCookie(response, "auth_guest", token,180);
+        CookieUtils.addCookie(response, "auth_guest", CookieUtils.serialize(token),180);
         String targetUri = redirectUri.orElse(SNS_SIGNUP_URL);
         return UriComponentsBuilder.fromUriString(targetUri)
                 .build().toUriString();
