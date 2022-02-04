@@ -54,8 +54,7 @@ public class OAuthAttributes {
         return User.builder()
                 .authProvider(authProvider)
                 .email(email)
-                .roles(Collections.singletonList(Role.USER.getKey()))
-                .signedUp(false)
+                .roles(Collections.singletonList(Role.GUEST.getKey()))
                 .build();
     }
 

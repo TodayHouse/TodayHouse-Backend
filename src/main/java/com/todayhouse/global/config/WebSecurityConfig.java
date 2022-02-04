@@ -61,7 +61,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**")
                 .permitAll()
-                .anyRequest().authenticated() // 그외 모든 요청은 인증이 필요
+                .anyRequest().hasAnyRole("USER", "ADMIN") // 그외 모든 요청은 user, admin만 가능
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class)

@@ -52,7 +52,6 @@ public class UserSignupRequest {
                 .agreeTOS(agreeTOS)
                 .agreePICU(agreePICU)
                 .agreePromotion(agreePromotion)
-                .signedUp(true)
                 .build();
     }
 }
