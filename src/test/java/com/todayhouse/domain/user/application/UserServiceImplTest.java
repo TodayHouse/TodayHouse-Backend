@@ -1,18 +1,14 @@
 package com.todayhouse.domain.user.application;
 
+import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.user.dao.UserRepository;
-import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Transactional
-@SpringBootTest
-class UserServiceImplTest {
+class UserServiceImplTest extends IntegrationBase {
     @Autowired
     UserRepository userRepository;
     @Autowired
