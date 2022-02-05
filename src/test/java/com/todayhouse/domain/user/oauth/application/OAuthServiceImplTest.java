@@ -57,7 +57,7 @@ class OAuthServiceImplTest {
     void provideTokenError() {
         String email = "user@user.com";
         User findUser = User.builder().id(1L).email(email)
-                .roles(Collections.singletonList(Role.GUEST.getKey())).build();
+                .roles(Collections.singletonList(Role.GUEST)).build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
 
         assertThrows(IllegalArgumentException.class, () -> oAuthService.provideToken(email));
@@ -68,7 +68,7 @@ class OAuthServiceImplTest {
     void provideToken() {
         String email = "user@user.com";
         User findUser = User.builder().id(1L).email(email)
-                .roles(Collections.singletonList(Role.USER.getKey())).build();
+                .roles(Collections.singletonList(Role.USER)).build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
         when(jwtTokenProvider.createToken(findUser.getEmail(), findUser.getRoles()))
                 .thenReturn("jwt~~!~!~!~!");
@@ -82,8 +82,8 @@ class OAuthServiceImplTest {
         String email = "test@test.com";
         User guest = User.builder()
                 .email(email)
-                .authProvider(AuthProvider.naver)
-                .roles(Collections.singletonList(Role.GUEST.getKey()))
+                .authProvider(AuthProvider.NAVER)
+                .roles(Collections.singletonList(Role.GUEST))
                 .build();
         OAuthSignupRequest request = OAuthSignupRequest.builder().email(email).nickname("test")
                 .agreePICU(true).agreeTOS(true).agreePromotion(true).agreeAge(true)

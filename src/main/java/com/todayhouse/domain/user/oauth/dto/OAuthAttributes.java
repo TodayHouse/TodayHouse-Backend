@@ -41,7 +41,7 @@ public class OAuthAttributes {
     private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
         return OAuthAttributes.builder()
-                .authProvider(AuthProvider.naver)
+                .authProvider(AuthProvider.NAVER)
                 .name((String) response.get("name"))
                 .email((String) response.get("email"))
                 .picture((String) response.get("profile_image"))
@@ -54,7 +54,7 @@ public class OAuthAttributes {
         return User.builder()
                 .authProvider(authProvider)
                 .email(email)
-                .roles(Collections.singletonList(Role.GUEST.getKey()))
+                .roles(Collections.singletonList(Role.GUEST))
                 .build();
     }
 

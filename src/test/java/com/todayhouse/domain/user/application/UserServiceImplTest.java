@@ -100,7 +100,7 @@ class UserServiceImplTest {
         String jwt = "jwt";
         UserLoginRequest request = UserLoginRequest.builder().email(email).password("12345").build();
         User findUser = User.builder().email(email).password("12345")
-                .roles(Collections.singletonList(Role.USER.getKey())).build();
+                .roles(Collections.singletonList(Role.USER)).build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
         when(passwordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(true);
         when(jwtTokenProvider.createToken(eq(email), anyList())).thenReturn(jwt);
@@ -114,7 +114,7 @@ class UserServiceImplTest {
         String email = "test@test.com";
         UserLoginRequest request = UserLoginRequest.builder().email(email).password("12345").build();
         User findUser = User.builder().email(email).password("12345")
-                .roles(Collections.singletonList(Role.USER.getKey())).build();
+                .roles(Collections.singletonList(Role.USER)).build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
         when(passwordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(false);
 

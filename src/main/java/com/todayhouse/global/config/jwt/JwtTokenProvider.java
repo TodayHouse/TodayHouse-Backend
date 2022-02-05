@@ -41,11 +41,11 @@ public class JwtTokenProvider {
     }
 
     // JWT 토큰 생성
-    public String createToken(String userPk, List<String> roles) {
+    public String createToken(String userPk, List<Role> roles) {
         Claims claims = Jwts.claims().setSubject(userPk); // JWT payload 에 저장되는 정보단위
         claims.put("roles", roles); // 정보는 key / value 쌍으로 저장된다.
         Date now = new Date();
-        Optional<String> roleGuest = roles.stream().filter(r -> r.equals(Role.GUEST.getKey())).findFirst();
+        Optional<Role> roleGuest = roles.stream().filter(r -> r.equals(Role.GUEST)).findFirst();
         return Jwts.builder()
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간 정보

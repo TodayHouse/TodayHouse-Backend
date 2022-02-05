@@ -46,10 +46,10 @@ public class UserSignupRequest {
 
     public User toEntity(){
         return User.builder()
-                .authProvider(AuthProvider.local)
+                .authProvider(AuthProvider.LOCAL)
                 .email(email)
                 .password(new BCryptPasswordEncoder().encode(password1))
-                .roles(Collections.singletonList(Role.USER.getKey()))
+                .roles(Collections.singletonList(Role.USER))
                 .nickname(nickname)
                 .agreeAge(agreeAge)
                 .agreeTOS(agreeTOS)

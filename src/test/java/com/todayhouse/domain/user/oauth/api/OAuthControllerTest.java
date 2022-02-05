@@ -47,9 +47,9 @@ class OAuthControllerTest extends IntegrationBase {
     void 유저정보_요청() throws Exception {
         //given
         String email = "test@test.com";
-        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.GUEST.getKey()))
-                .authProvider(AuthProvider.naver).build());
-        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST.getKey()));
+        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.GUEST))
+                .authProvider(AuthProvider.NAVER).build());
+        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
         Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
         //when
         MvcResult mvcResult = mockMvc.perform(get("http://localhost:8080/oauth2/signup/info")
@@ -68,8 +68,8 @@ class OAuthControllerTest extends IntegrationBase {
     void cookie없는_유저정보_요청() throws Exception {
         //given
         String email = "test@test.com";
-        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.GUEST.getKey()))
-                .authProvider(AuthProvider.naver).build());
+        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.GUEST))
+                .authProvider(AuthProvider.NAVER).build());
         //when, then
         mockMvc.perform(get("http://localhost:8080/oauth2/signup/info"))
                 .andExpect(status().is5xxServerError());
@@ -79,9 +79,9 @@ class OAuthControllerTest extends IntegrationBase {
     void guest_cookie로_jwt_요청() throws Exception {
         //given
         String email = "test@test.com";
-        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.GUEST.getKey()))
-                .authProvider(AuthProvider.naver).nickname("test").build());
-        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST.getKey()));
+        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.GUEST))
+                .authProvider(AuthProvider.NAVER).nickname("test").build());
+        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
         Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
         //when,then
         mockMvc.perform(get("http://localhost:8080/oauth2/token")
@@ -93,9 +93,9 @@ class OAuthControllerTest extends IntegrationBase {
     void user_cookie로_jwt_요청() throws Exception {
         //given
         String email = "test@test.com";
-        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.USER.getKey()))
-                .authProvider(AuthProvider.naver).nickname("test").build());
-        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.USER.getKey()));
+        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.USER))
+                .authProvider(AuthProvider.NAVER).nickname("test").build());
+        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.USER));
         Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
         //when
         MvcResult mvcResult = mockMvc.perform(get("http://localhost:8080/oauth2/token")
@@ -120,7 +120,7 @@ class OAuthControllerTest extends IntegrationBase {
         //given
         String email = "test@test.com";
         String nickname = "test";
-        OAuthAttributes attribute = OAuthAttributes.builder().authProvider(AuthProvider.naver)
+        OAuthAttributes attribute = OAuthAttributes.builder().authProvider(AuthProvider.NAVER)
                 .email(email).build();
         userRepository.save(attribute.toEntity());
         OAuthSignupRequest request = OAuthSignupRequest.builder().email(email).nickname(nickname)

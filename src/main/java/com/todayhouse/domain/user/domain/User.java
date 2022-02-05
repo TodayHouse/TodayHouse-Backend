@@ -40,18 +40,23 @@ public class User implements UserDetails {
     private String nickname;
 
     private boolean agreeAge;
+
+    @Column(name = "agree_TOS")
     private boolean agreeTOS;
+
+    @Column(name = "agree_PICU")
     private boolean agreePICU;
+
     private boolean agreePromotion;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
-    private List<String> roles = new ArrayList<>();
+    private List<Role> roles = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
-                .map(SimpleGrantedAuthority::new)
+                .map(role->new SimpleGrantedAuthority(role.getKey()))
                 .collect(Collectors.toList());
     }
 
@@ -85,13 +90,13 @@ public class User implements UserDetails {
         return this;
     }
 
-    public List<String> getRoleKey() {
+    public List<Role> getRoleKey() {
         return roles;
     }
 
     public void oAuthUserUpdate(OAuthSignupRequest request) {
         this.nickname = request.getNickname();
-        this.roles = Collections.singletonList(Role.USER.getKey());
+        this.roles = Collections.singletonList(Role.USER);
         this.agreeAge = request.isAgreeAge();
         this.agreeTOS = request.isAgreeTOS();
         this.agreePICU = request.isAgreePICU();

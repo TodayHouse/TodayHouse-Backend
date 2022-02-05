@@ -7,5 +7,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Role {
     USER("ROLE_USER"), ADMIN("ROLE_ADMIN"), GUEST("ROLE_GUEST");
+
     private final String key;
+
+    public static Role toRole(String key) {
+        for (Role r : Role.values()) {
+            if(r.getKey().equals(key))
+                return r;
+        }
+        return null;
+    }
 }

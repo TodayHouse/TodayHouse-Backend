@@ -1,6 +1,7 @@
 package com.todayhouse.domain.user.oauth.application;
 
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.oauth.dto.OAuthAttributes;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +14,12 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
@@ -37,8 +40,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         User user = saveOrUpdate(attributes);
         Set<GrantedAuthority> authorities = new LinkedHashSet<>();
-        for(String authority : user.getRoles()){
-            authorities.add(new SimpleGrantedAuthority(authority));
+        for(Role authority : user.getRoles()){
+            authorities.add(new SimpleGrantedAuthority(authority.getKey()));
         }
 
         return new DefaultOAuth2User(

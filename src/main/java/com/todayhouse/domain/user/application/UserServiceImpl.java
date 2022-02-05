@@ -75,10 +75,10 @@ public class UserServiceImpl implements UserService {
     @PostConstruct
     private void preMember() {
         userRepository.save(User.builder()
-                .authProvider(AuthProvider.local)
+                .authProvider(AuthProvider.LOCAL)
                 .email("admin")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
-                .roles(Collections.singletonList(Role.ADMIN.getKey()))
+                .roles(Collections.singletonList(Role.ADMIN))
                 .agreePICU(true)
                 .agreePromotion(true)
                 .agreeTOS(true)
@@ -86,10 +86,10 @@ public class UserServiceImpl implements UserService {
                 .build());
 
         userRepository.save(User.builder()
-                .authProvider(AuthProvider.local)
+                .authProvider(AuthProvider.LOCAL)
                 .email("a@a.com")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
-                .roles(Collections.singletonList(Role.USER.getKey()))
+                .roles(Collections.singletonList(Role.USER))
                 .agreePICU(true)
                 .agreePromotion(true)
                 .agreeTOS(true)

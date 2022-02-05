@@ -42,12 +42,12 @@ class JwtTokenProviderTest {
     void jwt_검증() {
         //given
         ReflectionTestUtils.setField(tokenProvider, "expiration", 1000000L);
-        List<String> roles = new ArrayList<>();
-        roles.add(Role.USER.getKey());
-        roles.add(Role.ADMIN.getKey());
+        List<Role> roles = new ArrayList<>();
+        roles.add(Role.USER);
+        roles.add(Role.ADMIN);
 
         User user = User.builder()
-                .authProvider(AuthProvider.local)
+                .authProvider(AuthProvider.LOCAL)
                 .email("test@test.com")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(roles)
@@ -74,7 +74,7 @@ class JwtTokenProviderTest {
     @Test
     void 만료된_jwt() throws InterruptedException {
         ReflectionTestUtils.setField(tokenProvider, "expiration", 0L);
-        String jwt = tokenProvider.createToken("test", Collections.singletonList(Role.USER.getKey()));
+        String jwt = tokenProvider.createToken("test", Collections.singletonList(Role.USER));
 
         Thread.sleep(1);
 
@@ -85,7 +85,7 @@ class JwtTokenProviderTest {
     void request_header에_jwt() {
         ReflectionTestUtils.setField(tokenProvider, "expiration", 1000000L);
         MockHttpServletRequest request = new MockHttpServletRequest();
-        String jwt = tokenProvider.createToken("a", Collections.singletonList(Role.GUEST.getKey()));
+        String jwt = tokenProvider.createToken("a", Collections.singletonList(Role.GUEST));
         request.addHeader("Authorization", "Bearer " + jwt);
 
         assertThat(tokenProvider.resolveToken(request)).isEqualTo(jwt);
@@ -94,7 +94,7 @@ class JwtTokenProviderTest {
     @Test
     void request_cookie에_jwt() {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        String jwt = tokenProvider.createToken("a", Collections.singletonList(Role.GUEST.getKey()));
+        String jwt = tokenProvider.createToken("a", Collections.singletonList(Role.GUEST));
         Cookie[] cookies = new Cookie[]{
                 new Cookie("auth_user", CookieUtils.serialize(jwt))
         };

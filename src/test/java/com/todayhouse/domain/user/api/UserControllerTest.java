@@ -44,10 +44,10 @@ class UserControllerTest extends IntegrationBase {
     void clearRepository() {
         userRepository.deleteAll();
         userRepository.save(User.builder()
-                .authProvider(AuthProvider.local)
+                .authProvider(AuthProvider.LOCAL)
                 .email("test")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
-                .roles(Collections.singletonList("ROLE_USER"))
+                .roles(Collections.singletonList(Role.USER))
                 .agreePICU(true)
                 .agreePromotion(true)
                 .agreeTOS(true)
@@ -96,7 +96,7 @@ class UserControllerTest extends IntegrationBase {
     @Test
     void jwtTest() throws Exception {
         String url = "http://localhost:8080/users/test";
-        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList(Role.USER.getKey()));
+        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList(Role.USER));
 
         mockMvc.perform(MockMvcRequestBuilders.get(url)
                         .header("Authorization", "Bearer " + jwt)
@@ -108,7 +108,7 @@ class UserControllerTest extends IntegrationBase {
     @Test
     void 이메일_닉네임_중복() throws Exception {
         String url = "http://localhost:8080/users/";
-        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList("ROLE_USER"));
+        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList(Role.USER));
 
         //email
         mockMvc.perform(MockMvcRequestBuilders.get(url + "emails/test/exist"))

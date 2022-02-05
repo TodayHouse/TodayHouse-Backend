@@ -1,5 +1,6 @@
 package com.todayhouse.global.config.oauth;
 
+import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -58,9 +59,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String email = (String) ((OAuth2User) authentication.getPrincipal()).getAttributes().get("email");
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        List<String> roles = new ArrayList<>();
+        List<Role> roles = new ArrayList<>();
         for (GrantedAuthority auth : authorities) {
-            roles.add(auth.getAuthority());
+            roles.add(Role.toRole(auth.getAuthority()));
         }
         String token = tokenProvider.createToken(email, roles);
         // 임시 jwt를 쿠키에 추가합니다.

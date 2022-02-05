@@ -29,7 +29,7 @@ public class OAuthServiceImpl implements OAuthService {
     public String provideToken(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
-        if (user.getRoles().contains(Role.GUEST.getKey())) {
+        if (user.getRoles().contains(Role.GUEST)) {
             throw new IllegalArgumentException("회원가입하지 않은 사용자입니다.");
         }
         return jwtTokenProvider.createToken(user.getEmail(), user.getRoles());
@@ -39,7 +39,7 @@ public class OAuthServiceImpl implements OAuthService {
     public User saveGuest(OAuthSignupRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
-        if (!user.getRoles().contains(Role.GUEST.getKey())) {
+        if (!user.getRoles().contains(Role.GUEST)) {
             throw new IllegalArgumentException("이미 회원가입한 이메일입니다.");
         }
         user.oAuthUserUpdate(request);
