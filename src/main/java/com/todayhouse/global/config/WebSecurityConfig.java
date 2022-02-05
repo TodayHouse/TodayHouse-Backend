@@ -57,7 +57,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and()
                 .authorizeRequests() // 요청에 대한 사용권한 체크
-                .antMatchers("/", "/h2-console/**", "/users/signup", "/users/login", "/**/exist", "/emails/**")
+                .antMatchers("/", "/h2-console/**", "/**/signup", "/users/login", "/**/exist", "/emails/**")
                 .permitAll()
                 .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**")
                 .permitAll()

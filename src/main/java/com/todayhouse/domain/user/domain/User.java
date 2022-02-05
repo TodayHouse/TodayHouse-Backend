@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.domain;
 
+import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,6 +87,15 @@ public class User implements UserDetails {
 
     public List<String> getRoleKey() {
         return roles;
+    }
+
+    public void oAuthUserUpdate(OAuthSignupRequest request) {
+        this.nickname = request.getNickname();
+        this.roles = Collections.singletonList(Role.USER.getKey());
+        this.agreeAge = request.isAgreeAge();
+        this.agreeTOS = request.isAgreeTOS();
+        this.agreePICU = request.isAgreePICU();
+        this.agreePromotion = request.isAgreePromotion();
     }
 
     @Override

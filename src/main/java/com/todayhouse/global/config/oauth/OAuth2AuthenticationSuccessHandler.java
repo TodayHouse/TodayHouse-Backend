@@ -1,12 +1,12 @@
 package com.todayhouse.global.config.oauth;
 
-import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +32,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtTokenProvider tokenProvider;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
-    private final String SNS_SIGNUP_URL = "http://localhost:3000/sns";
+    private final String SNS_SIGNUP_URL = "http://localhost:3000/sns_signup";
 
     @Value("${oauth.authorizedRedirectUris}")
     List<String> authorizedRedirectUris;
@@ -53,11 +54,18 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         if (redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get()))
             throw new IllegalArgumentException("unauthorized Redirect URI");
 
-        String email = (String) ((OAuth2User)authentication.getPrincipal()).getAttributes().get("email");
-        String token = tokenProvider.createToken(email, Collections.singletonList(Role.USER.getKey()));
-        // 임시 jwt 쿠키에 추가
-        CookieUtils.addCookie(response, "auth_guest", CookieUtils.serialize(token),180);
         String targetUri = redirectUri.orElse(SNS_SIGNUP_URL);
+
+        String email = (String) ((OAuth2User) authentication.getPrincipal()).getAttributes().get("email");
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        List<String> roles = new ArrayList<>();
+        for (GrantedAuthority auth : authorities) {
+            roles.add(auth.getAuthority());
+        }
+        String token = tokenProvider.createToken(email, roles);
+        // 임시 jwt를 쿠키에 추가합니다.
+        CookieUtils.addCookie(response, "auth_user", CookieUtils.serialize(token), 180);
+
         return UriComponentsBuilder.fromUriString(targetUri)
                 .build().toUriString();
     }
@@ -75,7 +83,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .anyMatch(authorizedRedirectUri -> {
 //                    지정된 uri, port로만 redirect
                     URI authorizedURI = URI.create(authorizedRedirectUri);
-                    if(authorizedURI.getHost().equalsIgnoreCase(clientRedirectUri.getHost())
+                    if (authorizedURI.getHost().equalsIgnoreCase(clientRedirectUri.getHost())
                             && authorizedURI.getPort() == clientRedirectUri.getPort()) {
                         return true;
                     }
