@@ -71,8 +71,8 @@ public class JwtTokenProvider {
         //Authorization : Bearer {토큰} 방식으로 헤더를 받는다.
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer "))
             return request.getHeader("Authorization").substring(7);
-        //auth_guest cookie 에서 토큰을 추출한다.
-        return CookieUtils.getCookie(request, "auth_guest")
+        //auth_user cookie 에서 토큰을 추출한다.
+        return CookieUtils.getCookie(request, "auth_user")
                 .map(cookie -> CookieUtils.deserialize(cookie, String.class))
                 .orElse(null);
     }

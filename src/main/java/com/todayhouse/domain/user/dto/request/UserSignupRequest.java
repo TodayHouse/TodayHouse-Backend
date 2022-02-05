@@ -36,6 +36,8 @@ public class UserSignupRequest {
     private String nickname;
 
     @NotNull
+    private boolean agreeAge;
+    @NotNull
     private boolean agreeTOS;
     @NotNull
     private boolean agreePICU;
@@ -49,6 +51,7 @@ public class UserSignupRequest {
                 .password(new BCryptPasswordEncoder().encode(password1))
                 .roles(Collections.singletonList(Role.USER.getKey()))
                 .nickname(nickname)
+                .agreeAge(agreeAge)
                 .agreeTOS(agreeTOS)
                 .agreePICU(agreePICU)
                 .agreePromotion(agreePromotion)

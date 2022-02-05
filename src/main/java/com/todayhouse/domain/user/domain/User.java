@@ -37,6 +37,7 @@ public class User implements UserDetails {
     @Column(length = 15, unique = true)
     private String nickname;
 
+    private boolean agreeAge;
     private boolean agreeTOS;
     private boolean agreePICU;
     private boolean agreePromotion;

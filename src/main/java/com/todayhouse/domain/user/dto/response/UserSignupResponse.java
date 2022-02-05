@@ -13,19 +13,17 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UserSignupResponse {
-    private Long id;
     private String email;
     private String nickname;
-    private List<String> role;
+    private boolean agreeAge;
     private boolean agreeTOS;
     private boolean agreePICU;
     private boolean agreePromotion;
 
     public UserSignupResponse(User user){
-        this.id = user.getId();
         this.email = user.getEmail();
         this.nickname = user.getNickname();
-        this.role = user.getRoles();
+        this.agreeAge = user.isAgreeAge();
         this.agreeTOS = user.isAgreeTOS();
         this.agreePICU = user.isAgreePICU();
         this.agreePromotion = user.isAgreePromotion();
