@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
-import java.util.Optional;
 
 @Transactional
 @RequiredArgsConstructor
@@ -26,12 +25,6 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -47,8 +40,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User saveUser(UserSignupRequest request) {
-        emailVerificationTokenRepository.findByEmailAndExpired(request.getEmail(), true)
-                .orElseThrow(() -> new IllegalArgumentException("이메일 인증이 필요합니다."));
+        if (emailVerificationTokenRepository.findByEmailAndExpired(request.getEmail(), true)
+                .isEmpty()) {
+            throw new IllegalArgumentException("이메일 인증이 필요합니다.");
+        }
         signupRequestValidate(request);
         return userRepository.save(request.toEntity());
     }
