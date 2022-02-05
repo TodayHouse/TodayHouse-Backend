@@ -6,10 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CookieUserResponse {
-    String email;
-    String nickname;
+public class OAuthSignupInfoResponse {
+    private String email;
+    private String nickname;
 }
