@@ -1,5 +1,7 @@
 package com.todayhouse.domain.user.dto.request;
 
+import com.todayhouse.domain.user.domain.AuthProvider;
+import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +18,7 @@ import java.util.Collections;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserSaveRequest {
+public class UserSignupRequest {
     @NotBlank
     @Size(max=50)
     private String email;
@@ -34,6 +36,8 @@ public class UserSaveRequest {
     private String nickname;
 
     @NotNull
+    private boolean agreeAge;
+    @NotNull
     private boolean agreeTOS;
     @NotNull
     private boolean agreePICU;
@@ -42,13 +46,15 @@ public class UserSaveRequest {
 
     public User toEntity(){
         return User.builder()
-                .email(this.email)
-                .password(new BCryptPasswordEncoder().encode(this.password1))
-                .roles(Collections.singletonList("ROLE_USER"))
-                .nickname(this.nickname)
-                .agreeTOS(this.agreeTOS)
-                .agreePICU(this.agreePICU)
-                .agreePromotion(this.agreePromotion)
+                .authProvider(AuthProvider.LOCAL)
+                .email(email)
+                .password(new BCryptPasswordEncoder().encode(password1))
+                .roles(Collections.singletonList(Role.USER))
+                .nickname(nickname)
+                .agreeAge(agreeAge)
+                .agreeTOS(agreeTOS)
+                .agreePICU(agreePICU)
+                .agreePromotion(agreePromotion)
                 .build();
     }
 }

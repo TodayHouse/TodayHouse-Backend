@@ -1,22 +1,22 @@
 package com.todayhouse.domain.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.AuthProvider;
+import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
-import com.todayhouse.domain.user.dto.request.UserSaveRequest;
+import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,10 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Transactional
-@AutoConfigureMockMvc
-@SpringBootTest
-class UserControllerTest {
+class UserControllerTest extends IntegrationBase {
     @Autowired
     MockMvc mockMvc;
 
@@ -47,9 +44,10 @@ class UserControllerTest {
     void clearRepository() {
         userRepository.deleteAll();
         userRepository.save(User.builder()
+                .authProvider(AuthProvider.LOCAL)
                 .email("test")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
-                .roles(Collections.singletonList("ROLE_USER"))
+                .roles(Collections.singletonList(Role.USER))
                 .agreePICU(true)
                 .agreePromotion(true)
                 .agreeTOS(true)
@@ -58,10 +56,10 @@ class UserControllerTest {
     }
 
     @Test
-    void 회원가입() throws Exception{
+    void 회원가입() throws Exception {
         String email = "today.house.clone@gmail.com";
         String token = "101010";
-        UserSaveRequest request = UserSaveRequest.builder()
+        UserSignupRequest request = UserSignupRequest.builder()
                 .email(email)
                 .password1("09876543")
                 .password2("09876543")
@@ -98,25 +96,19 @@ class UserControllerTest {
     @Test
     void jwtTest() throws Exception {
         String url = "http://localhost:8080/users/test";
-        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList("ROLE_USER"));
+        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList(Role.USER));
 
         mockMvc.perform(MockMvcRequestBuilders.get(url)
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
-
-        mockMvc.perform(MockMvcRequestBuilders.get(url)
-                        .header("Authorization", "Bearer " + jwt.replace("1", "2"))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is4xxClientError())
-                .andDo(print());
     }
 
     @Test
     void 이메일_닉네임_중복() throws Exception {
         String url = "http://localhost:8080/users/";
-        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList("ROLE_USER"));
+        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList(Role.USER));
 
         //email
         mockMvc.perform(MockMvcRequestBuilders.get(url + "emails/test/exist"))

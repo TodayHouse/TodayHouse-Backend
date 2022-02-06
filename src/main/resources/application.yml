@@ -1,6 +1,6 @@
 ﻿spring:
   profiles:
-    include: jwt, email, aws
+    include: jwt, email, aws, oauth
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver

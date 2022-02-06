@@ -55,6 +55,8 @@ public class EmailVerificationToken {
     // 토큰 재전송
     public String updateToken(String token) {
         this.token = token;
+        this.expired = false;
+        this.expiredAt = LocalDateTime.now().plusMinutes(EMAIL_TOKEN_EXPIRATION_TIME_VALUE);
         return this.id;
     }
 

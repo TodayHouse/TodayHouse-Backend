@@ -12,7 +12,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static com.todayhouse.global.error.BaseResponseStatus.*;
+import static com.todayhouse.global.error.BaseResponseStatus.AMAZON_CLIENT_EXCEPTION;
+import static com.todayhouse.global.error.BaseResponseStatus.IMAGE_FILE_IO_EXCEPTION;
 
 @Service
 public class S3Service {

@@ -12,22 +12,18 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserSaveResponse {
-    private Long id;
+public class UserSignupResponse {
     private String email;
-    private String password;
     private String nickname;
-    private List<String> role;
+    private boolean agreeAge;
     private boolean agreeTOS;
     private boolean agreePICU;
     private boolean agreePromotion;
 
-    public UserSaveResponse (User user){
-        this.id = user.getId();
+    public UserSignupResponse(User user){
         this.email = user.getEmail();
-        this.password = user.getPassword();
         this.nickname = user.getNickname();
-        this.role = user.getRoles();
+        this.agreeAge = user.isAgreeAge();
         this.agreeTOS = user.isAgreeTOS();
         this.agreePICU = user.isAgreePICU();
         this.agreePromotion = user.isAgreePromotion();

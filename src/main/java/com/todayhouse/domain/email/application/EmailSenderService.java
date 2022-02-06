@@ -4,6 +4,7 @@ import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.email.dto.request.EmailSendRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.exception.UserEmailExistExcecption;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -33,8 +34,8 @@ public class EmailSenderService {
         String token = createToken();
 
         // 이미 가입한 이메일 존재
-        if(userRepository.existsByEmail(email))
-            throw new IllegalArgumentException();
+        if (userRepository.existsByEmail(email))
+            throw new UserEmailExistExcecption();
 
         MimeMessage message = createMessage(email, token);
         javaMailSender.send(message);
@@ -73,9 +74,10 @@ public class EmailSenderService {
 
         return message;
     }
+
     // 토큰 재발급시 업데이트
     private String tokenSave(String email, String token) {
         return repository.findByEmail(email).map(unused -> unused.updateToken(token))
-                .orElseGet(()->repository.save(EmailVerificationToken.createEmailToken(email, token)).getId());
+                .orElseGet(() -> repository.save(EmailVerificationToken.createEmailToken(email, token)).getId());
     }
 }

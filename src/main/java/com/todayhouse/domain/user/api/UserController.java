@@ -2,9 +2,9 @@ package com.todayhouse.domain.user.api;
 
 import com.todayhouse.domain.user.application.UserService;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
-import com.todayhouse.domain.user.dto.request.UserSaveRequest;
+import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.dto.response.UserLoginResponse;
-import com.todayhouse.domain.user.dto.response.UserSaveResponse;
+import com.todayhouse.domain.user.dto.response.UserSignupResponse;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +35,10 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/signup")
-    public BaseResponse signup(@Valid @RequestBody UserSaveRequest request) {
+    public BaseResponse signup(@Valid @RequestBody UserSignupRequest request) {
         log.info("이메일: {}, 닉네임: {}",
                 request.getEmail(), request.getNickname());
-        UserSaveResponse response = new UserSaveResponse(userService.saveUser(request));
+        UserSignupResponse response = new UserSignupResponse(userService.saveUser(request));
         return new BaseResponse(response);
     }
 
