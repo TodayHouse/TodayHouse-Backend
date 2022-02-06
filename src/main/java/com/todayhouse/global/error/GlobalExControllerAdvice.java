@@ -13,11 +13,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice(annotations = RestController.class)
 public class GlobalExControllerAdvice {
 
+    // BaseException return
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(BaseException.class)
+    public BaseResponse baseResponse(BaseException e) {
+        log.error("{} Exception {}: {}", e.getStatus(), e.getStatus().getCode(), e.getStatus().getMessage());
+        return new BaseResponse(e.getStatus());
+    }
+
     // 내부 exception, 최하단에 위치
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
-    public BaseResponse baseException(Exception e){
-        log.error("Exception : {}",BaseResponseStatus.OTHERS.getMessage(), e);
+    public BaseResponse baseException(Exception e) {
+        log.error("Exception : {}", BaseResponseStatus.OTHERS.getMessage(), e);
         return new BaseResponse(BaseResponseStatus.OTHERS);
     }
 }

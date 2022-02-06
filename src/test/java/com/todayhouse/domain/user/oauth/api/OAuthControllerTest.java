@@ -65,14 +65,15 @@ class OAuthControllerTest extends IntegrationBase {
     }
 
     @Test
-    void cookie없는_유저정보_요청() throws Exception {
+    void cookie없이_유저정보_요청() throws Exception {
         //given
         String email = "test@test.com";
         userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.GUEST))
                 .authProvider(AuthProvider.NAVER).build());
         //when, then
         mockMvc.perform(get("http://localhost:8080/oauth2/signup/info"))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
     }
 
     @Test
@@ -86,7 +87,8 @@ class OAuthControllerTest extends IntegrationBase {
         //when,then
         mockMvc.perform(get("http://localhost:8080/oauth2/token")
                         .cookie(cookie))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
     }
 
     @Test
@@ -112,7 +114,8 @@ class OAuthControllerTest extends IntegrationBase {
     @Test
     void 인증없이_jwt_요청() throws Exception {
         mockMvc.perform(get("http://localhost:8080/oauth2/token"))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
     }
 
     @Test
@@ -149,6 +152,7 @@ class OAuthControllerTest extends IntegrationBase {
         mockMvc.perform(put("http://localhost:8080/oauth2/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(request)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
     }
 }

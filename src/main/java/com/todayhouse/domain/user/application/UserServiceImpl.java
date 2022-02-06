@@ -7,6 +7,7 @@ import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
+import com.todayhouse.domain.user.exception.*;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService {
     public User saveUser(UserSignupRequest request) {
         if (emailVerificationTokenRepository.findByEmailAndExpired(request.getEmail(), true)
                 .isEmpty()) {
-            throw new IllegalArgumentException("이메일 인증이 필요합니다.");
+            throw new UserEmailNotAuthException();
         }
         signupRequestValidate(request);
         return userRepository.save(request.toEntity());
@@ -52,9 +53,9 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public String login(UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserEmailNotFountException());
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("잘못된 비밀번호입니다.");
+            throw new WrongPasswordException();
         }
 
         return jwtTokenProvider.createToken(user.getEmail(), user.getRoles());
@@ -62,13 +63,13 @@ public class UserServiceImpl implements UserService {
 
     private void signupRequestValidate(UserSignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail()))
-            throw new IllegalArgumentException("중복된 이메일입니다.");
+            throw new UserEmailExistExcecption();
 
         if (userRepository.existsByNickname(request.getNickname()))
-            throw new IllegalArgumentException("중복된 닉네임입니다.");
+            throw new UserNicknameExistException();
 
         if (!request.getPassword1().equals(request.getPassword2()))
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new SignupPasswordException();
     }
 
     //테스트 계정

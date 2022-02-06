@@ -7,6 +7,7 @@ import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
+import com.todayhouse.domain.user.exception.WrongPasswordException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -118,6 +119,6 @@ class UserServiceImplTest {
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
         when(passwordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(false);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.login(request));
+        assertThrows(WrongPasswordException.class, () -> userService.login(request));
     }
 }

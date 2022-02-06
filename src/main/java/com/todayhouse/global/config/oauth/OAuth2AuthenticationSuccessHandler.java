@@ -2,6 +2,7 @@ package com.todayhouse.global.config.oauth;
 
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.todayhouse.domain.user.oauth.exception.InvalidRedirectUriException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Optional<String> redirectUri = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME).map(Cookie::getValue);
         if (redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get()))
-            throw new IllegalArgumentException("unauthorized Redirect URI");
+            throw new InvalidRedirectUriException();
 
         String targetUri = redirectUri.orElse(SNS_SIGNUP_URL);
 

@@ -6,6 +6,7 @@ import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.response.UserSignupResponse;
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
+import com.todayhouse.domain.user.oauth.exception.AuthGuestException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,7 +61,7 @@ class OAuthServiceImplTest {
                 .roles(Collections.singletonList(Role.GUEST)).build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
 
-        assertThrows(IllegalArgumentException.class, () -> oAuthService.provideToken(email));
+        assertThrows(AuthGuestException.class, () -> oAuthService.provideToken(email));
     }
 
     @Test
