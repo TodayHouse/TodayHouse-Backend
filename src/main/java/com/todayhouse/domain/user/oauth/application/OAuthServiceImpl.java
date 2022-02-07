@@ -27,6 +27,7 @@ public class OAuthServiceImpl implements OAuthService {
         return user.getNickname();
     }
 
+    // jwt 발급
     @Override
     @Transactional(readOnly = true)
     public String provideToken(String email) {
@@ -38,10 +39,12 @@ public class OAuthServiceImpl implements OAuthService {
         return jwtTokenProvider.createToken(user.getEmail(), user.getRoles());
     }
 
+    // 인증된 이메일을 회원가입
     @Override
     public User saveGuest(OAuthSignupRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserEmailNotFountException());
+        // 인증 받지 않았거나 이미 회원가입한 유저
         if (!user.getRoles().contains(Role.GUEST)) {
             throw new AuthNotGuestException();
         }

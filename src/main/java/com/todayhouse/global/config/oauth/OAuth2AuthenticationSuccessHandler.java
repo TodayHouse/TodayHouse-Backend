@@ -62,7 +62,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         List<Role> roles = new ArrayList<>();
         for (GrantedAuthority auth : authorities) {
-            roles.add(Role.toRole(auth.getAuthority()));
+            roles.add(Role.grantedAuthorityToRole(auth.getAuthority()));
         }
         String token = tokenProvider.createToken(email, roles);
         // 임시 jwt를 쿠키에 추가합니다.

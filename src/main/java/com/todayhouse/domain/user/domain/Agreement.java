@@ -24,6 +24,7 @@ public class Agreement {
     @Column(name = "agree_promotion")
     private boolean agreePromotion;
 
+    // 모든 약관 동의
     public static Agreement agreeAll(){
         return Agreement.builder()
                 .agreeAge(true)
