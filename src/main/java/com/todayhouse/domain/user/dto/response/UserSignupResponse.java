@@ -23,9 +23,9 @@ public class UserSignupResponse {
     public UserSignupResponse(User user){
         this.email = user.getEmail();
         this.nickname = user.getNickname();
-        this.agreeAge = user.isAgreeAge();
-        this.agreeTOS = user.isAgreeTOS();
-        this.agreePICU = user.isAgreePICU();
-        this.agreePromotion = user.isAgreePromotion();
+        this.agreeAge = user.getAgreement().isAgreeAge();
+        this.agreeTOS = user.getAgreement().isAgreeTOS();
+        this.agreePICU = user.getAgreement().isAgreePICU();
+        this.agreePromotion = user.getAgreement().isAgreePromotion();
     }
 }

@@ -2,6 +2,7 @@ package com.todayhouse.domain.user.application;
 
 import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
@@ -80,9 +81,7 @@ public class UserServiceImpl implements UserService {
                 .email("admin")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList(Role.ADMIN))
-                .agreePICU(true)
-                .agreePromotion(true)
-                .agreeTOS(true)
+                .agreement(Agreement.agreeAll())
                 .nickname("admin")
                 .build());
 
@@ -91,9 +90,7 @@ public class UserServiceImpl implements UserService {
                 .email("a@a.com")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList(Role.USER))
-                .agreePICU(true)
-                .agreePromotion(true)
-                .agreeTOS(true)
+                .agreement(Agreement.agreeAll())
                 .nickname("user1")
                 .build());
     }

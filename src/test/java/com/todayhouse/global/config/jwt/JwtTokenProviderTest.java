@@ -1,5 +1,6 @@
 package com.todayhouse.global.config.jwt;
 
+import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
@@ -51,9 +52,7 @@ class JwtTokenProviderTest {
                 .email("test@test.com")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(roles)
-                .agreePICU(true)
-                .agreePromotion(true)
-                .agreeTOS(true)
+                .agreement(Agreement.agreeAll())
                 .nickname("testname")
                 .build();
         String jwt = tokenProvider.createToken(user.getEmail(), roles);

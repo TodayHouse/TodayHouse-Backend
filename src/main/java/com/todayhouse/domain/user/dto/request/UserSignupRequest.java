@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.dto.request;
 
+import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
@@ -45,16 +46,15 @@ public class UserSignupRequest {
     private boolean agreePromotion;
 
     public User toEntity(){
+        Agreement agreement = Agreement.builder().agreeAge(agreeAge).agreeTOS(agreeTOS)
+                .agreePICU(agreePICU).agreePromotion(agreePromotion).build();
         return User.builder()
                 .authProvider(AuthProvider.LOCAL)
                 .email(email)
                 .password(new BCryptPasswordEncoder().encode(password1))
                 .roles(Collections.singletonList(Role.USER))
                 .nickname(nickname)
-                .agreeAge(agreeAge)
-                .agreeTOS(agreeTOS)
-                .agreePICU(agreePICU)
-                .agreePromotion(agreePromotion)
+                .agreement(agreement)
                 .build();
     }
 }

@@ -24,10 +24,11 @@ import java.util.stream.Collectors;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "auth_provider", nullable = false)
     private AuthProvider authProvider;
 
     @Column(length = 50, unique = true)
@@ -39,15 +40,16 @@ public class User implements UserDetails {
     @Column(length = 15, unique = true)
     private String nickname;
 
-    private boolean agreeAge;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
-    @Column(name = "agree_TOS")
-    private boolean agreeTOS;
+    private String birth;
 
-    @Column(name = "agree_PICU")
-    private boolean agreePICU;
+    @Column(name = "profile_image")
+    private String profileImage;
 
-    private boolean agreePromotion;
+    @Embedded
+    private Agreement agreement;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
@@ -97,24 +99,6 @@ public class User implements UserDetails {
     public void oAuthUserUpdate(OAuthSignupRequest request) {
         this.nickname = request.getNickname();
         this.roles = Collections.singletonList(Role.USER);
-        this.agreeAge = request.isAgreeAge();
-        this.agreeTOS = request.isAgreeTOS();
-        this.agreePICU = request.isAgreePICU();
-        this.agreePromotion = request.isAgreePromotion();
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", authProvider=" + authProvider +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", nickname='" + nickname + '\'' +
-                ", agreeTOS=" + agreeTOS +
-                ", agreePICU=" + agreePICU +
-                ", agreePromotion=" + agreePromotion +
-                ", roles=" + roles +
-                '}';
+        this.agreement = Agreement.agreeAll();
     }
 }
