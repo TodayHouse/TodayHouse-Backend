@@ -57,12 +57,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and()
                 .authorizeRequests() // 요청에 대한 사용권한 체크
-                .antMatchers("/", "/h2-console/**", "/**/signup", "/users/login", "/**/exist", "/emails/**"
-                        , "/oauth2/signup/info")
-                .permitAll()
-                .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**")
-                .permitAll()
-                .anyRequest().hasAnyRole("USER", "ADMIN") // 그외 모든 요청은 user, admin만 가능
+                .antMatchers()
+                .hasAnyRole("USER", "ADMIN") // user, admin 요청만 허용
+                .antMatchers()
+                .hasAnyRole("GUEST") // guest 요청만 허용
+                .antMatchers("/oauth2/**")
+                .authenticated()// 인증된 요청만 허용
+                .anyRequest().permitAll() // 그 외 모든 요청 허용
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class)

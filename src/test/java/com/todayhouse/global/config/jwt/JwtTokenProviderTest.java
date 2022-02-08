@@ -37,6 +37,7 @@ class JwtTokenProviderTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(tokenProvider, "secretKey", "abcabc123");
+        ReflectionTestUtils.setField(tokenProvider, "expiration", 1000000L);
     }
 
     @Test
@@ -82,7 +83,6 @@ class JwtTokenProviderTest {
 
     @Test
     void request_header에_jwt() {
-        ReflectionTestUtils.setField(tokenProvider, "expiration", 1000000L);
         MockHttpServletRequest request = new MockHttpServletRequest();
         String jwt = tokenProvider.createToken("a", Collections.singletonList(Role.GUEST));
         request.addHeader("Authorization", "Bearer " + jwt);

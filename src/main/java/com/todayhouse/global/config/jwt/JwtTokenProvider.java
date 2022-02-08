@@ -45,11 +45,11 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(userPk); // JWT payload 에 저장되는 정보단위
         claims.put("roles", roles); // 정보는 key / value 쌍으로 저장된다.
         Date now = new Date();
-        Optional<Role> roleGuest = roles.stream().filter(r -> r.equals(Role.GUEST)).findFirst();
+//        Optional<Role> roleGuest = roles.stream().filter(r -> r.equals(Role.GUEST)).findFirst();
         return Jwts.builder()
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + (roleGuest.isPresent() ? 5 * 60 * 1000 : expiration))) // set Expire Time, guest는 3분
+                .setExpiration(new Date(now.getTime() + expiration))
                 .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘, secret 값
                 .compact();
     }

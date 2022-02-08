@@ -17,6 +17,7 @@ import com.todayhouse.global.config.oauth.CookieUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -52,7 +53,7 @@ class OAuthControllerTest extends IntegrationBase {
         String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
         Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
         //when
-        MvcResult mvcResult = mockMvc.perform(get("http://localhost:8080/oauth2/signup/info")
+        MvcResult mvcResult = mockMvc.perform(get("http://localhost:8080/oauth2/email")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -61,7 +62,6 @@ class OAuthControllerTest extends IntegrationBase {
         BaseResponse baseResponse = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), BaseResponse.class);
         OAuthSignupInfoResponse response = new ObjectMapper().convertValue(baseResponse.getResult(), OAuthSignupInfoResponse.class);
         assertThat(response.getEmail()).isEqualTo(email);
-        assertThat(response.getNickname()).isEqualTo(null);
     }
 
     @Test
@@ -118,6 +118,7 @@ class OAuthControllerTest extends IntegrationBase {
                 .andDo(print());
     }
 
+    @WithMockUser(roles = "USER")
     @Test
     void 인증_이메일_회원가입() throws Exception {
         //given

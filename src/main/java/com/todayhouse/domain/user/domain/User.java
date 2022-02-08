@@ -51,6 +51,7 @@ public class User implements UserDetails {
     @Embedded
     private Agreement agreement;
 
+    @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<Role> roles = new ArrayList<>();

@@ -19,10 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
@@ -58,7 +55,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String targetUri = redirectUri.orElse(SNS_SIGNUP_URL);
 
-        String email = (String) ((OAuth2User) authentication.getPrincipal()).getAttributes().get("email");
+        String email = getEmailFromOAuth2User((OAuth2User) authentication.getPrincipal());
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         List<Role> roles = new ArrayList<>();
         for (GrantedAuthority auth : authorities) {
@@ -70,6 +67,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         return UriComponentsBuilder.fromUriString(targetUri)
                 .build().toUriString();
+    }
+
+    private String getEmailFromOAuth2User(OAuth2User oAuth2User) {
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        if (attributes.get("email") != null) // naver email
+            return (String) attributes.get("email");
+        else { // kakao email
+            return (String) ((Map<String, Object>) attributes.get("kakao_account"))
+                    .get("email");
+        }
     }
 
     // 쿠기 삭제

@@ -18,15 +18,11 @@ public class OAuthController {
 
     private final OAuthService oAuthService;
 
-    @GetMapping("/signup/info")
+    @GetMapping("/email")
     public BaseResponse signupInfo(Authentication authentication) {
-        String email;
-        if (authentication == null) email = "";
-        else
-            email = ((User) authentication.getPrincipal()).getEmail();
-        String nickname = oAuthService.findNicknamebyEmail(email);
+        String email = ((User) authentication.getPrincipal()).getEmail();
         OAuthSignupInfoResponse response = OAuthSignupInfoResponse.builder()
-                .email(email).nickname(nickname).build();
+                .email(email).build();
         return new BaseResponse(response);
     }
 
