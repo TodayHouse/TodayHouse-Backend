@@ -17,10 +17,18 @@ public class OAuthSignTest extends IntegrationBase {
     MockMvc mockMvc;
 
     @Test
-    public void OAuth_로그인_창_띄우기() throws Exception{
+    public void Naver_OAuth_로그인_창_띄우기() throws Exception {
         String url = "http://localhost:8080/oauth2/authorize/naver";
         mockMvc.perform(get(url))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", containsString("https://nid.naver.com/oauth2.0/authorize")));
+    }
+
+    @Test
+    public void Kakao_OAuth_로그인_창_띄우기() throws Exception {
+        String url = "http://localhost:8080/oauth2/authorize/kakao";
+        mockMvc.perform(get(url))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(header().string("Location", containsString("https://kauth.kakao.com/oauth/authorize")));
     }
 }

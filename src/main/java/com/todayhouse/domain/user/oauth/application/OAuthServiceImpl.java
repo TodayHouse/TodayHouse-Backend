@@ -10,6 +10,7 @@ import com.todayhouse.domain.user.oauth.exception.AuthNotGuestException;
 import com.todayhouse.domain.user.oauth.exception.InvalidAuthException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +39,7 @@ public class OAuthServiceImpl implements OAuthService {
         if (user.getRoles().contains(Role.GUEST)) {
             throw new AuthGuestException();
         }
-        if(!user.getRoles().contains(Role.USER)&&!user.getRoles().contains(Role.ADMIN)){
+        if (!user.getRoles().contains(Role.USER) && !user.getRoles().contains(Role.ADMIN)) {
             throw new InvalidAuthException();
         }
         return jwtTokenProvider.createToken(user.getEmail(), user.getRoles());
@@ -46,14 +47,15 @@ public class OAuthServiceImpl implements OAuthService {
 
     // 인증된 이메일을 회원가입
     @Override
-    public User saveGuest(OAuthSignupRequest request) {
+    public User saveGuest(OAuthSignupRequest request, String jwt) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserEmailNotFountException());
         // 인증 받지 않았거나 이미 회원가입한 유저
         if (!user.getRoles().contains(Role.GUEST)) {
             throw new AuthNotGuestException();
         }
-        user.oAuthUserUpdate(request);
+        User principal = (User) jwtTokenProvider.getAuthentication(jwt).getPrincipal();
+        user.updateWithOAuthSignup(request, principal);
         return user;
     }
 }

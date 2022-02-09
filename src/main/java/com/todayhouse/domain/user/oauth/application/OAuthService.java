@@ -9,5 +9,5 @@ public interface OAuthService {
 
     String provideToken(String email);
 
-    User saveGuest(OAuthSignupRequest request);
+    User saveGuest(OAuthSignupRequest request, String jwt);
 }

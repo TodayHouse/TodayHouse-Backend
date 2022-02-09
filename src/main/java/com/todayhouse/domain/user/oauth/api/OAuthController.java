@@ -6,10 +6,16 @@ import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthSignupInfoResponse;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthSignupResponse;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthTokenResponse;
+import com.todayhouse.domain.user.oauth.exception.InvalidAuthException;
 import com.todayhouse.global.common.BaseResponse;
+import com.todayhouse.global.config.oauth.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RequestMapping("/oauth2")
 @RestController
@@ -33,8 +39,13 @@ public class OAuthController {
     }
 
     @PutMapping("/signup")
-    public BaseResponse signup(@RequestBody OAuthSignupRequest request) {
-        User user = oAuthService.saveGuest(request);
+    public BaseResponse signup(@RequestBody OAuthSignupRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+        String jwt = CookieUtils.getCookie(servletRequest, "auth_user")
+                .map(cookie -> CookieUtils.deserialize(cookie, String.class))
+                .orElseThrow(()->new InvalidAuthException());
+        
+        User user = oAuthService.saveGuest(request, jwt);
+        CookieUtils.deleteCookie(servletRequest, servletResponse, "auth_user");
         return new BaseResponse(new OAuthSignupResponse(user));
     }
 }

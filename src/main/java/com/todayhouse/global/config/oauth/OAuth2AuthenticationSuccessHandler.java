@@ -2,6 +2,7 @@ package com.todayhouse.global.config.oauth;
 
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.todayhouse.domain.user.oauth.dto.OAuthAttributes;
 import com.todayhouse.domain.user.oauth.exception.InvalidRedirectUriException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -55,13 +56,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String targetUri = redirectUri.orElse(SNS_SIGNUP_URL);
 
-        String email = getEmailFromOAuth2User((OAuth2User) authentication.getPrincipal());
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        OAuthAttributes oAuthAttributes = getAttributeFromOAuth2User(oAuth2User);
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         List<Role> roles = new ArrayList<>();
         for (GrantedAuthority auth : authorities) {
             roles.add(Role.grantedAuthorityToRole(auth.getAuthority()));
         }
-        String token = tokenProvider.createToken(email, roles);
+        String token = tokenProvider.createOAuthToken(oAuthAttributes.getEmail(), roles,
+                oAuthAttributes.getAuthProvider(), oAuthAttributes.getPicture(), oAuthAttributes.getNickname());
         // 임시 jwt를 쿠키에 추가합니다.
         CookieUtils.addCookie(response, "auth_user", CookieUtils.serialize(token), 180);
 
@@ -69,13 +72,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .build().toUriString();
     }
 
-    private String getEmailFromOAuth2User(OAuth2User oAuth2User) {
+    // 유저 정보 추출
+    private OAuthAttributes getAttributeFromOAuth2User(OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
-        if (attributes.get("email") != null) // naver email
-            return (String) attributes.get("email");
-        else { // kakao email
-            return (String) ((Map<String, Object>) attributes.get("kakao_account"))
-                    .get("email");
+        if (attributes.get("email") != null) {
+            Map<String, Object> wrapper = new HashMap<>();
+            wrapper.put("response", wrapper);
+            return OAuthAttributes.of("naver", "id", wrapper);
+        } else {
+            return OAuthAttributes.of("kakao", "id", attributes);
         }
     }
 

@@ -1,10 +1,7 @@
 package com.todayhouse.domain.user.domain;
 
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -28,7 +26,7 @@ public class User implements UserDetails {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "auth_provider", nullable = false)
+    @Column(name = "auth_provider")
     private AuthProvider authProvider;
 
     @Column(length = 50, unique = true)
@@ -59,7 +57,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
-                .map(role->new SimpleGrantedAuthority(role.getKey()))
+                .map(role -> new SimpleGrantedAuthority(role.getKey()))
                 .collect(Collectors.toList());
     }
 
@@ -88,18 +86,13 @@ public class User implements UserDetails {
         return true;
     }
 
-    public User update(String name) {
-        this.email = name;
-        return this;
-    }
-
-    public List<Role> getRoleKey() {
-        return roles;
-    }
-
-    public void oAuthUserUpdate(OAuthSignupRequest request) {
+    public void updateWithOAuthSignup(OAuthSignupRequest request, User principal) {
         this.nickname = request.getNickname();
         this.roles = Collections.singletonList(Role.USER);
         this.agreement = Agreement.agreeAll();
+        this.authProvider = principal.getAuthProvider();
+        this.profileImage = principal.getProfileImage();
     }
+
+
 }
