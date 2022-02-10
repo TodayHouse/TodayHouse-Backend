@@ -94,6 +94,4 @@ public class User implements UserDetails {
         this.authProvider = principal.getAuthProvider();
         this.profileImage = principal.getProfileImage();
     }
-
-
 }

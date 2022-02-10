@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
@@ -32,14 +35,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtTokenProvider tokenProvider;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
-    private final String SNS_SIGNUP_URL = "http://localhost:3000/sns_signup";
+    private final String SNS_SIGNUP_URL = "http://localhost:3000/social_signup";
+    private final String MAIN_URL = "http://localhost:3000";
 
     @Value("${oauth.authorizedRedirectUris}")
     List<String> authorizedRedirectUris;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        String targetUrl = determineTargetUrl(request, response, authentication);
+        String targetUrl = determineCookieAndTargetUrl(request, response, authentication);
         log.info("인증 성공 target url : {}", targetUrl);
         if (response.isCommitted()) {
             log.debug("요청이 이미 완료되었습니다. " + targetUrl + "로 리다이렉트할 수 없습니다.");
@@ -49,42 +53,44 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
-    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+    protected String determineCookieAndTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Optional<String> redirectUri = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME).map(Cookie::getValue);
         if (redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get()))
             throw new InvalidRedirectUriException();
 
-        String targetUri = redirectUri.orElse(SNS_SIGNUP_URL);
+        String targetUri = redirectUri.orElse(MAIN_URL);
 
+        List<Role> roles = authentication.getAuthorities().stream().map(auth -> Role.keyToRole(auth.getAuthority()))
+                .collect(Collectors.toList());
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         OAuthAttributes oAuthAttributes = getAttributeFromOAuth2User(oAuth2User);
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        List<Role> roles = new ArrayList<>();
-        for (GrantedAuthority auth : authorities) {
-            roles.add(Role.grantedAuthorityToRole(auth.getAuthority()));
+        if (roles.contains(Role.GUEST)) { // 추가회원가입 필요 -> 임시 인증 쿠키, uri 변경
+            String jwt = tokenProvider.createOAuthToken(oAuthAttributes.getEmail(), roles,
+                    oAuthAttributes.getAuthProvider(), oAuthAttributes.getPicture(), oAuthAttributes.getNickname());
+            CookieUtils.addHttpOnlyCookie(response, "auth_user", CookieUtils.serialize(jwt), 60 * 60);
+            targetUri = SNS_SIGNUP_URL;
+        } else { // 로그인 -> jwt
+            String jwt = tokenProvider.createToken(oAuthAttributes.getEmail(), roles);
+            CookieUtils.addNormalCookie(response, "access_token", jwt, 10);
         }
-        String token = tokenProvider.createOAuthToken(oAuthAttributes.getEmail(), roles,
-                oAuthAttributes.getAuthProvider(), oAuthAttributes.getPicture(), oAuthAttributes.getNickname());
-        // 임시 jwt를 쿠키에 추가합니다.
-        CookieUtils.addCookie(response, "auth_user", CookieUtils.serialize(token), 180);
 
         return UriComponentsBuilder.fromUriString(targetUri)
                 .build().toUriString();
     }
 
-    // 유저 정보 추출
+    // OAuth2User를 OAuthAttribute로 변환
     private OAuthAttributes getAttributeFromOAuth2User(OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
         if (attributes.get("email") != null) {
             Map<String, Object> wrapper = new HashMap<>();
-            wrapper.put("response", wrapper);
+            wrapper.put("response", attributes);
             return OAuthAttributes.of("naver", "id", wrapper);
         } else {
             return OAuthAttributes.of("kakao", "id", attributes);
         }
     }
 
-    // 쿠기 삭제
+    // HttpCookie 삭제
     protected void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
         super.clearAuthenticationAttributes(request);
         httpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);

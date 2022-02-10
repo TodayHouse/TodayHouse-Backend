@@ -10,9 +10,9 @@ public enum Role {
 
     private final String key;
 
-    // authentication의 authority를 role로 변환
-    public static Role grantedAuthorityToRole(String key) {
-        for (Role r : Role.values()) {
+    // key를 role로 변환
+    public static Role keyToRole(String key) {
+        for (Role r : values()) {
             if (r.getKey().equals(key))
                 return r;
         }

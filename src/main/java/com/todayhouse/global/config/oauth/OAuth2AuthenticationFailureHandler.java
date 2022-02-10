@@ -30,12 +30,12 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                 .orElse(("http://localhost:3000"));
 
         log.info("인증 실패 target url : {}", targetUrl);
-        targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
-                .queryParam("error", exception.getLocalizedMessage())
-                .build().toUriString();
 
         httpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
 
+        targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
+                .queryParam("error", exception.getLocalizedMessage())
+                .build().toUriString();
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }
