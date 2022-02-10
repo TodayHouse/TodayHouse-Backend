@@ -51,6 +51,7 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(joinColumns = @JoinColumn(name = "user_id"))
     @Builder.Default
     private List<Role> roles = new ArrayList<>();
 

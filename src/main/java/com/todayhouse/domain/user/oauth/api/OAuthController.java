@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,8 +41,8 @@ public class OAuthController {
     public BaseResponse signup(@RequestBody OAuthSignupRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
         String jwt = CookieUtils.getCookie(servletRequest, "auth_user")
                 .map(cookie -> CookieUtils.deserialize(cookie, String.class))
-                .orElseThrow(()->new InvalidAuthException());
-        
+                .orElseThrow(() -> new InvalidAuthException());
+
         User user = oAuthService.saveGuest(request, jwt);
         CookieUtils.deleteCookie(servletRequest, servletResponse, "auth_user");
         return new BaseResponse(new OAuthSignupResponse(user));

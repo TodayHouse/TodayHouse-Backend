@@ -10,7 +10,6 @@ import com.todayhouse.domain.user.oauth.exception.AuthNotGuestException;
 import com.todayhouse.domain.user.oauth.exception.InvalidAuthException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

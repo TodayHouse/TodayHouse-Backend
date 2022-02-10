@@ -59,9 +59,9 @@ public class OAuthAttributes {
         Map<String, Object> profile = (Map<String, Object>) account.get("profile");
         return OAuthAttributes.builder()
                 .authProvider(AuthProvider.KAKAO)
-                .nickname((String) profile.get("nickname"))
+                .nickname(profile != null ? (String) profile.get("nickname") : null)
                 .email((String) account.get("email"))
-                .picture((String) profile.get("profile_image_url"))
+                .picture(profile != null ? (String) profile.get("profile_image_url") : null)
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .build();

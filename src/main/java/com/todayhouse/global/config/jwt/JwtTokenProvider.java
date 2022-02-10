@@ -18,7 +18,10 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -86,7 +89,7 @@ public class JwtTokenProvider {
 
         // UserDetails 객체를 만들어서 Authentication 리턴
         UserDetails principal = User.builder()
-                .authProvider(claims.get("authProvide")!=null?AuthProvider.valueOf(claims.get("authProvide").toString()):null)
+                .authProvider(claims.get("authProvide") != null ? AuthProvider.valueOf(claims.get("authProvide").toString()) : null)
                 .email(claims.getSubject())
                 .nickname((String) claims.get("nickname"))
                 .profileImage((String) claims.get("profileImage"))

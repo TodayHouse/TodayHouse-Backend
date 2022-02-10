@@ -25,7 +25,7 @@ public class Agreement {
     private boolean agreePromotion;
 
     // 모든 약관 동의
-    public static Agreement agreeAll(){
+    public static Agreement agreeAll() {
         return Agreement.builder()
                 .agreeAge(true)
                 .agreeTOS(true)

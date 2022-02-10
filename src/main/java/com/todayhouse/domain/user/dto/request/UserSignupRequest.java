@@ -21,19 +21,19 @@ import java.util.Collections;
 @Builder
 public class UserSignupRequest {
     @NotBlank
-    @Size(max=50)
+    @Size(max = 50)
     private String email;
 
     @NotBlank
-    @Size(min=8,max=200)
+    @Size(min = 8, max = 200)
     private String password1;
 
     @NotBlank
-    @Size(min=8,max=200)
+    @Size(min = 8, max = 200)
     private String password2;
 
     @NotBlank
-    @Size(min=2,max=15)
+    @Size(min = 2, max = 15)
     private String nickname;
 
     @NotNull
@@ -45,7 +45,7 @@ public class UserSignupRequest {
     @NotNull
     private boolean agreePromotion;
 
-    public User toEntity(){
+    public User toEntity() {
         Agreement agreement = Agreement.builder().agreeAge(agreeAge).agreeTOS(agreeTOS)
                 .agreePICU(agreePICU).agreePromotion(agreePromotion).build();
         return User.builder()

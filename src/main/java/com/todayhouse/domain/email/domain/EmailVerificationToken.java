@@ -61,7 +61,7 @@ public class EmailVerificationToken {
     }
 
     // 토큰 만료
-    public void expireToken(){
+    public void expireToken() {
         this.expired = true;
     }
 }

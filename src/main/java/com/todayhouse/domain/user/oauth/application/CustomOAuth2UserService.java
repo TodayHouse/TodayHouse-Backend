@@ -40,15 +40,16 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         User user = saveOrUpdate(attributes);
         Set<GrantedAuthority> authorities = new LinkedHashSet<>();
-        for(Role authority : user.getRoles()){
+        for (Role authority : user.getRoles()) {
             authorities.add(new SimpleGrantedAuthority(authority.getKey()));
         }
 
         return new DefaultOAuth2User(
                 authorities, attributes.getAttributes(), attributes.getNameAttributeKey());
     }
+
     //사용자 정보 업데이트시 반영
-    private User saveOrUpdate(OAuthAttributes attributes){
+    private User saveOrUpdate(OAuthAttributes attributes) {
         User user = userRepository.findByEmail(attributes.getEmail())
                 .orElse(attributes.toEntity());
         return userRepository.save(user);

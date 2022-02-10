@@ -26,7 +26,7 @@ public enum BaseResponseStatus {
     WRONG_SIGNUP_PASSWORD(false, 2013, "비밀번호 확인이 일치하지 않습니다."),
     INVALID_AUTH_EMAIL(false, 2014, "인증받지 않은 이메일입니다."),
     INVALID_GUEST_EMAIL(false, 2015, ""),
-    INVALID_EMAIL_TOEKN(false, 2016, "유효하지 않은 코드입니다."),
+    INVALID_EMAIL_TOKEN(false, 2016, "유효하지 않은 코드입니다."),
 
 
     // product

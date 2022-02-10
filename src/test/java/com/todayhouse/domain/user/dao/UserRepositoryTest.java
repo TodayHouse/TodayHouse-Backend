@@ -39,7 +39,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("없는 email 검색")
-    void findByInvalidEmail(){
+    void findByInvalidEmail() {
         testEntityManager.persist(user);
 
         assertThat(userRepository.findByEmail("invalid")).isEqualTo(Optional.empty());

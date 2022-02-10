@@ -15,7 +15,7 @@ public class TokenVerificationResponse {
     private String token;
     private LocalDateTime expiredAt;
 
-    public TokenVerificationResponse (EmailVerificationToken token){
+    public TokenVerificationResponse(EmailVerificationToken token) {
         this.email = token.getEmail();
         this.token = token.getToken();
         this.expiredAt = token.getExpiredAt();
