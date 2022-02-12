@@ -1,6 +1,6 @@
 package com.todayhouse.domain.user.oauth.dao;
 
-import com.todayhouse.global.config.oauth.CookieUtils;
+import com.todayhouse.global.config.cookie.CookieUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -11,5 +11,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OAuthSignupInfoResponse {
     private String email;
-    private String nickname;
 }

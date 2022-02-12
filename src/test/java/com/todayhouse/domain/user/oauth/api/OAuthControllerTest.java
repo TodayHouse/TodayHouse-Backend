@@ -3,6 +3,7 @@ package com.todayhouse.domain.user.oauth.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
@@ -13,7 +14,7 @@ import com.todayhouse.domain.user.oauth.dto.response.OAuthSignupResponse;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthTokenResponse;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
-import com.todayhouse.global.config.oauth.CookieUtils;
+import com.todayhouse.global.config.cookie.CookieUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -52,7 +53,7 @@ class OAuthControllerTest extends IntegrationBase {
         String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
         Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
         //when
-        MvcResult mvcResult = mockMvc.perform(get("http://localhost:8080/oauth2/signup/info")
+        MvcResult mvcResult = mockMvc.perform(get("http://localhost:8080/oauth2/email")
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -61,7 +62,6 @@ class OAuthControllerTest extends IntegrationBase {
         BaseResponse baseResponse = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), BaseResponse.class);
         OAuthSignupInfoResponse response = new ObjectMapper().convertValue(baseResponse.getResult(), OAuthSignupInfoResponse.class);
         assertThat(response.getEmail()).isEqualTo(email);
-        assertThat(response.getNickname()).isEqualTo(null);
     }
 
     @Test
@@ -123,15 +123,19 @@ class OAuthControllerTest extends IntegrationBase {
         //given
         String email = "test@test.com";
         String nickname = "test";
-        OAuthAttributes attribute = OAuthAttributes.builder().authProvider(AuthProvider.NAVER)
+        String img = "img.jpg";
+        OAuthAttributes attribute = OAuthAttributes.builder().authProvider(AuthProvider.KAKAO)
                 .email(email).build();
         userRepository.save(attribute.toEntity());
+        String jwt = jwtTokenProvider.createOAuthToken(email, Collections.singletonList(Role.GUEST), AuthProvider.KAKAO, img, nickname);
+        Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
         OAuthSignupRequest request = OAuthSignupRequest.builder().email(email).nickname(nickname)
                 .agreePICU(true).agreeAge(true).agreePromotion(true).agreeTOS(true).build();
         //when
         MvcResult mvcResult = mockMvc.perform(put("http://localhost:8080/oauth2/signup")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(request)))
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .cookie(cookie))
                 .andDo(print())
                 .andReturn();
         //then
@@ -139,6 +143,10 @@ class OAuthControllerTest extends IntegrationBase {
         OAuthSignupResponse response = new ObjectMapper().convertValue(baseResponse.getResult(), OAuthSignupResponse.class);
         assertThat(response.getEmail()).isEqualTo(email);
         assertThat(response.getNickname()).isEqualTo(nickname);
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        assertThat(user.getProfileImage()).isEqualTo(img);
+        assertThat(user.getAuthProvider()).isEqualTo(AuthProvider.KAKAO);
     }
 
     @Test
@@ -154,5 +162,26 @@ class OAuthControllerTest extends IntegrationBase {
                         .content(new ObjectMapper().writeValueAsString(request)))
                 .andExpect(status().is4xxClientError())
                 .andDo(print());
+    }
+
+    @Test
+    void 중복된_이메일로_회원가입_금지() throws Exception {
+        //given
+        String email = "test@test.com";
+        String nickname = "test";
+        User user = User.builder().roles(Collections.singletonList(Role.USER)).email(email).nickname(nickname)
+                .authProvider(AuthProvider.LOCAL).agreement(Agreement.agreeAll()).password("123456").build();
+        userRepository.save(user);
+        String jwt = jwtTokenProvider.createOAuthToken(email, Collections.singletonList(Role.GUEST), AuthProvider.KAKAO, "img.jpg", "nickname");
+        Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
+        OAuthSignupRequest request = OAuthSignupRequest.builder().email(email).nickname(nickname)
+                .agreePICU(true).agreeAge(true).agreePromotion(true).agreeTOS(true).build();
+        //when, then
+        mockMvc.perform(put("http://localhost:8080/oauth2/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .cookie(cookie))
+                .andExpect(status().is4xxClientError());
+
     }
 }

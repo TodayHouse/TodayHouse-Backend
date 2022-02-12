@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,12 +18,12 @@ public class UserSignupResponse {
     private boolean agreePICU;
     private boolean agreePromotion;
 
-    public UserSignupResponse(User user){
+    public UserSignupResponse(User user) {
         this.email = user.getEmail();
         this.nickname = user.getNickname();
-        this.agreeAge = user.isAgreeAge();
-        this.agreeTOS = user.isAgreeTOS();
-        this.agreePICU = user.isAgreePICU();
-        this.agreePromotion = user.isAgreePromotion();
+        this.agreeAge = user.getAgreement().isAgreeAge();
+        this.agreeTOS = user.getAgreement().isAgreeTOS();
+        this.agreePICU = user.getAgreement().isAgreePICU();
+        this.agreePromotion = user.getAgreement().isAgreePromotion();
     }
 }

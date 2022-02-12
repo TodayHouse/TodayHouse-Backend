@@ -1,6 +1,7 @@
 package com.todayhouse.global.config.oauth;
 
 import com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.todayhouse.global.config.cookie.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
@@ -30,12 +31,12 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                 .orElse(("http://localhost:3000"));
 
         log.info("인증 실패 target url : {}", targetUrl);
-        targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
-                .queryParam("error", exception.getLocalizedMessage())
-                .build().toUriString();
 
         httpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
 
+        targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
+                .queryParam("error", exception.getLocalizedMessage())
+                .build().toUriString();
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

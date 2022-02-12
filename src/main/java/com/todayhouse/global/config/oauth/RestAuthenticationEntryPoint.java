@@ -12,7 +12,7 @@ import java.io.IOException;
 @Slf4j
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
+    // 인증 오류 발생 시 처리
     @Override
     public void commence(HttpServletRequest httpServletRequest,
                          HttpServletResponse httpServletResponse,

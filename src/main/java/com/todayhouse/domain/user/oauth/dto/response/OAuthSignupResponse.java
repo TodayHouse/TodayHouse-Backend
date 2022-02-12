@@ -1,14 +1,11 @@
 package com.todayhouse.domain.user.oauth.dto.response;
 
 import com.todayhouse.domain.user.domain.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class OAuthSignupResponse {
     private String email;
@@ -21,9 +18,9 @@ public class OAuthSignupResponse {
     public OAuthSignupResponse(User user) {
         this.email = user.getEmail();
         this.nickname = user.getNickname();
-        this.agreeAge = user.isAgreeAge();
-        this.agreeTOS = user.isAgreeTOS();
-        this.agreePICU = user.isAgreePICU();
-        this.agreePromotion = user.isAgreePromotion();
+        this.agreeAge = user.getAgreement().isAgreeAge();
+        this.agreeTOS = user.getAgreement().isAgreeTOS();
+        this.agreePICU = user.getAgreement().isAgreePICU();
+        this.agreePromotion = user.getAgreement().isAgreePromotion();
     }
 }

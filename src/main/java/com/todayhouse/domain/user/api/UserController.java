@@ -20,15 +20,15 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/emails/{email}/exist")
-    public BaseResponse existEmail(@PathVariable String email){
-        log.info("확인 이메일: {}",email);
+    public BaseResponse existEmail(@PathVariable String email) {
+        log.info("확인 이메일: {}", email);
         boolean exist = userService.existByEmail(email);
         return new BaseResponse(exist);
     }
 
     @GetMapping("/nicknames/{nickname}/exist")
-    public BaseResponse existNickname(@PathVariable String nickname){
-        log.info("확인 닉네임: {}",nickname);
+    public BaseResponse existNickname(@PathVariable String nickname) {
+        log.info("확인 닉네임: {}", nickname);
         boolean exist = userService.existByNickname(nickname);
         return new BaseResponse(exist);
     }
@@ -51,7 +51,7 @@ public class UserController {
 
     //api test용
     @GetMapping("/test")
-    public String test(){
+    public String test() {
         return "hello test";
     }
 }

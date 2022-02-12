@@ -5,6 +5,7 @@ import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
@@ -48,9 +49,7 @@ class UserControllerTest extends IntegrationBase {
                 .email("test")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(Collections.singletonList(Role.USER))
-                .agreePICU(true)
-                .agreePromotion(true)
-                .agreeTOS(true)
+                .agreement(Agreement.agreeAll())
                 .nickname("testname")
                 .build());
     }

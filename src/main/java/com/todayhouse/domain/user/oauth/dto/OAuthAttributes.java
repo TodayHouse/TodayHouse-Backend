@@ -6,26 +6,30 @@ import com.todayhouse.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.Collections;
 import java.util.Map;
 
 @Builder
 @Getter
+@ToString
 @AllArgsConstructor
 public class OAuthAttributes {
     protected Map<String, Object> attributes;
     protected String nameAttributeKey;
     protected AuthProvider authProvider;
-    protected String name;
+    protected String nickname;
     protected String email;
     protected String picture;
 
     // 리소스 서버에서 받은 정보 추출
     public static OAuthAttributes of(String registrationId, String userNameAttributeName,
-                                     Map<String, Object> attributes){
-//        if(registrationId.equals("naver"))
-        return ofNaver("id",attributes);
+                                     Map<String, Object> attributes) {
+        if (registrationId.equals("naver"))
+            return ofNaver("id", attributes);
+        else
+            return ofKakao("id", attributes);
     }
 
 //    private static OAuthAttributes ofGoogle(String userNameAttributeName, Map<String, Object> attributes){
@@ -38,11 +42,11 @@ public class OAuthAttributes {
 //                .build();
 //    }
 
-    private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {
+    public static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
         return OAuthAttributes.builder()
                 .authProvider(AuthProvider.NAVER)
-                .name((String) response.get("name"))
+                .nickname((String) response.get("nickname"))
                 .email((String) response.get("email"))
                 .picture((String) response.get("profile_image"))
                 .attributes(response)
@@ -50,23 +54,23 @@ public class OAuthAttributes {
                 .build();
     }
 
-    public User toEntity(){
-        return User.builder()
-                .authProvider(authProvider)
-                .email(email)
-                .roles(Collections.singletonList(Role.GUEST))
+    public static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
+        Map<String, Object> account = (Map<String, Object>) attributes.get("kakao_account");
+        Map<String, Object> profile = (Map<String, Object>) account.get("profile");
+        return OAuthAttributes.builder()
+                .authProvider(AuthProvider.KAKAO)
+                .nickname(profile != null ? (String) profile.get("nickname") : null)
+                .email((String) account.get("email"))
+                .picture(profile != null ? (String) profile.get("profile_image_url") : null)
+                .attributes(attributes)
+                .nameAttributeKey(userNameAttributeName)
                 .build();
     }
 
-    @Override
-    public String toString() {
-        return "OAuthAttributes{" +
-                "attributes=" + attributes +
-                ", nameAttributeKey='" + nameAttributeKey + '\'' +
-                ", authProvider=" + authProvider +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", picture='" + picture + '\'' +
-                '}';
+    public User toEntity() {
+        return User.builder()
+                .email(email)
+                .roles(Collections.singletonList(Role.GUEST))
+                .build();
     }
 }

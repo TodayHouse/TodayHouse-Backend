@@ -14,10 +14,10 @@ import javax.validation.constraints.Size;
 @Builder
 public class UserLoginRequest {
     @NotBlank
-    @Size(max=50)
+    @Size(max = 50)
     String email;
 
     @NotBlank
-    @Size(min=8,max=200)
+    @Size(min = 8, max = 200)
     String password;
 }

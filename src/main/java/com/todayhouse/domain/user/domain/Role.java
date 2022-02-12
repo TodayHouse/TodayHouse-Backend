@@ -10,9 +10,10 @@ public enum Role {
 
     private final String key;
 
-    public static Role toRole(String key) {
-        for (Role r : Role.values()) {
-            if(r.getKey().equals(key))
+    // key를 role로 변환
+    public static Role keyToRole(String key) {
+        for (Role r : values()) {
+            if (r.getKey().equals(key))
                 return r;
         }
         return null;

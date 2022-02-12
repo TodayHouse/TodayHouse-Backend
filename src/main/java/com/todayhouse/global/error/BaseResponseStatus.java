@@ -26,7 +26,7 @@ public enum BaseResponseStatus {
     WRONG_SIGNUP_PASSWORD(false, 2013, "비밀번호 확인이 일치하지 않습니다."),
     INVALID_AUTH_EMAIL(false, 2014, "인증받지 않은 이메일입니다."),
     INVALID_GUEST_EMAIL(false, 2015, ""),
-    INVALID_EMAIL_TOEKN(false, 2016, "유효하지 않은 코드입니다."),
+    INVALID_EMAIL_TOKEN(false, 2016, "유효하지 않은 코드입니다."),
 
 
     // product
@@ -40,10 +40,11 @@ public enum BaseResponseStatus {
     POST_STORY_EMPTY_CONTENT(false, 2201, "본문을 입력해주세요."),
     POST_STORY_EMPTY_CATEGORY(false, 2202, "카테고리를 선택해주세요."),
 
-    // oauth
+    // jwt
     NOT_GUEST_ACCESS(false, 2300, "이미 회원가입 했습니다."),
     IS_GUEST_ACCESS(false, 2301, "회원가입을 하지 않았습니다."),
     INVALID_REDIRECT_URI(false, 2302, "허용되지 않은 URI입니다."),
+    INVALID_AUTH(false, 2303, "올바르지 않은 권한입니다."),
 
     // 3000 : Database / Server 오류
     // common

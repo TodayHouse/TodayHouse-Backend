@@ -1,18 +1,17 @@
 package com.todayhouse.global.config.jwt;
 
+import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
-import com.todayhouse.global.config.oauth.CookieUtils;
+import com.todayhouse.global.config.cookie.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -22,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JwtTokenProviderTest {
@@ -30,16 +28,15 @@ class JwtTokenProviderTest {
     @InjectMocks
     JwtTokenProvider tokenProvider;
 
-    @Mock
-    UserDetailsService userDetailsService;
-
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(tokenProvider, "secretKey", "abcabc123");
+        ReflectionTestUtils.setField(tokenProvider, "expiration", 1000000L);
+        ReflectionTestUtils.setField(tokenProvider, "guestExpiration", 1000000L);
     }
 
     @Test
-    void jwt_검증() {
+    void token_검증() {
         //given
         ReflectionTestUtils.setField(tokenProvider, "expiration", 1000000L);
         List<Role> roles = new ArrayList<>();
@@ -51,13 +48,10 @@ class JwtTokenProviderTest {
                 .email("test@test.com")
                 .password(new BCryptPasswordEncoder().encode("12345678"))
                 .roles(roles)
-                .agreePICU(true)
-                .agreePromotion(true)
-                .agreeTOS(true)
+                .agreement(Agreement.agreeAll())
                 .nickname("testname")
                 .build();
         String jwt = tokenProvider.createToken(user.getEmail(), roles);
-        when(userDetailsService.loadUserByUsername("test@test.com")).thenReturn(user);
 
         //when,then
         assertThat(tokenProvider.validateToken(jwt)).isTrue();
@@ -65,10 +59,8 @@ class JwtTokenProviderTest {
 
         Authentication authentication = tokenProvider.getAuthentication(jwt);
         User findUser = (User) authentication.getPrincipal();
-        assertThat(findUser.getNickname()).isEqualTo(user.getNickname());
         assertThat(findUser.getEmail()).isEqualTo(user.getEmail());
-        assertThat(findUser.getAuthorities()).isEqualTo(user.getAuthorities());
-        assertThat(findUser.getAuthProvider()).isEqualTo(user.getAuthProvider());
+        assertThat(findUser.getRoles()).isEqualTo(user.getRoles());
     }
 
     @Test
@@ -83,7 +75,6 @@ class JwtTokenProviderTest {
 
     @Test
     void request_header에_jwt() {
-        ReflectionTestUtils.setField(tokenProvider, "expiration", 1000000L);
         MockHttpServletRequest request = new MockHttpServletRequest();
         String jwt = tokenProvider.createToken("a", Collections.singletonList(Role.GUEST));
         request.addHeader("Authorization", "Bearer " + jwt);
@@ -101,5 +92,23 @@ class JwtTokenProviderTest {
         request.setCookies(cookies);
 
         assertThat(tokenProvider.resolveToken(request)).isEqualTo(jwt);
+    }
+
+    @Test
+    void oAuthToken_검증() {
+        User user = User.builder().email("test@test.com").profileImage("http://a.jpg")
+                .authProvider(AuthProvider.KAKAO).nickname("hello")
+                .roles(Collections.singletonList(Role.GUEST)).build();
+
+        String jwt = tokenProvider.createOAuthToken(user.getEmail(), user.getRoles(),
+                user.getAuthProvider(), user.getProfileImage(), user.getNickname());
+
+        assertThat(tokenProvider.validateToken(jwt)).isTrue();
+        assertThat(tokenProvider.getUserPk(jwt)).isEqualTo(user.getEmail());
+        User getUser = (User) tokenProvider.getAuthentication(jwt).getPrincipal();
+        assertThat(getUser.getRoles()).isEqualTo(user.getRoles());
+        assertThat(getUser.getAuthProvider()).isEqualTo(user.getAuthProvider());
+        assertThat(getUser.getNickname()).isEqualTo(user.getNickname());
+        assertThat(getUser.getProfileImage()).isEqualTo(user.getProfileImage());
     }
 }

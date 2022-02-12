@@ -5,6 +5,6 @@ import com.todayhouse.global.error.BaseResponseStatus;
 
 public class InvalidEmailTokenException extends BaseException {
     public InvalidEmailTokenException() {
-        super(BaseResponseStatus.INVALID_EMAIL_TOEKN);
+        super(BaseResponseStatus.INVALID_EMAIL_TOKEN);
     }
 }

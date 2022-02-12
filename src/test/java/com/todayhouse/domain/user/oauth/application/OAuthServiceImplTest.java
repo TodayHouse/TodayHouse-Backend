@@ -14,12 +14,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.verify;
 
@@ -89,13 +91,15 @@ class OAuthServiceImplTest {
         OAuthSignupRequest request = OAuthSignupRequest.builder().email(email).nickname("test")
                 .agreePICU(true).agreeTOS(true).agreePromotion(true).agreeAge(true)
                 .build();
-        UserSignupResponse result =
-                UserSignupResponse.builder().email(email).nickname("test")
-                        .agreePICU(true).agreeAge(true).agreeTOS(true).agreePromotion(true)
-                        .build();
+        UserSignupResponse result = UserSignupResponse.builder()
+                .agreePICU(true).agreeAge(true).agreeTOS(true).agreePromotion(true)
+                .email(email).nickname("test")
+                .build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(guest));
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(guest, "", null);
+        when(jwtTokenProvider.getAuthentication(anyString())).thenReturn(auth);
 
-        UserSignupResponse userSignupResponse = new UserSignupResponse(oAuthService.saveGuest(request));
+        UserSignupResponse userSignupResponse = new UserSignupResponse(oAuthService.saveGuest(request, "jwt"));
 
         assertThat(userSignupResponse.getEmail().equals(result.getEmail())).isTrue();
         assertThat(userSignupResponse.getNickname().equals(result.getNickname())).isTrue();
