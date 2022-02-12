@@ -14,7 +14,7 @@ import com.todayhouse.domain.user.oauth.dto.response.OAuthSignupResponse;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthTokenResponse;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
-import com.todayhouse.global.config.oauth.CookieUtils;
+import com.todayhouse.global.config.cookie.CookieUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

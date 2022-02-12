@@ -8,7 +8,7 @@ import com.todayhouse.domain.user.oauth.dto.response.OAuthSignupResponse;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthTokenResponse;
 import com.todayhouse.domain.user.oauth.exception.InvalidAuthException;
 import com.todayhouse.global.common.BaseResponse;
-import com.todayhouse.global.config.oauth.CookieUtils;
+import com.todayhouse.global.config.cookie.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

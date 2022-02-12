@@ -1,4 +1,4 @@
-package com.todayhouse.global.config.oauth;
+package com.todayhouse.global.config.cookie;
 
 import org.springframework.util.SerializationUtils;
 

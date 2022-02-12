@@ -4,6 +4,7 @@ import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.todayhouse.domain.user.oauth.dto.OAuthAttributes;
 import com.todayhouse.domain.user.oauth.exception.InvalidRedirectUriException;
+import com.todayhouse.global.config.cookie.CookieUtils;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
