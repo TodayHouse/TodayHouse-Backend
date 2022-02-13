@@ -5,15 +5,22 @@ import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.email.dto.request.EmailSendRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
-import com.todayhouse.domain.user.exception.UserEmailExistExcecption;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mail.javamail.JavaMailSender;
 
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class EmailSenderServiceTest extends IntegrationBase {
 
     @Autowired
@@ -25,13 +32,24 @@ class EmailSenderServiceTest extends IntegrationBase {
     @Autowired
     UserRepository userRepository;
 
+    @MockBean
+    JavaMailSender javaMailSender;
+
     @Test
-    void 이미_가입된_이메일() {
-        EmailSendRequest request = EmailSendRequest.builder().email("admin")
-                .build();
-        assertThrows(UserEmailExistExcecption.class, () -> {
-            service.sendEmail(request);
-        });
+    void 이메일_보내기() {
+        String email = "test@test.com";
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        EmailSendRequest request = EmailSendRequest.builder().email(email).build();
+        doNothing().when(javaMailSender).send((MimeMessage) any());
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+        String token = service.sendEmail(request);
+
+        verify(javaMailSender).send((MimeMessage) any());
+
+        EmailVerificationToken find = repository.findByEmail(email).orElseThrow(IllegalArgumentException::new);
+
+        assertThat(token).isEqualTo(find.getId());
+        assertThat(find.getEmail()).isEqualTo(email);
     }
 
     @Test

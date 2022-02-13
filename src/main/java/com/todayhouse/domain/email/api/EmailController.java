@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+
 @Slf4j
 @RequestMapping("/emails")
 @RestController
@@ -28,9 +30,9 @@ public class EmailController {
     }
 
     @PutMapping("/token/verify")
-    public BaseResponse verifyEmailToken(@RequestBody TokenVerificationRequest request) {
+    public BaseResponse verifyEmailToken(@RequestBody TokenVerificationRequest request, HttpServletResponse servletResponse) {
         log.info("이메일 : {}, 토큰 : {}", request.getEmail(), request.getToken());
-        EmailVerificationToken token = tokenVerificationService.verifyToken(request);
+        EmailVerificationToken token = tokenVerificationService.verifyToken(request, servletResponse);
         return new BaseResponse(new TokenVerificationResponse(token));
     }
 }
