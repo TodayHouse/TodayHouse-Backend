@@ -3,8 +3,6 @@ package com.todayhouse.domain.email.application;
 import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.email.dto.request.EmailSendRequest;
-import com.todayhouse.domain.user.dao.UserRepository;
-import com.todayhouse.domain.user.exception.UserEmailExistExcecption;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -23,7 +21,6 @@ public class EmailSenderService {
 
     private final JavaMailSender javaMailSender;
     private final EmailVerificationTokenRepository repository;
-    private final UserRepository userRepository;
 
     @Value("${spring.mail.username}")
     private String google;
@@ -32,14 +29,10 @@ public class EmailSenderService {
     public String sendEmail(EmailSendRequest request) {
         String email = request.getEmail();
         String token = createToken();
-
-        // 이미 가입한 이메일 존재
-        if (userRepository.existsByEmail(email))
-            throw new UserEmailExistExcecption();
-
         MimeMessage message = createMessage(email, token);
         javaMailSender.send(message);
-        return tokenSave(email, token);
+
+        return saveToken(email, token);
     }
 
     private String createToken() {
@@ -71,12 +64,11 @@ public class EmailSenderService {
         } catch (Exception e) {
             throw new RuntimeException();
         }
-
         return message;
     }
 
     // 토큰 재발급시 업데이트
-    private String tokenSave(String email, String token) {
+    private String saveToken(String email, String token) {
         return repository.findByEmail(email).map(unused -> unused.updateToken(token))
                 .orElseGet(() -> repository.save(EmailVerificationToken.createEmailToken(email, token)).getId());
     }
