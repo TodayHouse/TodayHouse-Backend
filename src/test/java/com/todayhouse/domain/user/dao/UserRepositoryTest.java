@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.dao;
 
+import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
@@ -15,8 +16,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@DataJpaTest
-class UserRepositoryTest {
+class UserRepositoryTest extends DataJpaBase {
 
     @Autowired
     TestEntityManager testEntityManager;

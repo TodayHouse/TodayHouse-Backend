@@ -1,10 +1,10 @@
 package com.todayhouse.domain.email.dao;
 
+import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.time.LocalDateTime;
@@ -12,8 +12,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@DataJpaTest
-class EmailVerificationTokenRepositoryTest {
+class EmailVerificationTokenRepositoryTest extends DataJpaBase {
     @Autowired
     TestEntityManager testEntityManager;
 
@@ -51,5 +50,30 @@ class EmailVerificationTokenRepositoryTest {
         testEntityManager.clear();
 
         assertThat(tokenRepository.findByEmailAndExpired(verificationToken.getEmail(), true));
+    }
+
+    @Test
+    void 토큰_추가_후_변경() {
+        String email = "today.house.clone@gmail.com";
+        String token = "123776";
+        String newToken = "0987621";
+        String id = tokenRepository.findByEmail(email).map(unused -> unused.updateToken(token))
+                .orElseGet(() -> tokenRepository.save(EmailVerificationToken.createEmailToken(email, token)).getId());
+
+        Optional<EmailVerificationToken> result = tokenRepository.findById(id);
+
+        assertThat(result.map(t -> t.getId())).isEqualTo(Optional.of(id));
+        assertThat(result.map(t -> t.getEmail())).isEqualTo(Optional.of("today.house.clone@gmail.com"));
+
+        //변경
+        Optional<Object> prev = result.map(t -> t.getToken());
+
+        id = tokenRepository.findByEmail(email).map(unused -> unused.updateToken(newToken))
+                .orElseGet(() -> tokenRepository.save(EmailVerificationToken.createEmailToken(email, newToken)).getId());
+        Optional<EmailVerificationToken> update = tokenRepository.findById(id);
+
+        //검증
+        assertThat(tokenRepository.count()).isEqualTo(1);
+        assertThat(prev).isNotEqualTo(update.map(t -> t.getToken()));
     }
 }
