@@ -36,14 +36,14 @@ public class UserController {
 
     @GetMapping("/emails/{email}/exist")
     public BaseResponse existEmail(@PathVariable String email) {
-        log.info("확인 이메일: {}", email);
+        log.info("이메일: {}", email);
         boolean exist = userService.existByEmail(email);
         return new BaseResponse(exist);
     }
 
     @GetMapping("/nicknames/{nickname}/exist")
     public BaseResponse existNickname(@PathVariable String nickname) {
-        log.info("확인 닉네임: {}", nickname);
+        log.info("닉네임: {}", nickname);
         boolean exist = userService.existByNickname(nickname);
         return new BaseResponse(exist);
     }
