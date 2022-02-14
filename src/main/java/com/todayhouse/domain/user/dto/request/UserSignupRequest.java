@@ -10,9 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.Collections;
 
 @Getter
@@ -20,12 +18,12 @@ import java.util.Collections;
 @AllArgsConstructor
 @Builder
 public class UserSignupRequest {
-    @NotBlank
     @Size(max = 50)
+    @Email(message = "이메일 형식에 맞지 않습니다.")
     private String email;
 
-    @NotBlank
-    @Size(min = 8, max = 200)
+    @Pattern(regexp="^[A-Za-z[0-9]]{8,50}$",
+            message = "비밀번호는 영문, 숫자를 포함하여 8자 이상이어야 합니다.")
     private String password1;
 
     @NotBlank

@@ -46,13 +46,7 @@ public class JwtTokenProvider {
     public String createToken(String userPk, List<Role> roles) {
         Claims claims = Jwts.claims().setSubject(userPk); // JWT payload 에 저장되는 정보단위
         claims.put("roles", roles); // 정보는 key / value 쌍으로 저장된다.
-        Date now = new Date();
-        return Jwts.builder()
-                .setClaims(claims) // 정보 저장
-                .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + expiration))
-                .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘, secret 값
-                .compact();
+        return createJWT(claims, expiration);
     }
 
     // JWT guest 토큰 생성
@@ -64,13 +58,7 @@ public class JwtTokenProvider {
             claims.put("profileImage", profileImage);
         if (nickname != null)
             claims.put("nickname", nickname);
-        Date now = new Date();
-        return Jwts.builder()
-                .setClaims(claims) // 정보 저장
-                .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + guestExpiration))
-                .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘, secret 값
-                .compact();
+        return createJWT(claims, guestExpiration);
     }
 
     // 인증 성공시 JWT 토큰에서 인증 정보(payload) 조회, SecurityContextHolder에 저장할 객체 생성
@@ -125,6 +113,16 @@ public class JwtTokenProvider {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private String createJWT(Claims claims, Long period) {
+        Date now = new Date();
+        return Jwts.builder()
+                .setClaims(claims) // 정보 저장
+                .setIssuedAt(now) // 토큰 발행 시간 정보
+                .setExpiration(new Date(now.getTime() + period))
+                .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘, secret 값
+                .compact();
     }
 }
 

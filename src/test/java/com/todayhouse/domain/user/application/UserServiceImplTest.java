@@ -5,8 +5,10 @@ import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
+import com.todayhouse.domain.user.exception.SignupPasswordException;
 import com.todayhouse.domain.user.exception.WrongPasswordException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
@@ -120,5 +123,30 @@ class UserServiceImplTest {
         when(passwordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(false);
 
         assertThrows(WrongPasswordException.class, () -> userService.login(request));
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경")
+    void passwordUpdate(){
+        String email = "test@test.com";
+        PasswordUpdateRequest request = PasswordUpdateRequest.builder()
+                .password1("abcde").password2("abcde")
+                .build();
+        User user = User.builder().password("123456").build();
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(user));
+
+        userService.updatePassword(email, request);
+        assertThat(new BCryptPasswordEncoder().matches(request.getPassword1(),user.getPassword())).isTrue();
+    }
+
+    @Test
+    @DisplayName("비밀번호 확인이 다름")
+    void passwordError(){
+        String email = "test@test.com";
+        PasswordUpdateRequest request = PasswordUpdateRequest.builder()
+                .password1("abcde").password2("abcdea")
+                .build();
+
+        assertThrows(SignupPasswordException.class, ()-> userService.updatePassword(email, request));
     }
 }

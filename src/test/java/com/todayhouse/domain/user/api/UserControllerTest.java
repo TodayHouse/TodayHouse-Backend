@@ -9,24 +9,29 @@ import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
+import com.todayhouse.global.config.cookie.CookieUtils;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.servlet.http.Cookie;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class UserControllerTest extends IntegrationBase {
     @Autowired
@@ -41,13 +46,16 @@ class UserControllerTest extends IntegrationBase {
     @Autowired
     EmailVerificationTokenRepository emailVerificationTokenRepository;
 
+    @MockBean
+    Principal principal;
+
     @BeforeEach
     void clearRepository() {
         userRepository.deleteAll();
         userRepository.save(User.builder()
                 .authProvider(AuthProvider.LOCAL)
-                .email("test")
-                .password(new BCryptPasswordEncoder().encode("12345678"))
+                .email("test@test.com")
+                .password(new BCryptPasswordEncoder().encode("abc12345"))
                 .roles(Collections.singletonList(Role.USER))
                 .agreement(Agreement.agreeAll())
                 .nickname("testname")
@@ -67,13 +75,17 @@ class UserControllerTest extends IntegrationBase {
                 .agreePromotion(true)
                 .agreeTOS(true).build();
         String url = "http://localhost:8080/users/signup";
+        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
+        Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
+
         EmailVerificationToken emailToken = EmailVerificationToken.createEmailToken(email, token);
         emailToken.expireToken();
         emailVerificationTokenRepository.save(emailToken);
 
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(request)))
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -81,8 +93,8 @@ class UserControllerTest extends IntegrationBase {
     @Test
     void 로그인() throws Exception {
         Map<String, String> user = new HashMap<>();
-        user.put("email", "test");
-        user.put("password", "12345678");
+        user.put("email", "test@test.com");
+        user.put("password", "abc12345");
         String url = "http://localhost:8080/users/login";
 
         mockMvc.perform(MockMvcRequestBuilders.post(url)
@@ -97,7 +109,7 @@ class UserControllerTest extends IntegrationBase {
         String url = "http://localhost:8080/users/test";
         String jwt = jwtTokenProvider.createToken("test", Collections.singletonList(Role.USER));
 
-        mockMvc.perform(MockMvcRequestBuilders.get(url)
+        mockMvc.perform(get(url)
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -107,22 +119,56 @@ class UserControllerTest extends IntegrationBase {
     @Test
     void 이메일_닉네임_중복() throws Exception {
         String url = "http://localhost:8080/users/";
-        String jwt = jwtTokenProvider.createToken("test", Collections.singletonList(Role.USER));
 
         //email
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "emails/test/exist"))
+        mockMvc.perform(get(url + "emails/test@test.com/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(true));
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "emails/fail/exist"))
+        mockMvc.perform(get(url + "emails/fail@test.com/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(false));
 
         //nickname
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "nicknames/testname/exist"))
+        mockMvc.perform(get(url + "nicknames/testname/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(true));
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "nicknames/testfail/exist"))
+        mockMvc.perform(get(url + "nicknames/testfail/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(false));
     }
+
+    @Test
+    void 비밀번호_변경() throws Exception {
+        String email = "test@test.com";
+        String url = "http://localhost:8080/users/password/new";
+        String token = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
+        Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(token));
+        PasswordUpdateRequest request = PasswordUpdateRequest.builder()
+                .password1("abcdefg1").password2("abcdefg1")
+                .build();
+        mockMvc.perform(put(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(cookie().maxAge("auth_user", 0))
+                .andReturn();
+
+        User user = userRepository.findByEmail("test@test.com").orElse(null);
+        assertThat(new BCryptPasswordEncoder().matches(request.getPassword1(), user.getPassword())).isTrue();
+    }
+
+    @Test
+    void 쿠키_없이_비밀번호_변경은_오류() throws Exception {
+        String url = "http://localhost:8080/users/password/new";
+        PasswordUpdateRequest request = PasswordUpdateRequest.builder()
+                .password1("abc12345").password2("abc12345")
+                .build();
+
+        mockMvc.perform(put(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(request)))
+                .andExpect(status().is4xxClientError());
+    }
+
 }

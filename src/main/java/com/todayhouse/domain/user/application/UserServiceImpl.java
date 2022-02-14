@@ -6,6 +6,7 @@ import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.exception.*;
@@ -18,15 +19,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
+import java.util.Optional;
 
+@Service
 @Transactional
 @RequiredArgsConstructor
-@Service
 public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -46,7 +55,8 @@ public class UserServiceImpl implements UserService {
                 .isEmpty()) {
             throw new UserEmailNotAuthException();
         }
-        signupRequestValidate(request);
+        // 중복 회원가입, request 유효성 검사
+        validateSignupRequest(request);
         return userRepository.save(request.toEntity());
     }
 
@@ -54,7 +64,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public String login(UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserEmailNotFountException());
+                .orElseThrow(UserEmailNotFountException::new);
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new WrongPasswordException();
         }
@@ -62,7 +72,15 @@ public class UserServiceImpl implements UserService {
         return jwtTokenProvider.createToken(user.getEmail(), user.getRoles());
     }
 
-    private void signupRequestValidate(UserSignupRequest request) {
+    @Override
+    public void updatePassword(String email, PasswordUpdateRequest request) {
+        if(!request.getPassword1().equals(request.getPassword2()))
+            throw new SignupPasswordException();
+        User user = userRepository.findByEmail(email).orElseThrow(UserEmailNotFountException::new);
+        user.updatePassword(request.getPassword1());
+    }
+
+    private void validateSignupRequest(UserSignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail()))
             throw new UserEmailExistExcecption();
 
@@ -78,8 +96,8 @@ public class UserServiceImpl implements UserService {
     private void preMember() {
         userRepository.save(User.builder()
                 .authProvider(AuthProvider.LOCAL)
-                .email("admin")
-                .password(new BCryptPasswordEncoder().encode("12345678"))
+                .email("admin@admin.com")
+                .password(new BCryptPasswordEncoder().encode("today123"))
                 .roles(Collections.singletonList(Role.ADMIN))
                 .agreement(Agreement.agreeAll())
                 .nickname("admin")
@@ -88,7 +106,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(User.builder()
                 .authProvider(AuthProvider.LOCAL)
                 .email("a@a.com")
-                .password(new BCryptPasswordEncoder().encode("12345678"))
+                .password(new BCryptPasswordEncoder().encode("abc12345"))
                 .roles(Collections.singletonList(Role.USER))
                 .agreement(Agreement.agreeAll())
                 .nickname("user1")

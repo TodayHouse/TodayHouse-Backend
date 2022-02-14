@@ -1,61 +1,68 @@
 package com.todayhouse.domain.email.application;
 
-import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import com.todayhouse.domain.email.dto.request.EmailSendRequest;
-import com.todayhouse.domain.user.dao.UserRepository;
-import com.todayhouse.domain.user.exception.UserEmailExistExcecption;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.javamail.JavaMailSender;
 
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-class EmailSenderServiceTest extends IntegrationBase {
+@ExtendWith(MockitoExtension.class)
+class EmailSenderServiceTest {
 
-    @Autowired
-    EmailVerificationTokenRepository repository;
-
-    @Autowired
+    @InjectMocks
     EmailSenderService service;
 
-    @Autowired
-    UserRepository userRepository;
+    @Mock
+    JavaMailSender javaMailSender;
+
+    @Mock
+    EmailVerificationTokenRepository repository;
 
     @Test
-    void 이미_가입된_이메일() {
-        EmailSendRequest request = EmailSendRequest.builder().email("admin")
-                .build();
-        assertThrows(UserEmailExistExcecption.class, () -> {
-            service.sendEmail(request);
-        });
+    void 이메일_처음_보내기() {
+        String email = "test@test.com";
+        EmailVerificationToken emailToken = EmailVerificationToken.builder()
+                .token("123456").email(email).expired(false).id("123456789").build();
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        EmailSendRequest request = EmailSendRequest.builder().email(email).build();
+        doNothing().when(javaMailSender).send((MimeMessage) any());
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+        when(repository.findByEmail(email)).thenReturn(Optional.empty());
+        when(repository.save(any(EmailVerificationToken.class))).thenReturn(emailToken);
+
+        String token = service.sendEmail(request);
+
+        verify(javaMailSender).send((MimeMessage) any());
+        verify(repository).save(any(EmailVerificationToken.class));
+        assertThat(token).isEqualTo(emailToken.getId());
     }
 
     @Test
-    void 토큰_추가_후_변경() {
-        String email = "today.house.clone@gmail.com";
-        String token = "123776";
-        String newToken = "0987621";
-        String id = repository.findByEmail(email).map(unused -> unused.updateToken(token))
-                .orElseGet(() -> repository.save(EmailVerificationToken.createEmailToken(email, token)).getId());
+    void 이메일_재전송() {
+        String email = "test@test.com";
+        EmailVerificationToken emailToken = EmailVerificationToken.builder()
+                .token("123456").email(email).expired(false).id("123456789").build();
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        EmailSendRequest request = EmailSendRequest.builder().email(email).build();
+        doNothing().when(javaMailSender).send((MimeMessage) any());
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+        when(repository.findByEmail(email)).thenReturn(Optional.ofNullable(emailToken));
 
-        Optional<EmailVerificationToken> result = repository.findById(id);
+        String token = service.sendEmail(request);
 
-        assertThat(result.map(t -> t.getId())).isEqualTo(Optional.of(id));
-        assertThat(result.map(t -> t.getEmail())).isEqualTo(Optional.of("today.house.clone@gmail.com"));
-
-        //변경
-        Optional<Object> prev = result.map(t -> t.getToken());
-
-        id = repository.findByEmail(email).map(unused -> unused.updateToken(newToken))
-                .orElseGet(() -> repository.save(EmailVerificationToken.createEmailToken(email, newToken)).getId());
-        Optional<EmailVerificationToken> update = repository.findById(id);
-
-        //검증
-        assertThat(repository.count()).isEqualTo(1);
-        assertThat(prev).isNotEqualTo(update.map(t -> t.getToken()));
+        verify(javaMailSender).send((MimeMessage) any());
+        assertThat(token).isEqualTo(emailToken.getId());
     }
 }
