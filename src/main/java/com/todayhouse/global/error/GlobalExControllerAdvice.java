@@ -3,6 +3,7 @@ package com.todayhouse.global.error;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 // 모든 RestController에 적용
 @RestControllerAdvice(annotations = RestController.class)
 public class GlobalExControllerAdvice {
+
+    // @Valid 검증 실패
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public BaseResponse InvalidArgumentResponse(MethodArgumentNotValidException e){
+        log.error("Exception : {}", e.getMessage());
+        return new BaseResponse(e.getMessage());
+    }
 
     // BaseException return
     @ResponseStatus(HttpStatus.BAD_REQUEST)

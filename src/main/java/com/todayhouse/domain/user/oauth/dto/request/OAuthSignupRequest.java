@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -14,8 +15,8 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @Builder
 public class OAuthSignupRequest {
-    @NotBlank
     @Size(max = 50)
+    @Email(message = "이메일 형식에 맞지 않습니다.")
     private String email;
 
     @NotBlank

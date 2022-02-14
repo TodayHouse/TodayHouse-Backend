@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RequestMapping("/oauth2")
 @RestController
@@ -38,7 +39,7 @@ public class OAuthController {
     }
 
     @PutMapping("/signup")
-    public BaseResponse signup(@RequestBody OAuthSignupRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+    public BaseResponse signup(@Valid @RequestBody OAuthSignupRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
         String jwt = CookieUtils.getCookie(servletRequest, "auth_user")
                 .map(cookie -> CookieUtils.deserialize(cookie, String.class))
                 .orElseThrow(() -> new InvalidAuthException());

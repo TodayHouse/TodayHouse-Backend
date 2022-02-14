@@ -54,8 +54,8 @@ class UserControllerTest extends IntegrationBase {
         userRepository.deleteAll();
         userRepository.save(User.builder()
                 .authProvider(AuthProvider.LOCAL)
-                .email("test")
-                .password(new BCryptPasswordEncoder().encode("12345678"))
+                .email("test@test.com")
+                .password(new BCryptPasswordEncoder().encode("abc12345"))
                 .roles(Collections.singletonList(Role.USER))
                 .agreement(Agreement.agreeAll())
                 .nickname("testname")
@@ -93,8 +93,8 @@ class UserControllerTest extends IntegrationBase {
     @Test
     void 로그인() throws Exception {
         Map<String, String> user = new HashMap<>();
-        user.put("email", "test");
-        user.put("password", "12345678");
+        user.put("email", "test@test.com");
+        user.put("password", "abc12345");
         String url = "http://localhost:8080/users/login";
 
         mockMvc.perform(MockMvcRequestBuilders.post(url)
@@ -121,10 +121,10 @@ class UserControllerTest extends IntegrationBase {
         String url = "http://localhost:8080/users/";
 
         //email
-        mockMvc.perform(get(url + "emails/test/exist"))
+        mockMvc.perform(get(url + "emails/test@test.com/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(true));
-        mockMvc.perform(get(url + "emails/fail/exist"))
+        mockMvc.perform(get(url + "emails/fail@test.com/exist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(false));
 
@@ -139,12 +139,12 @@ class UserControllerTest extends IntegrationBase {
 
     @Test
     void 비밀번호_변경() throws Exception {
-        String email = "test";
+        String email = "test@test.com";
         String url = "http://localhost:8080/users/password/new";
         String token = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
         Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(token));
         PasswordUpdateRequest request = PasswordUpdateRequest.builder()
-                .password1("abcdef").password2("abcdef")
+                .password1("abcdefg1").password2("abcdefg1")
                 .build();
         mockMvc.perform(put(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -154,7 +154,7 @@ class UserControllerTest extends IntegrationBase {
                 .andExpect(cookie().maxAge("auth_user", 0))
                 .andReturn();
 
-        User user = userRepository.findByEmail("test").orElse(null);
+        User user = userRepository.findByEmail("test@test.com").orElse(null);
         assertThat(new BCryptPasswordEncoder().matches(request.getPassword1(), user.getPassword())).isTrue();
     }
 
@@ -162,7 +162,7 @@ class UserControllerTest extends IntegrationBase {
     void 쿠키_없이_비밀번호_변경은_오류() throws Exception {
         String url = "http://localhost:8080/users/password/new";
         PasswordUpdateRequest request = PasswordUpdateRequest.builder()
-                .password1("abcdef").password2("abcdef")
+                .password1("abc12345").password2("abc12345")
                 .build();
 
         mockMvc.perform(put(url)

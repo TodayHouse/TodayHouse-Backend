@@ -65,7 +65,7 @@ public class UserController {
     }
 
     @PutMapping("/password/new")
-    public BaseResponse updatePassword(@RequestBody PasswordUpdateRequest request, Principal principal,
+    public BaseResponse updatePassword(@Valid @RequestBody PasswordUpdateRequest request, Principal principal,
                                        HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
         userService.updatePassword(principal.getName(), request);
         CookieUtils.deleteCookie(servletRequest, servletResponse, "auth_user");
