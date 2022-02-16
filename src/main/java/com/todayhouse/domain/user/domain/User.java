@@ -47,6 +47,8 @@ public class User implements UserDetails {
     @Column(name = "profile_image")
     private String profileImage;
 
+    private String introduction;
+
     @Embedded
     private Agreement agreement;
 
@@ -55,6 +57,16 @@ public class User implements UserDetails {
     @CollectionTable(joinColumns = @JoinColumn(name = "user_id"))
     @Builder.Default
     private List<Role> roles = new ArrayList<>();
+
+    @Column(name = "follower_id")
+    @OneToMany(mappedBy = "from", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Follow> followers = new ArrayList<>();
+
+    @Column(name = "following_id")
+    @OneToMany(mappedBy = "to", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Follow> followings = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
