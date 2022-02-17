@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Getter
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Follow {
     @Id
@@ -17,11 +17,11 @@ public class Follow {
     @Column(name = "follow_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "follower_id")
     private User from;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "following_id")
     private User to;
 
@@ -29,10 +29,16 @@ public class Follow {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Builder
-    public Follow(User from, User to){
+    public Follow(User from, User to) {
         this.from = from;
-        from.getFollowers().add(this);
         this.to = to;
-        to.getFollowings().add(this);
+    }
+
+    @Override
+    public String toString() {
+        return "Follow{" +
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

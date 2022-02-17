@@ -58,16 +58,6 @@ public class User implements UserDetails {
     @Builder.Default
     private List<Role> roles = new ArrayList<>();
 
-    @Column(name = "follower_id")
-    @OneToMany(mappedBy = "from", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<Follow> followers = new ArrayList<>();
-
-    @Column(name = "following_id")
-    @OneToMany(mappedBy = "to", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<Follow> followings = new ArrayList<>();
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
@@ -108,7 +98,7 @@ public class User implements UserDetails {
         this.profileImage = principal.getProfileImage();
     }
 
-    public void updatePassword(String password){
+    public void updatePassword(String password) {
         this.password = new BCryptPasswordEncoder().encode(password);
     }
 }

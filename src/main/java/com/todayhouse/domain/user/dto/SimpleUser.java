@@ -1,10 +1,15 @@
 package com.todayhouse.domain.user.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 
+@Getter
+@ToString
 @AllArgsConstructor
 public class SimpleUser {
-    String nickname;
-    String profileImage;
-    String introduction;
+    private Long id;
+    private String nickname;
+    private String profileImage;
+    private String introduction;
 }
