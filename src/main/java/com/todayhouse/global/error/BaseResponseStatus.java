@@ -21,7 +21,7 @@ public enum BaseResponseStatus {
     POST_USER_EMPTY_BIRTH(false, 2008, "생년월일을 입력해주세요."),
     POST_USER_EMPTY_NICKNAME(false, 2009, "닉네임을 입력해주세요."),
     POST_USER_EXISTS_NICKNAME(false, 2010, "중복된 닉네임입니다."),
-    NOT_FOUND_EMAIL(false, 2011, "존재하지 않는 이메일입니다."),
+    USER_NOT_FOUND(false, 2011, "존재하지 않는 유저입니다."),
     WRONG_PASSWORD(false, 2012, "잘못된 비밀번호입니다."),
     WRONG_SIGNUP_PASSWORD(false, 2013, "비밀번호 확인이 일치하지 않습니다."),
     INVALID_AUTH_EMAIL(false, 2014, "인증받지 않은 이메일입니다."),

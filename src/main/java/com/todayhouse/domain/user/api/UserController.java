@@ -8,12 +8,11 @@ import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.dto.response.UserFindResponse;
 import com.todayhouse.domain.user.dto.response.UserLoginResponse;
 import com.todayhouse.domain.user.dto.response.UserSignupResponse;
-import com.todayhouse.domain.user.exception.UserEmailNotFountException;
+import com.todayhouse.domain.user.exception.UserNotFoundException;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.cookie.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +29,7 @@ public class UserController {
 
     @GetMapping("/emails/{email}")
     public BaseResponse findUser(@PathVariable String email) {
-        User user = userService.findByEmail(email).orElseThrow(UserEmailNotFountException::new);
+        User user = userService.findByEmail(email).orElseThrow(UserNotFoundException::new);
         return new BaseResponse(new UserFindResponse(user));
     }
 
