@@ -16,13 +16,15 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@Service
 @Transactional
 @RequiredArgsConstructor
-@Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+
     private final UserRepository userRepository;
 
     @Override
@@ -39,10 +41,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
 
         User user = saveOrUpdate(attributes);
-        Set<GrantedAuthority> authorities = new LinkedHashSet<>();
-        for (Role authority : user.getRoles()) {
-            authorities.add(new SimpleGrantedAuthority(authority.getKey()));
-        }
+
+        if (user.getAuthProvider() != null) // success handler에서 회원 가입 유무 판별을 위함
+            attributes.getAttributes().put("authProvider", user.getAuthProvider());
+
+        Set<GrantedAuthority> authorities = transRoleListToGrantedAuthoritySet(user.getRoles());
 
         return new DefaultOAuth2User(
                 authorities, attributes.getAttributes(), attributes.getNameAttributeKey());
@@ -53,6 +56,13 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         User user = userRepository.findByEmail(attributes.getEmail())
                 .orElse(attributes.toEntity());
         return userRepository.save(user);
+    }
+
+    //role list를 GrantedAuthority set으로 변환
+    private Set<GrantedAuthority> transRoleListToGrantedAuthoritySet(List<Role> roles) {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getKey()))
+                .collect(Collectors.toSet());
     }
 }
 

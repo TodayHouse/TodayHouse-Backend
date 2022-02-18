@@ -171,4 +171,33 @@ class UserControllerTest extends IntegrationBase {
                 .andExpect(status().is4xxClientError());
     }
 
+    @Test
+    void 소셜_인증만_받고_회원가입() throws Exception {
+        String email = "today.house.clone@gmail.com";
+        String token = "101010";
+        UserSignupRequest request = UserSignupRequest.builder()
+                .email(email)
+                .password1("09876543")
+                .password2("09876543")
+                .nickname("test")
+                .agreePICU(true)
+                .agreePromotion(true)
+                .agreeTOS(true)
+                .agreeAge(true).build();
+        String url = "http://localhost:8080/users/signup";
+        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
+        Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
+
+        userRepository.save(User.builder().email("today.house.clone@gmail.com").roles(Collections.singletonList(Role.GUEST)).build());
+        EmailVerificationToken emailToken = EmailVerificationToken.createEmailToken(email, token);
+        emailToken.expireToken();
+        emailVerificationTokenRepository.save(emailToken);
+
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
 }
