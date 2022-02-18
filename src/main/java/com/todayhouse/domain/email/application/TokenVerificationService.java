@@ -29,12 +29,13 @@ public class TokenVerificationService {
                         request.getEmail(), request.getToken(), LocalDateTime.now(), false)
                 .orElseThrow(() -> new InvalidEmailTokenException());
         result.expireToken();
+        //OAuth, 일반 회원 가입 시 사용
         addTokenCookie(request.getEmail(), servletResponse);
         return result;
     }
 
     private void addTokenCookie(String email, HttpServletResponse response) {
         String token = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
-        CookieUtils.addNormalCookie(response, "auth_user", CookieUtils.serialize(token), 60 * 60); // 1시간
+        CookieUtils.addHttpOnlyCookie(response, "auth_user", CookieUtils.serialize(token), 60 * 60); // 1시간
     }
 }
