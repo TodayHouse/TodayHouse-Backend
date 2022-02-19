@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @Builder
@@ -49,7 +50,7 @@ public class OAuthAttributes {
                 .nickname((String) response.get("nickname"))
                 .email((String) response.get("email"))
                 .picture((String) response.get("profile_image"))
-                .attributes(response)
+                .attributes(new HashMap<>(response))
                 .nameAttributeKey(userNameAttributeName)
                 .build();
     }
@@ -62,7 +63,7 @@ public class OAuthAttributes {
                 .nickname(profile != null ? (String) profile.get("nickname") : null)
                 .email((String) account.get("email"))
                 .picture(profile != null ? (String) profile.get("profile_image_url") : null)
-                .attributes(attributes)
+                .attributes(new HashMap<>(attributes))
                 .nameAttributeKey(userNameAttributeName)
                 .build();
     }
