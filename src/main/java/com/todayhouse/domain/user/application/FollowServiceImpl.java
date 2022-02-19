@@ -34,13 +34,13 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     @Transactional(readOnly = true)
-    public int countFollowers(Long userId) {
+    public long countFollowers(Long userId) {
         return followRepository.countByToId(userId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public int countFollowings(Long userId) {
+    public long countFollowings(Long userId) {
         return followRepository.countByFromId(userId);
     }
 

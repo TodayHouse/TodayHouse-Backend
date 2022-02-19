@@ -8,9 +8,9 @@ import java.util.Set;
 public interface FollowService {
     Follow saveFollow(Long fromId, Long toId);
 
-    int countFollowers(Long userId);
+    long countFollowers(Long userId);
 
-    int countFollowings(Long userId);
+    long countFollowings(Long userId);
 
     Set<SimpleUser> findFollowers(Long userId);
 

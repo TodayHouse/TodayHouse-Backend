@@ -55,8 +55,8 @@ class FollowServiceImplTest {
     @Test
     @DisplayName("팔로워 수 세기")
     void countFollowers() {
-        int follower = 100;
-        when(followRepository.countByToId(anyLong())).thenReturn(100);
+        long follower = 100;
+        when(followRepository.countByToId(anyLong())).thenReturn(100L);
 
         assertEquals(followService.countFollowers(1L), follower);
     }
@@ -64,8 +64,8 @@ class FollowServiceImplTest {
     @Test
     @DisplayName("팔로잉 수 세기")
     void countFollowings() {
-        int follower = 100;
-        when(followRepository.countByFromId(anyLong())).thenReturn(100);
+        long follower = 100;
+        when(followRepository.countByFromId(anyLong())).thenReturn(100L);
 
         assertEquals(followService.countFollowings(1L), follower);
     }

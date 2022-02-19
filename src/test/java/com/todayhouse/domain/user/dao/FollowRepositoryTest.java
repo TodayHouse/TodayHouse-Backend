@@ -32,7 +32,7 @@ class FollowRepositoryTest {
         User findUser = em.getEntityManager().createQuery("select u from User u where u.nickname = :nickname", User.class)
                 .setParameter("nickname", "user1").getSingleResult();
 
-        int count = followRepository.countByFromId(findUser.getId());
+        long count = followRepository.countByFromId(findUser.getId());
 
         assertEquals(3, count);
     }
@@ -45,7 +45,7 @@ class FollowRepositoryTest {
         User findUser = em.getEntityManager().createQuery("select u from User u where u.nickname = :nickname", User.class)
                 .setParameter("nickname", "user4").getSingleResult();
 
-        int count = followRepository.countByToId(findUser.getId());
+        long count = followRepository.countByToId(findUser.getId());
 
         assertEquals(2, count);
     }
