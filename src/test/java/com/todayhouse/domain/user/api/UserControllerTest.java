@@ -73,7 +73,8 @@ class UserControllerTest extends IntegrationBase {
                 .nickname("test")
                 .agreePICU(true)
                 .agreePromotion(true)
-                .agreeTOS(true).build();
+                .agreeTOS(true)
+                .agreeAge(true).build();
         String url = "http://localhost:8080/users/signup";
         String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
         Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));

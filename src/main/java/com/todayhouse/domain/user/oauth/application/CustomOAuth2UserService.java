@@ -39,11 +39,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .getUserNameAttributeName();
         //OAuth2UserService를 통해 가져온 OAuth2User의 attribute를 담는다.
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
+        attributes.getAttributes().put("authProvider", attributes.getAuthProvider());
 
         User user = saveOrUpdate(attributes);
 
         if (user.getAuthProvider() != null) // success handler에서 회원 가입 유무 판별을 위함
-            attributes.getAttributes().put("authProvider", user.getAuthProvider());
+            attributes.getAttributes().put("signupProvider", user.getAuthProvider());
 
         Set<GrantedAuthority> authorities = transRoleListToGrantedAuthoritySet(user.getRoles());
 

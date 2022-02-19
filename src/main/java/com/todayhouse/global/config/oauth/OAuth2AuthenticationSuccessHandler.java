@@ -74,11 +74,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             CookieUtils.addHttpOnlyCookie(response, "auth_user", CookieUtils.serialize(jwt), 60 * 60);
             targetUri = SNS_SIGNUP_URL;
         } else { // 이미 가입한 유저
-            if (attributes.get("authProvider").equals(AuthProvider.LOCAL)) { // 일반 회원 가입한 유저
-                targetUri = ERROR_URL + "?email=" + oAuthAttributes.getEmail();
-            } else { // 로그인 -> jwt
+            if (attributes.get("authProvider").equals(attributes.get("signupProvider"))) { // 로그인
                 String jwt = tokenProvider.createToken(oAuthAttributes.getEmail(), roles);
                 CookieUtils.addNormalCookie(response, "access_token", jwt, 10);
+            } else { // 중복 회원 가입 시 에러 페이지
+                targetUri = ERROR_URL + "?email=" + oAuthAttributes.getEmail() + "&provider=" + attributes.get("signupProvider");
             }
         }
         return UriComponentsBuilder.fromUriString(targetUri)
@@ -87,7 +87,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // OAuth2User의 attribute를 OAuthAttribute로 변환
     private OAuthAttributes getOAuthAttributes(Map<String, Object> attributes) {
-        if (attributes.get("email") != null) {
+        if (attributes.get("authProvider").equals(AuthProvider.NAVER)) {
             Map<String, Object> wrapper = new HashMap<>();
             wrapper.put("response", attributes);
             return OAuthAttributes.of("naver", "id", wrapper);

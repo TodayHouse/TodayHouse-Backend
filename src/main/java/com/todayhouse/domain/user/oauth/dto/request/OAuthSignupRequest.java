@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 @Getter
 @AllArgsConstructor
@@ -23,13 +20,13 @@ public class OAuthSignupRequest {
     @Size(min = 2, max = 15)
     private String nickname;
 
-    @NotNull
+    @AssertTrue
     private boolean agreeAge;
 
-    @NotNull
+    @AssertTrue
     private boolean agreeTOS;
 
-    @NotNull
+    @AssertTrue
     private boolean agreePICU;
 
     @NotNull
