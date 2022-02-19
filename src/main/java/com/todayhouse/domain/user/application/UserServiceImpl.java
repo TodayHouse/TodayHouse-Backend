@@ -30,7 +30,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
 
-
     @Override
     @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
@@ -74,7 +73,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updatePassword(String email, PasswordUpdateRequest request) {
-        if(!request.getPassword1().equals(request.getPassword2()))
+        if (!request.getPassword1().equals(request.getPassword2()))
             throw new SignupPasswordException();
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         user.updatePassword(request.getPassword1());

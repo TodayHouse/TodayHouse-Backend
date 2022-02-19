@@ -45,6 +45,7 @@ public enum BaseResponseStatus {
     IS_GUEST_ACCESS(false, 2301, "회원가입을 하지 않았습니다."),
     INVALID_REDIRECT_URI(false, 2302, "허용되지 않은 URI입니다."),
     INVALID_AUTH(false, 2303, "올바르지 않은 권한입니다."),
+    INVALID_REQUEST(false, 2304, "올바르지 않은 요청입니다."),
 
     // 3000 : Database / Server 오류
     // common

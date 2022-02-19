@@ -16,13 +16,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByNickname(String nickname);
 
+    // 팔로잉 찾기
     @Query("select new com.todayhouse.domain.user.dto.SimpleUser(u.id, u.nickname, u.introduction, u.profileImage) " +
             "from User u join Follow f on u.id = f.to.id " +
             "where f.from.id = :id")
-    Set<SimpleUser> findUsersByFromId(@Param("id") Long id);
+    Set<SimpleUser> findFollowingsByFromId(@Param("id") Long id);
 
+    // 팔로워 찾기
     @Query("select new com.todayhouse.domain.user.dto.SimpleUser(u.id, u.nickname, u.introduction, u.profileImage) " +
             "from User u join Follow f on u.id = f.from.id " +
             "where f.to.id = :id")
-    Set<SimpleUser> findUsersByToId(@Param("id") Long id);
+    Set<SimpleUser> findFollowersByToId(@Param("id") Long id);
 }

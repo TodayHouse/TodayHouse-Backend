@@ -75,7 +75,7 @@ class UserRepositoryTest extends DataJpaBase {
         User findUser = em.getEntityManager().createQuery("select u from User u where u.nickname = :nickname", User.class)
                 .setParameter("nickname", "user1").getSingleResult();
         //when
-        Set<SimpleUser> set = userRepository.findUsersByFromId(findUser.getId());
+        Set<SimpleUser> set = userRepository.findFollowingsByFromId(findUser.getId());
         //then
         assertThat(set, contains(
                 hasProperty("nickname", is("user2")),
@@ -93,7 +93,7 @@ class UserRepositoryTest extends DataJpaBase {
         User findUser = em.getEntityManager().createQuery("select u from User u where u.nickname = :nickname", User.class)
                 .setParameter("nickname", "user4").getSingleResult();
         //when
-        Set<SimpleUser> set = userRepository.findUsersByToId(findUser.getId());
+        Set<SimpleUser> set = userRepository.findFollowersByToId(findUser.getId());
         //then
         assertThat(set, contains(
                 hasProperty("nickname", is("user1")),
