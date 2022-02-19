@@ -37,9 +37,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtTokenProvider tokenProvider;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
-    private final String SNS_SIGNUP_URL = "http://localhost:3000/social_signup";
-    private final String MAIN_URL = "http://localhost:3000";
+    private final String SNS_SIGNUP_URL = "http://localhost:3000/social-signup";
     private final String ERROR_URL = "http://localhost:3000/error";
+    private final String MAIN_URL = "http://localhost:3000";
 
     @Value("${oauth.authorizedRedirectUris}")
     List<String> authorizedRedirectUris;
