@@ -48,11 +48,14 @@ public class UserController {
     }
 
     // 회원가입
+    // email 인증 후 auth_user 쿠키가 있어야 가능
     @PostMapping("/signup")
-    public BaseResponse signup(@Valid @RequestBody UserSignupRequest request) {
+    public BaseResponse signup(@Valid @RequestBody UserSignupRequest request,
+                               HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
         log.info("이메일: {}, 닉네임: {}",
                 request.getEmail(), request.getNickname());
         UserSignupResponse response = new UserSignupResponse(userService.saveUser(request));
+        CookieUtils.deleteCookie(servletRequest, servletResponse, "auth_user");
         return new BaseResponse(response);
     }
 

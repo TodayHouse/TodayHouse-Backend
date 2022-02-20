@@ -1,5 +1,6 @@
 package com.todayhouse.global.config.oauth;
 
+import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.oauth.dao.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.todayhouse.domain.user.oauth.dto.OAuthAttributes;
@@ -36,7 +37,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtTokenProvider tokenProvider;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
-    private final String SNS_SIGNUP_URL = "http://localhost:3000/social_signup";
+    private final String SNS_SIGNUP_URL = "http://localhost:3000/social-signup";
+    private final String ERROR_URL = "http://localhost:3000/error";
     private final String MAIN_URL = "http://localhost:3000";
 
     @Value("${oauth.authorizedRedirectUris}")
@@ -63,26 +65,29 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         List<Role> roles = authentication.getAuthorities().stream().map(auth -> Role.keyToRole(auth.getAuthority()))
                 .collect(Collectors.toList());
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        OAuthAttributes oAuthAttributes = getAttributeFromOAuth2User(oAuth2User);
+        Map<String, Object> attributes = ((OAuth2User) authentication.getPrincipal()).getAttributes();
+        OAuthAttributes oAuthAttributes = getOAuthAttributes(attributes);
+
         if (roles.contains(Role.GUEST)) { // 추가회원가입 필요 -> 임시 인증 쿠키, uri 변경
             String jwt = tokenProvider.createOAuthToken(oAuthAttributes.getEmail(), roles,
                     oAuthAttributes.getAuthProvider(), oAuthAttributes.getPicture(), oAuthAttributes.getNickname());
             CookieUtils.addHttpOnlyCookie(response, "auth_user", CookieUtils.serialize(jwt), 60 * 60);
             targetUri = SNS_SIGNUP_URL;
-        } else { // 로그인 -> jwt
-            String jwt = tokenProvider.createToken(oAuthAttributes.getEmail(), roles);
-            CookieUtils.addNormalCookie(response, "access_token", jwt, 10);
+        } else { // 이미 가입한 유저
+            if (attributes.get("authProvider").equals(attributes.get("signupProvider"))) { // 로그인
+                String jwt = tokenProvider.createToken(oAuthAttributes.getEmail(), roles);
+                CookieUtils.addNormalCookie(response, "access_token", jwt, 10);
+            } else { // 중복 회원 가입 시 에러 페이지
+                targetUri = ERROR_URL + "?email=" + oAuthAttributes.getEmail() + "&provider=" + attributes.get("signupProvider");
+            }
         }
-
         return UriComponentsBuilder.fromUriString(targetUri)
                 .build().toUriString();
     }
 
-    // OAuth2User를 OAuthAttribute로 변환
-    private OAuthAttributes getAttributeFromOAuth2User(OAuth2User oAuth2User) {
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        if (attributes.get("email") != null) {
+    // OAuth2User의 attribute를 OAuthAttribute로 변환
+    private OAuthAttributes getOAuthAttributes(Map<String, Object> attributes) {
+        if (attributes.get("authProvider").equals(AuthProvider.NAVER)) {
             Map<String, Object> wrapper = new HashMap<>();
             wrapper.put("response", attributes);
             return OAuthAttributes.of("naver", "id", wrapper);

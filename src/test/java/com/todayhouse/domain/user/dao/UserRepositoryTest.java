@@ -55,7 +55,7 @@ class UserRepositoryTest extends DataJpaBase {
     void existsByEmail() {
         em.persist(user);
 
-        assertThat(userRepository.existsByEmail(user.getEmail())).isTrue();
+        assertThat(userRepository.existsByEmailAndNicknameIsNotNull(user.getEmail())).isTrue();
     }
 
     @Test
