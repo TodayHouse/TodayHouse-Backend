@@ -2,6 +2,7 @@ package com.todayhouse.domain.user.domain;
 
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,6 +53,7 @@ public class User implements UserDetails {
     @Embedded
     private Agreement agreement;
 
+    @BatchSize(size = 3)
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(joinColumns = @JoinColumn(name = "user_id"))

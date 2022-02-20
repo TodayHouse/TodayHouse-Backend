@@ -81,6 +81,8 @@ class FollowRepositoryTest {
         //given
         User user1 = User.builder().nickname("user1").profileImage("1").introduction("1111").build();
         User user2 = User.builder().nickname("user2").profileImage("2").introduction("2222").build();
+        em.persist(user1);
+        em.persist(user2);
         em.persist(Follow.builder().from(user1).to(user2).build());
 
         //when

@@ -57,11 +57,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and()
                 .authorizeRequests() // 요청에 대한 사용권한 체크
-                .antMatchers()
+                .antMatchers("/follows")
                 .hasAnyRole("USER", "ADMIN") // user, admin 요청만 허용
-                .antMatchers("/users/password/new", "/users/signup")
+                .antMatchers("/users/password/new", "/users/signup", "/oauth2/**")
                 .hasAnyRole("GUEST") // guest 요청만 허용
-                .antMatchers("/oauth2/**")
+                .antMatchers()
                 .authenticated()// 인증된 요청만 허용
                 .anyRequest().permitAll() // 그 외 모든 요청 허용
                 .and()
