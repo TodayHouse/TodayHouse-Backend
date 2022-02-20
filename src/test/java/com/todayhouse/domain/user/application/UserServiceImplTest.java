@@ -48,8 +48,8 @@ class UserServiceImplTest {
     void existByEmail() {
         String email = "test@test.com";
         String anyEmail = "any";
-        when(userRepository.existsByEmail(email)).thenReturn(true);
-        when(userRepository.existsByEmail(anyEmail)).thenReturn(false);
+        when(userRepository.existsByEmailAndNicknameIsNotNull(email)).thenReturn(true);
+        when(userRepository.existsByEmailAndNicknameIsNotNull(anyEmail)).thenReturn(false);
 
         assertThat(userService.existByEmail(email)).isTrue();
         assertThat(userService.existByEmail(anyEmail)).isFalse();

@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public boolean existByEmail(String email) {
-        return userRepository.existsByEmail(email);
+        return userRepository.existsByEmailAndNicknameIsNotNull(email);
     }
 
     @Override
@@ -57,7 +57,8 @@ public class UserServiceImpl implements UserService {
         }
         // 중복 회원가입, request 유효성 검사
         validateSignupRequest(request);
-        return userRepository.save(request.toEntity());
+        // OAuth 인증만 받고 가입하지 않은 이메일은 업데이트
+        return saveOrUpdateUser(request);
     }
 
     @Override
@@ -74,14 +75,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updatePassword(String email, PasswordUpdateRequest request) {
-        if(!request.getPassword1().equals(request.getPassword2()))
+        if (!request.getPassword1().equals(request.getPassword2()))
             throw new SignupPasswordException();
         User user = userRepository.findByEmail(email).orElseThrow(UserEmailNotFountException::new);
         user.updatePassword(request.getPassword1());
     }
 
     private void validateSignupRequest(UserSignupRequest request) {
-        if (userRepository.existsByEmail(request.getEmail()))
+        if (userRepository.existsByEmailAndNicknameIsNotNull(request.getEmail()))
             throw new UserEmailExistExcecption();
 
         if (userRepository.existsByNickname(request.getNickname()))
@@ -89,6 +90,14 @@ public class UserServiceImpl implements UserService {
 
         if (!request.getPassword1().equals(request.getPassword2()))
             throw new SignupPasswordException();
+    }
+
+    private User saveOrUpdateUser(UserSignupRequest request) {
+        return userRepository.findByEmail(request.getEmail())
+                .map(u -> {
+                    u.updateUser(request.toEntity());
+                    return u;
+                }).orElseGet(() -> userRepository.save(request.toEntity()));
     }
 
     //테스트 계정

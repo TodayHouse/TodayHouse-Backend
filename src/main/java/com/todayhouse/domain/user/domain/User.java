@@ -88,6 +88,15 @@ public class User implements UserDetails {
         return true;
     }
 
+    public void updateUser(User user){
+        this.authProvider = user.getAuthProvider();
+        this.nickname = user.getNickname();
+        this.password = user.getPassword();
+        this.profileImage = user.getProfileImage();
+        this.agreement = user.getAgreement();
+        this.roles = user.getRoles();
+    }
+
     public void updateWithOAuthSignup(OAuthSignupRequest request, User principal) {
         this.nickname = request.getNickname();
         this.roles = Collections.singletonList(Role.USER);
