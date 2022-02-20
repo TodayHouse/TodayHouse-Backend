@@ -17,4 +17,6 @@ public interface FollowService {
     Set<SimpleUser> findFollowings(Long userId);
 
     void deleteFollow(Long fromId, Long toId);
+
+    boolean isFollowing(Long fromId, Long toId);
 }

@@ -10,4 +10,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     long countByToId(Long id);
 
     void deleteByFromIdAndToId(Long fromId, Long toId);
+
+    boolean existsFollowByFromIdAndToId(Long fromId, Long ToId);
 }

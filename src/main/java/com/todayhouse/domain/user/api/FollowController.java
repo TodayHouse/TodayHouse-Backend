@@ -52,4 +52,9 @@ public class FollowController {
         Set<SimpleUser> followings = followService.findFollowings(id);
         return new BaseResponse(followings);
     }
+
+    @GetMapping
+    public BaseResponse isFollowing(@RequestParam Long fromId, @RequestParam Long toId) {
+        return new BaseResponse(followService.isFollowing(fromId, toId));
+    }
 }

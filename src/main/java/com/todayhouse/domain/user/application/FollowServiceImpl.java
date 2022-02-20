@@ -63,6 +63,11 @@ public class FollowServiceImpl implements FollowService {
         followRepository.deleteByFromIdAndToId(fromId, toId);
     }
 
+    @Override
+    public boolean isFollowing(Long fromId, Long toId) {
+        return followRepository.existsFollowByFromIdAndToId(fromId, toId);
+    }
+
     // jwt의 email과 맞는지 확인
     private void checkEmailInvalidation(String email) {
         String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();

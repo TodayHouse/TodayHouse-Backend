@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -100,6 +101,14 @@ class FollowServiceImplTest {
         followService.deleteFollow(1L, 2L);
 
         verify(followRepository).deleteByFromIdAndToId(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("팔로우 여부")
+    void exist(){
+        when(followRepository.existsFollowByFromIdAndToId(anyLong(), anyLong())).thenReturn(true);
+
+        assertThat(followService.isFollowing(1L, 2L)).isTrue();
     }
 
     private void checkEmailInvalidation(String email) {

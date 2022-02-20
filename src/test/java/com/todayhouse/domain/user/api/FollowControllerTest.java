@@ -177,4 +177,24 @@ class FollowControllerTest extends IntegrationBase {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().is4xxClientError());
     }
+
+    @Test
+    void 팔로우_여부() throws Exception {
+        int id1 = Math.toIntExact(userRepository.findByEmail("user1@test").orElse(null).getId());
+        int id2 = Math.toIntExact(userRepository.findByEmail("user2@test").orElse(null).getId());
+        int id3 = Math.toIntExact(userRepository.findByEmail("user3@test").orElse(null).getId());
+        String url = "http://localhost:8080/follows?";
+
+        MvcResult mvcResult1 = mockMvc.perform(get(url+"fromId="+id1+"&toId="+id2)).andExpect(status().isOk()).andReturn();
+        MvcResult mvcResult2 = mockMvc.perform(get(url+"fromId="+id2+"&toId="+id3)).andExpect(status().isOk()).andReturn();
+
+        String contentAsString1 = mvcResult1.getResponse().getContentAsString();
+        BaseResponse baseResponse1 = objectMapper.readValue(contentAsString1, BaseResponse.class);
+
+        String contentAsString2 = mvcResult2.getResponse().getContentAsString();
+        BaseResponse baseResponse2 = objectMapper.readValue(contentAsString2, BaseResponse.class);
+
+        assertThat(baseResponse1.getResult()).isEqualTo(true);
+        assertThat(baseResponse2.getResult()).isEqualTo(false);
+    }
 }

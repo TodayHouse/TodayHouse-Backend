@@ -2,8 +2,10 @@ package com.todayhouse.domain.user.dao;
 
 import com.todayhouse.domain.user.domain.Follow;
 import com.todayhouse.domain.user.domain.User;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
@@ -94,6 +96,19 @@ class FollowRepositoryTest {
                 .setParameter("from", user1.getId())
                 .setParameter("to", user2.getId()).getResultList();
         assertThat(resultList.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("팔로우 여부")
+    void exist(){
+        User user1 = User.builder().nickname("user1").profileImage("1").introduction("1111").build();
+        User user2 = User.builder().nickname("user2").profileImage("2").introduction("2222").build();
+        em.persist(user1);
+        em.persist(user2);
+        em.persist(Follow.builder().from(user1).to(user2).build());
+
+        assertThat(followRepository.existsFollowByFromIdAndToId(user1.getId(), user2.getId())).isTrue();
+        assertThat(followRepository.existsFollowByFromIdAndToId(user2.getId(), user1.getId())).isFalse();
     }
 
     public static void insertFollow(TestEntityManager em) {
