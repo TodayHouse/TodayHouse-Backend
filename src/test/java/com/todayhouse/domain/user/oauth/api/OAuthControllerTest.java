@@ -11,10 +11,9 @@ import com.todayhouse.domain.user.oauth.dto.OAuthAttributes;
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthSignupInfoResponse;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthSignupResponse;
-import com.todayhouse.domain.user.oauth.dto.response.OAuthTokenResponse;
 import com.todayhouse.global.common.BaseResponse;
-import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import com.todayhouse.global.config.cookie.CookieUtils;
+import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -76,47 +75,47 @@ class OAuthControllerTest extends IntegrationBase {
                 .andDo(print());
     }
 
-    @Test
-    void guest_cookie로_jwt_요청() throws Exception {
-        //given
-        String email = "test@test.com";
-        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.GUEST))
-                .authProvider(AuthProvider.NAVER).nickname("test").build());
-        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
-        Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
-        //when,then
-        mockMvc.perform(get("http://localhost:8080/oauth2/token")
-                        .cookie(cookie))
-                .andExpect(status().is4xxClientError())
-                .andDo(print());
-    }
+//    @Test
+//    void guest_cookie로_jwt_요청() throws Exception {
+//        //given
+//        String email = "test@test.com";
+//        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.GUEST))
+//                .authProvider(AuthProvider.NAVER).nickname("test").build());
+//        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.GUEST));
+//        Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
+//        //when,then
+//        mockMvc.perform(get("http://localhost:8080/oauth2/token")
+//                        .cookie(cookie))
+//                .andExpect(status().is4xxClientError())
+//                .andDo(print());
+//    }
 
-    @Test
-    void user_cookie로_jwt_요청() throws Exception {
-        //given
-        String email = "test@test.com";
-        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.USER))
-                .authProvider(AuthProvider.NAVER).nickname("test").build());
-        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.USER));
-        Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
-        //when
-        MvcResult mvcResult = mockMvc.perform(get("http://localhost:8080/oauth2/token")
-                        .cookie(cookie))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andReturn();
-        //then
-        BaseResponse baseResponse = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), BaseResponse.class);
-        OAuthTokenResponse response = new ObjectMapper().convertValue(baseResponse.getResult(), OAuthTokenResponse.class);
-        assertThat(response.getAccessToken()).isEqualTo(jwt);
-    }
+//    @Test
+//    void user_cookie로_jwt_요청() throws Exception {
+//        //given
+//        String email = "test@test.com";
+//        userRepository.save(User.builder().email(email).roles(Collections.singletonList(Role.USER))
+//                .authProvider(AuthProvider.NAVER).nickname("test").build());
+//        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.USER));
+//        Cookie cookie = new Cookie("auth_user", CookieUtils.serialize(jwt));
+//        //when
+//        MvcResult mvcResult = mockMvc.perform(get("http://localhost:8080/oauth2/token")
+//                        .cookie(cookie))
+//                .andExpect(status().isOk())
+//                .andDo(print())
+//                .andReturn();
+//        //then
+//        BaseResponse baseResponse = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), BaseResponse.class);
+//        OAuthTokenResponse response = new ObjectMapper().convertValue(baseResponse.getResult(), OAuthTokenResponse.class);
+//        assertThat(response.getAccessToken()).isEqualTo(jwt);
+//    }
 
-    @Test
-    void 인증없이_jwt_요청() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/oauth2/token"))
-                .andExpect(status().is4xxClientError())
-                .andDo(print());
-    }
+//    @Test
+//    void 인증없이_jwt_요청() throws Exception {
+//        mockMvc.perform(get("http://localhost:8080/oauth2/token"))
+//                .andExpect(status().is4xxClientError())
+//                .andDo(print());
+//    }
 
     @Test
     void 인증_이메일_회원가입() throws Exception {

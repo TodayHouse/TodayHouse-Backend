@@ -3,7 +3,7 @@ package com.todayhouse.domain.user.oauth.application;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
-import com.todayhouse.domain.user.exception.UserEmailNotFountException;
+import com.todayhouse.domain.user.exception.UserNotFoundException;
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import com.todayhouse.domain.user.oauth.exception.AuthGuestException;
 import com.todayhouse.domain.user.oauth.exception.AuthNotGuestException;
@@ -24,7 +24,7 @@ public class OAuthServiceImpl implements OAuthService {
     @Transactional(readOnly = true)
     public String findNicknamebyEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserEmailNotFountException());
+                .orElseThrow(() -> new UserNotFoundException());
         return user.getNickname();
     }
 
@@ -34,7 +34,7 @@ public class OAuthServiceImpl implements OAuthService {
     @Transactional(readOnly = true)
     public String provideToken(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserEmailNotFountException());
+                .orElseThrow(() -> new UserNotFoundException());
         if (user.getRoles().contains(Role.GUEST)) {
             throw new AuthGuestException();
         }
@@ -48,7 +48,7 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public User saveGuest(OAuthSignupRequest request, String jwt) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserEmailNotFountException());
+                .orElseThrow(() -> new UserNotFoundException());
         // 인증 받지 않았거나 이미 회원가입한 유저
         if (!user.getRoles().contains(Role.GUEST)) {
             throw new AuthNotGuestException();

@@ -5,6 +5,7 @@ import com.todayhouse.domain.user.domain.Agreement;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.dto.SimpleUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,18 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasProperty;
 
 class UserRepositoryTest extends DataJpaBase {
 
     @Autowired
-    TestEntityManager testEntityManager;
+    TestEntityManager em;
 
     @Autowired
     UserRepository userRepository;
@@ -39,7 +45,7 @@ class UserRepositoryTest extends DataJpaBase {
     @Test
     @DisplayName("없는 email 검색")
     void findByInvalidEmail() {
-        testEntityManager.persist(user);
+        em.persist(user);
 
         assertThat(userRepository.findByEmail("invalid")).isEqualTo(Optional.empty());
     }
@@ -47,7 +53,7 @@ class UserRepositoryTest extends DataJpaBase {
     @Test
     @DisplayName("email이 있는지 검색")
     void existsByEmail() {
-        testEntityManager.persist(user);
+        em.persist(user);
 
         assertThat(userRepository.existsByEmailAndNicknameIsNotNull(user.getEmail())).isTrue();
     }
@@ -55,8 +61,43 @@ class UserRepositoryTest extends DataJpaBase {
     @Test
     @DisplayName("nickname이 있는지 검색")
     void existsByNickname() {
-        testEntityManager.persist(user);
+        em.persist(user);
 
         assertThat(userRepository.existsByNickname(user.getNickname())).isTrue();
+    }
+
+    @Test
+    @DisplayName("팔로잉 유저 리스트 구하기")
+    void findUsersByFollowerId() {
+        //user1 은 user2,3,4를 팔로우
+        //given
+        FollowRepositoryTest.insertFollow(em);
+        User findUser = em.getEntityManager().createQuery("select u from User u where u.nickname = :nickname", User.class)
+                .setParameter("nickname", "user1").getSingleResult();
+        //when
+        Set<SimpleUser> set = userRepository.findFollowingsByFromId(findUser.getId());
+        //then
+        assertThat(set, contains(
+                hasProperty("nickname", is("user2")),
+                hasProperty("nickname", is("user3")),
+                hasProperty("nickname", is("user4"))
+        ));
+    }
+
+    @Test
+    @DisplayName("팔로워 유저 리스트 구하기")
+    void findUsersByFollowingId() {
+        //user1,2는 user4를 팔로우
+        //given
+        FollowRepositoryTest.insertFollow(em);
+        User findUser = em.getEntityManager().createQuery("select u from User u where u.nickname = :nickname", User.class)
+                .setParameter("nickname", "user4").getSingleResult();
+        //when
+        Set<SimpleUser> set = userRepository.findFollowersByToId(findUser.getId());
+        //then
+        assertThat(set, contains(
+                hasProperty("nickname", is("user1")),
+                hasProperty("nickname", is("user2"))
+        ));
     }
 }

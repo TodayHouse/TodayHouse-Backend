@@ -2,6 +2,7 @@ package com.todayhouse.domain.user.domain;
 
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -47,9 +48,12 @@ public class User implements UserDetails {
     @Column(name = "profile_image")
     private String profileImage;
 
+    private String introduction;
+
     @Embedded
     private Agreement agreement;
 
+    @BatchSize(size = 3)
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(joinColumns = @JoinColumn(name = "user_id"))
@@ -105,7 +109,7 @@ public class User implements UserDetails {
         this.profileImage = principal.getProfileImage();
     }
 
-    public void updatePassword(String password){
+    public void updatePassword(String password) {
         this.password = new BCryptPasswordEncoder().encode(password);
     }
 }

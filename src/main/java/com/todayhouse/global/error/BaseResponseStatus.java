@@ -21,7 +21,7 @@ public enum BaseResponseStatus {
     POST_USER_EMPTY_BIRTH(false, 2008, "생년월일을 입력해주세요."),
     POST_USER_EMPTY_NICKNAME(false, 2009, "닉네임을 입력해주세요."),
     POST_USER_EXISTS_NICKNAME(false, 2010, "중복된 닉네임입니다."),
-    NOT_FOUND_EMAIL(false, 2011, "존재하지 않는 이메일입니다."),
+    USER_NOT_FOUND(false, 2011, "존재하지 않는 유저입니다."),
     WRONG_PASSWORD(false, 2012, "잘못된 비밀번호입니다."),
     WRONG_SIGNUP_PASSWORD(false, 2013, "비밀번호 확인이 일치하지 않습니다."),
     INVALID_AUTH_EMAIL(false, 2014, "인증받지 않은 이메일입니다."),
@@ -45,6 +45,7 @@ public enum BaseResponseStatus {
     IS_GUEST_ACCESS(false, 2301, "회원가입을 하지 않았습니다."),
     INVALID_REDIRECT_URI(false, 2302, "허용되지 않은 URI입니다."),
     INVALID_AUTH(false, 2303, "올바르지 않은 권한입니다."),
+    INVALID_REQUEST(false, 2304, "올바르지 않은 요청입니다."),
 
     // 3000 : Database / Server 오류
     // common

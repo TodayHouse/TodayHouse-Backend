@@ -5,7 +5,6 @@ import com.todayhouse.domain.user.oauth.application.OAuthService;
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthSignupInfoResponse;
 import com.todayhouse.domain.user.oauth.dto.response.OAuthSignupResponse;
-import com.todayhouse.domain.user.oauth.dto.response.OAuthTokenResponse;
 import com.todayhouse.domain.user.oauth.exception.InvalidAuthException;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.cookie.CookieUtils;
@@ -32,11 +31,11 @@ public class OAuthController {
         return new BaseResponse(response);
     }
 
-    @GetMapping("/token")
-    public BaseResponse provideToken(Authentication authentication) {
-        String email = ((User) authentication.getPrincipal()).getEmail();
-        return new BaseResponse(new OAuthTokenResponse(oAuthService.provideToken(email)));
-    }
+//    @GetMapping("/token")
+//    public BaseResponse provideToken(Authentication authentication) {
+//        String email = ((User) authentication.getPrincipal()).getEmail();
+//        return new BaseResponse(new OAuthTokenResponse(oAuthService.provideToken(email)));
+//    }
 
     @PutMapping("/signup")
     public BaseResponse signup(@Valid @RequestBody OAuthSignupRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {

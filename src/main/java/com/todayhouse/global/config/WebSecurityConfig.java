@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -57,11 +58,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and()
                 .authorizeRequests() // 요청에 대한 사용권한 체크
-                .antMatchers()
-                .hasAnyRole("USER", "ADMIN") // user, admin 요청만 허용
-                .antMatchers("/users/password/new")
+                .antMatchers(HttpMethod.POST, "/follows")
+                .hasAnyRole("USER", "ADMIN") // user, admin post 요청만 허용
+                .antMatchers(HttpMethod.DELETE, "/follows")
+                .hasAnyRole("USER", "ADMIN") // user, admin delete 요청만 허용
+                .antMatchers("/users/password/new", "/users/signup", "/oauth2/**")
                 .hasAnyRole("GUEST") // guest 요청만 허용
-                .antMatchers("/oauth2/**", "/users/signup")
+                .antMatchers()
                 .authenticated()// 인증된 요청만 허용
                 .anyRequest().permitAll() // 그 외 모든 요청 허용
                 .and()
