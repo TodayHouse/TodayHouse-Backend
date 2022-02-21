@@ -105,7 +105,7 @@ class FollowServiceImplTest {
 
     @Test
     @DisplayName("팔로우 여부")
-    void exist(){
+    void exist() {
         when(followRepository.existsFollowByFromIdAndToId(anyLong(), anyLong())).thenReturn(true);
 
         assertThat(followService.isFollowing(1L, 2L)).isTrue();

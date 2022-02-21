@@ -2,10 +2,8 @@ package com.todayhouse.domain.user.dao;
 
 import com.todayhouse.domain.user.domain.Follow;
 import com.todayhouse.domain.user.domain.User;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
@@ -100,7 +98,7 @@ class FollowRepositoryTest {
 
     @Test
     @DisplayName("팔로우 여부")
-    void exist(){
+    void exist() {
         User user1 = User.builder().nickname("user1").profileImage("1").introduction("1111").build();
         User user2 = User.builder().nickname("user2").profileImage("2").introduction("2222").build();
         em.persist(user1);

@@ -185,8 +185,8 @@ class FollowControllerTest extends IntegrationBase {
         int id3 = Math.toIntExact(userRepository.findByEmail("user3@test").orElse(null).getId());
         String url = "http://localhost:8080/follows?";
 
-        MvcResult mvcResult1 = mockMvc.perform(get(url+"fromId="+id1+"&toId="+id2)).andExpect(status().isOk()).andReturn();
-        MvcResult mvcResult2 = mockMvc.perform(get(url+"fromId="+id2+"&toId="+id3)).andExpect(status().isOk()).andReturn();
+        MvcResult mvcResult1 = mockMvc.perform(get(url + "fromId=" + id1 + "&toId=" + id2)).andExpect(status().isOk()).andReturn();
+        MvcResult mvcResult2 = mockMvc.perform(get(url + "fromId=" + id2 + "&toId=" + id3)).andExpect(status().isOk()).andReturn();
 
         String contentAsString1 = mvcResult1.getResponse().getContentAsString();
         BaseResponse baseResponse1 = objectMapper.readValue(contentAsString1, BaseResponse.class);
