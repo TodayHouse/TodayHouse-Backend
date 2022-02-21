@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.domain;
 
+import com.todayhouse.domain.user.dto.request.SellerRequest;
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
@@ -60,6 +61,9 @@ public class User implements UserDetails {
     @Builder.Default
     private List<Role> roles = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Seller seller;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
@@ -92,7 +96,7 @@ public class User implements UserDetails {
         return true;
     }
 
-    public void updateUser(User user){
+    public void updateUser(User user) {
         this.authProvider = user.getAuthProvider();
         this.nickname = user.getNickname();
         this.password = user.getPassword();
@@ -111,5 +115,10 @@ public class User implements UserDetails {
 
     public void updatePassword(String password) {
         this.password = new BCryptPasswordEncoder().encode(password);
+    }
+
+    public void createSeller(SellerRequest request){
+        Seller seller = request.toEntity();
+        this.seller = seller;
     }
 }
