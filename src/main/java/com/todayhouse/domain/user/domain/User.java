@@ -61,7 +61,7 @@ public class User implements UserDetails {
     @Builder.Default
     private List<Role> roles = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Seller seller;
 
     @Override

@@ -5,6 +5,7 @@ import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Follow;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.SimpleUser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,11 @@ class FollowServiceImplTest {
 
     @Mock
     FollowRepository followRepository;
+
+    @AfterEach
+    public void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     @DisplayName("팔로우 관계 저장")

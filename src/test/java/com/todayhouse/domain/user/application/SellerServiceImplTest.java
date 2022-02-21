@@ -5,6 +5,7 @@ import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.SellerRequest;
 import com.todayhouse.domain.user.exception.SellerExistException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +33,11 @@ class SellerServiceImplTest {
     @Mock
     UserRepository userRepository;
 
+    @AfterEach
+    public void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     void seller_등록() {
         String email = "email@com";
@@ -55,6 +61,15 @@ class SellerServiceImplTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(user));
 
         assertThrows(SellerExistException.class, () -> sellerService.saveSellerRequest(request));
+    }
+
+    @Test
+    void userId로_seller_찾기() {
+        Seller seller = Seller.builder().build();
+        when(userRepository.findById(1L))
+                .thenReturn(Optional.ofNullable(User.builder().id(1L).seller(seller).build()));
+
+        assertThat(sellerService.findSeller(1L)).isEqualTo(Optional.ofNullable(seller));
     }
 
     private void checkEmailInvalidation(String email) {

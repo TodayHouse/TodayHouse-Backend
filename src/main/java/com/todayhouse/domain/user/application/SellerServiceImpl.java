@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.application;
 
+import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
@@ -10,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -27,5 +30,11 @@ public class SellerServiceImpl implements SellerService {
         user.createSeller(request);
         User save = userRepository.save(user);
         return save.getSeller();
+    }
+
+    @Override
+    public Optional<Seller> findSeller(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        return Optional.ofNullable(user.getSeller());
     }
 }
