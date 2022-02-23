@@ -1,8 +1,11 @@
 package com.todayhouse.domain.user.domain;
 
+import com.todayhouse.domain.product.domain.Product;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -15,8 +18,11 @@ public class Seller {
     @Column(name = "seller_id")
     private Long id;
 
-    @Column(name = "company_name")
+    @Column(name = "company_name", unique = true)
     private String companyName;
+
+    @Column(name = "brand_name", unique = true)
+    private String brandName;
 
     private String representative;
 
@@ -31,4 +37,9 @@ public class Seller {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Product> products = new ArrayList<>();
+
 }
