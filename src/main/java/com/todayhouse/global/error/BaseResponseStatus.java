@@ -28,12 +28,15 @@ public enum BaseResponseStatus {
     INVALID_GUEST_EMAIL(false, 2015, ""),
     INVALID_EMAIL_TOKEN(false, 2016, "유효하지 않은 코드입니다."),
     SELLER_EXIST(false, 2017, "이미 입점한 유저입니다."),
+    SELLER_NOT_FOUND(false, 2018, "입점을 하지 않았습니다."),
 
     // product
     POST_PRODUCT_EMPTY_BRAND(false, 2100, "브랜드명을 입력해주세요."),
     POST_PRODUCT_EMPTY_TITLE(false, 2101, "제목을 입력해주세요."),
     POST_PRODUCT_EMPTY_PRICE(false, 2102, "가격을 입력해주세요."),
     POST_PRODUCT_EMPTY_DELIVERY(false, 2103, "배송비를 입력해주세요."),
+    PRODUCT_NOT_FOUND(false, 2104, "상품을 찾을 수 없습니다."),
+    SELLER_NOT_SETTING(false, 2105, "Product에 Seller가 설정되지 않았습니다."),
 
     // story
     POST_STORY_EMPTY_TITLE(false, 2200, "제목을 입력해주세요."),

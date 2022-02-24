@@ -1,5 +1,7 @@
 package com.todayhouse.domain.product.domain;
 
+import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
+import com.todayhouse.domain.product.exception.SellerNotSettingException;
 import com.todayhouse.domain.user.domain.Seller;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -68,9 +70,22 @@ public class Product {
     }
 
     public void setSeller(Seller seller) {
+        if(seller == null)
+            throw new SellerNotSettingException();
         if (this.seller != null) return;
         this.seller = seller;
         seller.getProducts().add(this);
+    }
+
+    public void updateProduct(ProductUpdateRequest request){
+        this.title = request.getTitle();
+        this.image = request.getImage();
+        this.price = request.getPrice();
+        this.discountRate = request.getDiscountRate();
+        this.deliveryFee = request.getDeliveryFee();
+        this.specialPrice = request.isSpecialPrice();
+        this.productDetail = request.getProductDetail();
+        this.sales = request.getSales();
     }
 
     @Override
