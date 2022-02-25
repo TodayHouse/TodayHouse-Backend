@@ -9,6 +9,7 @@ import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
+import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.user.dao.SellerRepository;
@@ -114,7 +115,7 @@ class ProductControllerTest extends IntegrationBase {
         assertThat(response.getTotalPages()).isEqualTo(2);
         assertThat(response.getTotalElements()).isEqualTo(4);
         Long tmp = 0L;
-        for(ProductResponse p : products){
+        for (ProductResponse p : products) {
             assertThat(p.getId()).isGreaterThan(tmp);
             tmp = p.getId();
         }
@@ -142,7 +143,7 @@ class ProductControllerTest extends IntegrationBase {
         assertThat(response.getTotalPages()).isEqualTo(1);
         assertThat(response.getTotalElements()).isEqualTo(4);
         int price = 10000;
-        for(ProductResponse p : products){
+        for (ProductResponse p : products) {
             assertThat(p.getPrice()).isLessThanOrEqualTo(price);
             price = p.getPrice();
         }
@@ -164,7 +165,7 @@ class ProductControllerTest extends IntegrationBase {
 
     @Test
     @DisplayName("product 수정")
-    void updateProduct() throws Exception{
+    void updateProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
         ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).title("new").build();
@@ -183,7 +184,7 @@ class ProductControllerTest extends IntegrationBase {
 
     @Test
     @DisplayName("product 삭제")
-    void deleteProduct() throws Exception{
+    void deleteProduct() throws Exception {
         String url = "http://localhost:8080/products/1";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
 
@@ -193,6 +194,33 @@ class ProductControllerTest extends IntegrationBase {
 
         List<Product> products = productRepository.findAll();
         assertThat(products.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("배달비 존재, 특가 product를 id 내림차순 페이징")
+    void findProductsPaginationBrand() throws Exception {
+        String url = "http://localhost:8080/products?page=0&size=4&sort=id,DESC";
+        ProductSearchRequest productSearch = ProductSearchRequest.builder().specialPrice(true).deliveryFee(true).build();
+        Seller seller = sellerRepository.findById(1L).orElse(null);
+        productRepository.save(Product.builder().specialPrice(true).deliveryFee(2000).seller(seller).build());
+        productRepository.save(Product.builder().specialPrice(false).deliveryFee(1000).seller(seller).build());
+        productRepository.save(Product.builder().specialPrice(true).seller(seller).build());
+
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(productSearch)))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
+        Page<ProductResponse> response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<CustomPageImpl<ProductResponse>>() {
+        });
+        List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
+        });
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(products.get(0).getDeliveryFee()).isEqualTo(2000);
+        assertThat(products.get(0).isSpecialPrice()).isTrue();
     }
 
     public static class CustomPageImpl<T> extends PageImpl<T> {
