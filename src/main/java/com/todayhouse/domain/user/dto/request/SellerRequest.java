@@ -16,6 +16,9 @@ public class SellerRequest {
     private String email;
 
     @NotBlank
+    private String brand;
+
+    @NotBlank
     private String companyName;
 
     @NotBlank
@@ -30,6 +33,7 @@ public class SellerRequest {
     public Seller toEntity() {
         return Seller.builder()
                 .email(this.email)
+                .brand(this.brand)
                 .companyName(this.companyName)
                 .customerCenter(this.customerCenter)
                 .representative(this.representative)

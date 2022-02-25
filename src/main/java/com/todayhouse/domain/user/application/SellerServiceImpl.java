@@ -1,18 +1,16 @@
 package com.todayhouse.domain.user.application;
 
-import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.SellerRequest;
 import com.todayhouse.domain.user.exception.SellerExistException;
+import com.todayhouse.domain.user.exception.SellerNotFoundException;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -33,8 +31,11 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public Optional<Seller> findSeller(Long userId) {
+    public Seller findSeller(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        return Optional.ofNullable(user.getSeller());
+        Seller seller = user.getSeller();
+        if (seller == null)
+            throw new SellerNotFoundException();
+        return seller;
     }
 }

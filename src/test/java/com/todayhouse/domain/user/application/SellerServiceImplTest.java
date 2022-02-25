@@ -69,7 +69,7 @@ class SellerServiceImplTest {
         when(userRepository.findById(1L))
                 .thenReturn(Optional.ofNullable(User.builder().id(1L).seller(seller).build()));
 
-        assertThat(sellerService.findSeller(1L)).isEqualTo(Optional.ofNullable(seller));
+        assertThat(sellerService.findSeller(1L)).isEqualTo(seller);
     }
 
     private void checkEmailInvalidation(String email) {

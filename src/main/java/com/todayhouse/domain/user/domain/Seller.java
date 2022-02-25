@@ -18,28 +18,36 @@ public class Seller {
     @Column(name = "seller_id")
     private Long id;
 
-    @Column(name = "company_name", unique = true)
-    private String companyName;
+    private String email;
 
     @Column(name = "brand_name", unique = true)
-    private String brandName;
+    private String brand;
+
+    @Column(name = "company_name", unique = true)
+    private String companyName;
 
     private String representative;
 
     @Column(name = "customer_center")
     private String customerCenter;
 
-    private String email;
-
     @Column(name = "registration_num")
     private String registrationNum;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Product> products = new ArrayList<>();
 
+    @Override
+    public String toString() {
+        return "Seller{" +
+                "id=" + id +
+                ", companyName='" + companyName + '\'' +
+                ", brandName='" + brand + '\'' +
+                ", representative='" + representative + '\'' +
+                ", customerCenter='" + customerCenter + '\'' +
+                ", email='" + email + '\'' +
+                ", registrationNum='" + registrationNum + '\'' +
+                '}';
+    }
 }

@@ -1,7 +1,9 @@
 package com.todayhouse.domain.user.api;
 
 import com.todayhouse.domain.user.application.SellerService;
+import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.dto.request.SellerRequest;
+import com.todayhouse.domain.user.dto.response.SellerResponse;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +18,13 @@ public class SellerController {
 
     @PostMapping
     public BaseResponse saveSeller(@Valid @RequestBody SellerRequest request) {
-        return new BaseResponse(service.saveSellerRequest(request));
+        Seller seller = service.saveSellerRequest(request);
+        return new BaseResponse(new SellerResponse(seller));
     }
 
     @GetMapping("/{id}")
     public BaseResponse findSeller(@PathVariable Long id) {
-        return new BaseResponse(service.findSeller(id));
+        Seller seller = service.findSeller(id);
+        return new BaseResponse(new SellerResponse(seller));
     }
 }
