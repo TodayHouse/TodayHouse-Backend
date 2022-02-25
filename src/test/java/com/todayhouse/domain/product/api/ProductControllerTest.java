@@ -12,6 +12,7 @@ import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
+import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
@@ -108,7 +109,7 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
-        Page<ProductResponse> response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<CustomPageImpl<ProductResponse>>() {
+        ProductSearchResponse response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
         });
         List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
         });
@@ -136,7 +137,7 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
-        Page<ProductResponse> response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<CustomPageImpl<ProductResponse>>() {
+        ProductSearchResponse response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
         });
         List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
         });
@@ -214,7 +215,7 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
-        Page<ProductResponse> response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<CustomPageImpl<ProductResponse>>() {
+        ProductSearchResponse response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
         });
         List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
         });

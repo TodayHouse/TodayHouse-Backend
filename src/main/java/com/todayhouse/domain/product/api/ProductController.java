@@ -7,6 +7,7 @@ import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.dto.response.ProductSaveResponse;
+import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ public class ProductController {
     public BaseResponse findProductsPagination(@RequestBody(required = false) ProductSearchRequest productSearch,
                                                Pageable pageable) {
         Page<ProductResponse> products = productService.findAll(productSearch, pageable);
-        return new BaseResponse(products);
+        return new BaseResponse(new ProductSearchResponse(products));
     }
 
     @GetMapping("/{id}")
