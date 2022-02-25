@@ -22,17 +22,19 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String brand;
+
     private String title;
 
     private String image;
 
     private int price;
 
-    @Column(name = "discount_rate")
-    private int discountRate;
-
     @Column(name = "delivery_fee")
     private int deliveryFee;
+
+    @Column(name = "discount_rate")
+    private int discountRate;
 
     @Column(name = "special_price")
     private boolean specialPrice;
@@ -61,8 +63,8 @@ public class Product {
         this.title = title;
         this.image = image;
         this.price = price;
-        this.discountRate = discountRate;
         this.deliveryFee = deliveryFee;
+        this.discountRate = discountRate;
         this.specialPrice = specialPrice;
         this.productDetail = productDetail;
         this.sales = sales;
@@ -74,6 +76,7 @@ public class Product {
             throw new SellerNotSettingException();
         if (this.seller != null) return;
         this.seller = seller;
+        this.brand = seller.getBrand();
         seller.getProducts().add(this);
     }
 

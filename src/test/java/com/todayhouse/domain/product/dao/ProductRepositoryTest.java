@@ -31,7 +31,7 @@ class ProductRepositoryTest extends DataJpaBase {
 
     @BeforeAll
     void preSet() {
-        Seller seller = Seller.builder().email("seller@email.com").brandName("house").build();
+        Seller seller = Seller.builder().email("seller@email.com").brand("house").build();
         sellerRepository.save(seller);
         Product product1 = Product.builder().title("p1").seller(seller).build();
         Product product2 = Product.builder().title("p2").seller(seller).build();

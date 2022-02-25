@@ -1,6 +1,5 @@
 package com.todayhouse.domain.product.dto.request;
 
-import com.todayhouse.domain.product.domain.Product;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;

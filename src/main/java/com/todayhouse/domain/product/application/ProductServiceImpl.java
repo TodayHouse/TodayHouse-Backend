@@ -5,6 +5,7 @@ import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
+import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
@@ -18,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.stream.Collectors;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -27,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
     private final CustomProductRepository customProductRepository;
 
     @Override
-    public Product saveProduct(ProductSaveRequest request) {
+    public Product saveProductRequest(ProductSaveRequest request) {
         // jwt로 seller 찾기
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
@@ -38,8 +41,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> findAll(Pageable pageable) {
-        return customProductRepository.findAll(pageable);
+    public Page<ProductResponse> findAll(Pageable pageable) {
+        Page<ProductResponse> response = customProductRepository.findAll(pageable)
+                .map(p -> new ProductResponse(p));
+        return response;
     }
 
     @Override
@@ -56,17 +61,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void removeProduct(Long id) {
+    public void deleteProduct(Long id) {
         getValidProduct(id);
         productRepository.deleteById(id);
     }
 
-    // product의 user email과 jwt의 email이 같은지 확인
+    // product의 seller와 user의 seller가 같은지 확인
     private Product getValidProduct(Long id){
         String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(jwtEmail).orElseThrow(UserNotFoundException::new);
         Product product = productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
-        String email = product.getSeller().getUser().getEmail();
-        if (!email.equals(jwtEmail))
+        if (!user.getSeller().equals(product.getSeller()))
             throw new InvalidRequestException();
         return product;
     }
