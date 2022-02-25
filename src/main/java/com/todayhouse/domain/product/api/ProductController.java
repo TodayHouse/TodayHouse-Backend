@@ -3,6 +3,7 @@ package com.todayhouse.domain.product.api;
 import com.todayhouse.domain.product.application.ProductService;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
+import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.dto.response.ProductSaveResponse;
@@ -27,9 +28,11 @@ public class ProductController {
         return new BaseResponse(new ProductSaveResponse(product));
     }
 
+    //?page=0&size=4&sort=price,DESC&sort=id,DESC 형식으로 작성
     @GetMapping
-    public BaseResponse findProductsPagination(Pageable pageable) {
-        Page<ProductResponse> products = productService.findAll(pageable);
+    public BaseResponse findProductsPagination(@RequestBody(required = false) ProductSearchRequest productSearch,
+                                               Pageable pageable) {
+        Page<ProductResponse> products = productService.findAll(productSearch, pageable);
         return new BaseResponse(products);
     }
 

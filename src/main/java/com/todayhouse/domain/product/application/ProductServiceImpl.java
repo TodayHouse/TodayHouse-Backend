@@ -4,6 +4,7 @@ import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
+import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
@@ -41,8 +42,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> findAll(Pageable pageable) {
-        Page<ProductResponse> response = customProductRepository.findAll(pageable)
+    public Page<ProductResponse> findAll(ProductSearchRequest productSearch, Pageable pageable) {
+        Page<ProductResponse> response = customProductRepository.findAll(productSearch, pageable)
                 .map(p -> new ProductResponse(p));
         return response;
     }

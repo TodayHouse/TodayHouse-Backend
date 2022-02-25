@@ -2,6 +2,7 @@ package com.todayhouse.domain.product.dao;
 
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,21 +34,23 @@ class ProductRepositoryTest extends DataJpaBase {
     void preSet() {
         Seller seller = Seller.builder().email("seller@email.com").brand("house").build();
         sellerRepository.save(seller);
-        Product product1 = Product.builder().title("p1").seller(seller).build();
-        Product product2 = Product.builder().title("p2").seller(seller).build();
-        Product product3 = Product.builder().title("p3").seller(seller).build();
+        Product product1 = Product.builder().price(1000).title("p1").seller(seller).build();
+        Product product2 = Product.builder().price(2000).title("p2").seller(seller).build();
+        Product product3 = Product.builder().price(3000).title("p3").seller(seller).build();
         productRepository.save(product1);
         productRepository.save(product2);
         productRepository.save(product3);
     }
 
     @Test
-    void product_페이징() {
+    void 가격_2000_이상_product_페이징() {
         PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
-        Page<Product> page = customProductRepository.findAll(pageRequest);
+        ProductSearchRequest productSearch = ProductSearchRequest.builder().priceFrom(2000).build();
+        Page<Product> page = customProductRepository.findAll(productSearch, pageRequest);
 
-        assertThat(page.getTotalPages()).isEqualTo(2);
-        assertThat(page.getTotalElements()).isEqualTo(3);
+        System.out.println(page.getContent());
+        assertThat(page.getTotalPages()).isEqualTo(1);
+        assertThat(page.getTotalElements()).isEqualTo(2);
         List<Product> products = page.getContent();
         LocalDateTime time = LocalDateTime.now();
         for (Product p : products) {

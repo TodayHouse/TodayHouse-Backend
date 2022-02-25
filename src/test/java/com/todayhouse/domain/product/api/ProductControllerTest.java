@@ -76,7 +76,9 @@ class ProductControllerTest extends IntegrationBase {
     void saveProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
-        ProductSaveRequest request = ProductSaveRequest.builder().title("new").build();
+        ProductSaveRequest request = ProductSaveRequest.builder()
+                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).image("img.jpg")
+                .build();
 
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
