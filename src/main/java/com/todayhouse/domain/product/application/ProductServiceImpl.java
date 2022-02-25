@@ -20,8 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -55,7 +53,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product updateProduct(ProductUpdateRequest request) {
-        // jwt의 email과 product를 등록한 user의 email이 같은지 확인
         Product product = getValidProduct(request.getId());
         product.updateProduct(request);
         return productRepository.save(product);
@@ -68,7 +65,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // product의 seller와 user의 seller가 같은지 확인
-    private Product getValidProduct(Long id){
+    private Product getValidProduct(Long id) {
         String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(jwtEmail).orElseThrow(UserNotFoundException::new);
         Product product = productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
