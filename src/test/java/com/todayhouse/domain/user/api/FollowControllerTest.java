@@ -63,9 +63,6 @@ class FollowControllerTest extends IntegrationBase {
         followRepository.save(Follow.builder().from(user1).to(user2).build());
         followRepository.save(Follow.builder().from(user1).to(user3).build());
         followRepository.save(Follow.builder().from(user1).to(user4).build());
-
-        System.out.println(userRepository.findAll());
-        System.out.println(followRepository.findAll());
     }
 
     @Test

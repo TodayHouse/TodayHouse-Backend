@@ -64,14 +64,12 @@ class FollowRepositoryTest {
         Follow follow = Follow.builder().from(user1).to(user2).build();
         em.persist(follow);
         em.flush();
-        System.out.println(follow.getId());
 
         //then
         Follow find = em.getEntityManager()
                 .createQuery("select f from Follow f where f.from.id = :from and f.to.id = :to", Follow.class)
                 .setParameter("from", user1.getId())
                 .setParameter("to", user2.getId()).getSingleResult();
-        System.out.println(find.getId());
         assertThat(find).isEqualTo(follow);
     }
 

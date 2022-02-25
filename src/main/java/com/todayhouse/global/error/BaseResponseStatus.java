@@ -27,7 +27,7 @@ public enum BaseResponseStatus {
     INVALID_AUTH_EMAIL(false, 2014, "인증받지 않은 이메일입니다."),
     INVALID_GUEST_EMAIL(false, 2015, ""),
     INVALID_EMAIL_TOKEN(false, 2016, "유효하지 않은 코드입니다."),
-
+    SELLER_EXIST(false, 2017, "이미 입점한 유저입니다."),
 
     // product
     POST_PRODUCT_EMPTY_BRAND(false, 2100, "브랜드명을 입력해주세요."),
