@@ -2,7 +2,10 @@ package com.todayhouse.domain.user.domain;
 
 import com.todayhouse.domain.user.dto.request.SellerRequest;
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,12 +19,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Entity
 @Getter
-@ToString
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Entity
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,7 +63,8 @@ public class User implements UserDetails {
     @Builder.Default
     private List<Role> roles = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "seller_id")
     private Seller seller;
 
     @Override
@@ -117,7 +120,7 @@ public class User implements UserDetails {
         this.password = new BCryptPasswordEncoder().encode(password);
     }
 
-    public void createSeller(SellerRequest request){
+    public void createSeller(SellerRequest request) {
         Seller seller = request.toEntity();
         this.seller = seller;
     }

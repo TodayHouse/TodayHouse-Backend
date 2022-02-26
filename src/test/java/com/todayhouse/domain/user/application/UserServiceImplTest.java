@@ -11,6 +11,7 @@ import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.exception.SignupPasswordException;
 import com.todayhouse.domain.user.exception.WrongPasswordException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,11 @@ class UserServiceImplTest {
     JwtTokenProvider jwtTokenProvider;
     @Mock
     EmailVerificationTokenRepository emailVerificationTokenRepository;
+
+    @AfterEach
+    public void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     @DisplayName("존재하는 email인지 확인")
@@ -134,7 +140,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("비밀번호 변경")
-    void passwordUpdate(){
+    void passwordUpdate() {
         String email = "test@test.com";
         PasswordUpdateRequest request = PasswordUpdateRequest.builder()
                 .password1("abcde").password2("abcde")
@@ -144,17 +150,17 @@ class UserServiceImplTest {
         checkEmailInvalidation(email);
 
         userService.updatePassword(request);
-        assertThat(new BCryptPasswordEncoder().matches(request.getPassword1(),user.getPassword())).isTrue();
+        assertThat(new BCryptPasswordEncoder().matches(request.getPassword1(), user.getPassword())).isTrue();
     }
 
     @Test
     @DisplayName("비밀번호 확인이 다름")
-    void passwordError(){
+    void passwordError() {
         String email = "test@test.com";
         PasswordUpdateRequest request = PasswordUpdateRequest.builder()
                 .password1("abcde").password2("abcdea")
                 .build();
-        assertThrows(SignupPasswordException.class, ()-> userService.updatePassword(request));
+        assertThrows(SignupPasswordException.class, () -> userService.updatePassword(request));
     }
 
     private void checkEmailInvalidation(String email) {

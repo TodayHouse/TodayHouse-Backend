@@ -6,7 +6,6 @@ import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.dto.response.UserFindResponse;
-import com.todayhouse.domain.user.dto.response.UserLoginResponse;
 import com.todayhouse.domain.user.dto.response.UserSignupResponse;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import com.todayhouse.global.common.BaseResponse;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.security.Principal;
 
 @Slf4j
 @RestController
