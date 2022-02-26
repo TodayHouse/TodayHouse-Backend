@@ -17,6 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -26,6 +29,7 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -103,13 +107,15 @@ class UserServiceImplTest {
         String email = "test@test.com";
         String jwt = "jwt";
         UserLoginRequest request = UserLoginRequest.builder().email(email).password("12345").build();
-        User findUser = User.builder().email(email).password("12345")
+        User findUser = User.builder().id(1L).email(email).password("12345")
                 .roles(Collections.singletonList(Role.USER)).build();
+
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
         when(passwordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(true);
         when(jwtTokenProvider.createToken(eq(email), anyList())).thenReturn(jwt);
 
-        assertThat(userService.login(request)).isEqualTo(jwt);
+        assertThat(userService.login(request).getId()).isEqualTo(findUser.getId());
+        assertThat(userService.login(request).getAccessToken()).isEqualTo(jwt);
     }
 
     @Test
@@ -119,6 +125,7 @@ class UserServiceImplTest {
         UserLoginRequest request = UserLoginRequest.builder().email(email).password("12345").build();
         User findUser = User.builder().email(email).password("12345")
                 .roles(Collections.singletonList(Role.USER)).build();
+
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
         when(passwordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(false);
 
@@ -134,8 +141,9 @@ class UserServiceImplTest {
                 .build();
         User user = User.builder().password("123456").build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(user));
+        checkEmailInvalidation(email);
 
-        userService.updatePassword(email, request);
+        userService.updatePassword(request);
         assertThat(new BCryptPasswordEncoder().matches(request.getPassword1(),user.getPassword())).isTrue();
     }
 
@@ -146,7 +154,14 @@ class UserServiceImplTest {
         PasswordUpdateRequest request = PasswordUpdateRequest.builder()
                 .password1("abcde").password2("abcdea")
                 .build();
+        assertThrows(SignupPasswordException.class, ()-> userService.updatePassword(request));
+    }
 
-        assertThrows(SignupPasswordException.class, ()-> userService.updatePassword(email, request));
+    private void checkEmailInvalidation(String email) {
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(securityContext.getAuthentication().getName()).thenReturn(email);
+        SecurityContextHolder.setContext(securityContext);
     }
 }
