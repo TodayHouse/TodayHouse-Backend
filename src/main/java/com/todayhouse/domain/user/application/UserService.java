@@ -4,6 +4,7 @@ import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
+import com.todayhouse.domain.user.dto.response.UserLoginResponse;
 
 import java.util.Optional;
 
@@ -16,7 +17,7 @@ public interface UserService {
 
     User saveUser(UserSignupRequest request);
 
-    String login(UserLoginRequest request);
+    UserLoginResponse login(UserLoginRequest request);
 
-    void updatePassword(String email, PasswordUpdateRequest request);
+    void updatePassword(PasswordUpdateRequest request);
 }

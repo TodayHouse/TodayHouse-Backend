@@ -6,7 +6,6 @@ import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.dto.response.UserFindResponse;
-import com.todayhouse.domain.user.dto.response.UserLoginResponse;
 import com.todayhouse.domain.user.dto.response.UserSignupResponse;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import com.todayhouse.global.common.BaseResponse;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.security.Principal;
 
 @Slf4j
 @RestController
@@ -62,14 +60,13 @@ public class UserController {
     // 로그인
     @PostMapping("/login")
     public BaseResponse login(@Valid @RequestBody UserLoginRequest request) {
-        UserLoginResponse response = new UserLoginResponse(userService.login(request));
-        return new BaseResponse(response);
+        return new BaseResponse(userService.login(request));
     }
 
     @PutMapping("/password/new")
-    public BaseResponse updatePassword(@Valid @RequestBody PasswordUpdateRequest request, Principal principal,
+    public BaseResponse updatePassword(@Valid @RequestBody PasswordUpdateRequest request,
                                        HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-        userService.updatePassword(principal.getName(), request);
+        userService.updatePassword(request);
         CookieUtils.deleteCookie(servletRequest, servletResponse, "auth_user");
         return new BaseResponse();
     }
