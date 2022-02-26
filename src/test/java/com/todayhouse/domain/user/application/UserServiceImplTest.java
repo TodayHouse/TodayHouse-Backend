@@ -11,6 +11,7 @@ import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.exception.SignupPasswordException;
 import com.todayhouse.domain.user.exception.WrongPasswordException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,11 @@ class UserServiceImplTest {
     JwtTokenProvider jwtTokenProvider;
     @Mock
     EmailVerificationTokenRepository emailVerificationTokenRepository;
+
+    @AfterEach
+    public void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     @DisplayName("존재하는 email인지 확인")

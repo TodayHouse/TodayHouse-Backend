@@ -7,5 +7,6 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class UserLoginResponse {
+    Long id;
     String accessToken;
 }
