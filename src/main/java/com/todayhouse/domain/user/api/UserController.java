@@ -62,14 +62,13 @@ public class UserController {
     // 로그인
     @PostMapping("/login")
     public BaseResponse login(@Valid @RequestBody UserLoginRequest request) {
-        UserLoginResponse response = new UserLoginResponse(userService.login(request));
-        return new BaseResponse(response);
+        return new BaseResponse(userService.login(request));
     }
 
     @PutMapping("/password/new")
-    public BaseResponse updatePassword(@Valid @RequestBody PasswordUpdateRequest request, Principal principal,
+    public BaseResponse updatePassword(@Valid @RequestBody PasswordUpdateRequest request,
                                        HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-        userService.updatePassword(principal.getName(), request);
+        userService.updatePassword(request);
         CookieUtils.deleteCookie(servletRequest, servletResponse, "auth_user");
         return new BaseResponse();
     }

@@ -75,8 +75,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             targetUri = SNS_SIGNUP_URL;
         } else { // 이미 가입한 유저
             if (attributes.get("authProvider").equals(attributes.get("signupProvider"))) { // 로그인
+                String id = (String) attributes.get("houseId");
                 String jwt = tokenProvider.createToken(oAuthAttributes.getEmail(), roles);
-                CookieUtils.addNormalCookie(response, "access_token", jwt, 10);
+                CookieUtils.addNormalCookie(response, "access_token", jwt, 30);
+                CookieUtils.addNormalCookie(response, "id", id, 30);
             } else { // 중복 회원 가입 시 에러 페이지
                 targetUri = ERROR_URL + "?email=" + oAuthAttributes.getEmail() + "&provider=" + attributes.get("signupProvider");
             }
