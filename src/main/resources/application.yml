@@ -9,14 +9,16 @@
     console:
       enabled: true
   jpa:
-    show-sql: true
     hibernate:
       ddl-auto: create
     database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      show-sql: true
+      format-sql: true
   servlet:
     multipart:
       max-file-size: 10MB
-      max-request-size: 10MB
+      max-request-size: 20MB
   session:
     store-type: jdbc
     jdbc:
