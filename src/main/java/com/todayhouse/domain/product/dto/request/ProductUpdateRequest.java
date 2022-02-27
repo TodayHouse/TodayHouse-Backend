@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ProductUpdateRequest {
-    @NotNull
+    @NotNull(message = "id를 입력해주세요.")
     private Long id;
     private String title;
     private String image;

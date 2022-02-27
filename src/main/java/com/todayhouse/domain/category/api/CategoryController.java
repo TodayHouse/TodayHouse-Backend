@@ -42,6 +42,6 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public BaseResponse deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
-        return new BaseResponse();
+        return new BaseResponse("삭제되었습니다.");
     }
 }
