@@ -96,7 +96,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void 특정_카테고리_찾기(){
+    void 특정_카테고리_찾기() {
         Category c1 = Category.builder().name("c1").build();
         Category c2 = Category.builder().name("c2").build();
         Category c3 = Category.builder().name("c3").parent(c2).build();

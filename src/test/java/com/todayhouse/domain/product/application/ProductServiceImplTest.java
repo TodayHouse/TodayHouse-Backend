@@ -5,23 +5,20 @@ import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
-import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
-import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.LinkedList;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -114,7 +111,7 @@ class ProductServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
     }
 
-    private Product getValidProduct(Long id){
+    private Product getValidProduct(Long id) {
         String email = "email@test.com";
         SecurityContextSetting(email);
         Seller seller = Seller.builder().build();

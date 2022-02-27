@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,7 +60,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @PostConstruct
-    public void perCategory(){
+    public void perCategory() {
         Category 가구 = Category.builder().name("가구").build();
         Category 가전 = Category.builder().name("가전").build();
         Category 생필품 = Category.builder().name("생필품").build();

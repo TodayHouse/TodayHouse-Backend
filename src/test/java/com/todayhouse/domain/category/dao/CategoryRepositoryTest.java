@@ -23,7 +23,7 @@ class CategoryRepositoryTest extends DataJpaBase {
     TestEntityManager em;
 
     @BeforeAll
-    void setUp(){
+    void setUp() {
         categoryRepository.deleteAll();
     }
 
@@ -53,7 +53,7 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void category_수정(){
+    void category_수정() {
         Category par = Category.builder().name("par").build();
         Category ch = Category.builder().name("ch").parent(par).build();
 
@@ -67,7 +67,7 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void category_찾기(){
+    void category_찾기() {
         Category par = Category.builder().name("par").build();
         Category ch = Category.builder().name("ch").parent(par).build();
 
@@ -76,12 +76,12 @@ class CategoryRepositoryTest extends DataJpaBase {
         em.clear();
 
         List<Category> all = categoryRepository.findAll();
-        assertTrue(all.stream().anyMatch(c->c.getName().equals("par")));
-        assertTrue(all.stream().anyMatch(c->c.getName().equals("ch")));
+        assertTrue(all.stream().anyMatch(c -> c.getName().equals("par")));
+        assertTrue(all.stream().anyMatch(c -> c.getName().equals("ch")));
     }
 
     @Test
-    void category_name으로_찾기(){
+    void category_name으로_찾기() {
         Category par = Category.builder().name("par").build();
         em.persist(par);
         em.flush();
@@ -92,7 +92,7 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void 같은_이름의_category_확인(){
+    void 같은_이름의_category_확인() {
         Category par = Category.builder().name("par").build();
         em.persist(par);
         em.flush();
@@ -104,7 +104,7 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void category_이름으로_삭제(){
+    void category_이름으로_삭제() {
         Category par = Category.builder().name("par").build();
         em.persist(par);
         em.flush();
@@ -113,11 +113,11 @@ class CategoryRepositoryTest extends DataJpaBase {
         categoryRepository.deleteByName("par");
 
         List<Category> categories = em.getEntityManager().createQuery("select c from Category c", Category.class).getResultList();
-        assertEquals(0,categories.size());
+        assertEquals(0, categories.size());
     }
 
     @Test
-    void depth로_찾기(){
+    void depth로_찾기() {
         Category par = Category.builder().name("par").build();
         Category ch = Category.builder().name("ch").parent(par).build();
 

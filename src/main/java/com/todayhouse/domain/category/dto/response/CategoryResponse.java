@@ -3,7 +3,6 @@ package com.todayhouse.domain.category.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.todayhouse.domain.category.domain.Category;
 import lombok.*;
-import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
 import java.util.stream.Collectors;

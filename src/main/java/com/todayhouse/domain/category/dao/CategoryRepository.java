@@ -8,7 +8,10 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findByName(String name);
+
     List<Category> findByDepth(int depth);
+
     boolean existsByName(String name);
+
     void deleteByName(String name);
 }

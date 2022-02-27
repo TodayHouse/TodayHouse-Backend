@@ -32,7 +32,7 @@ public class ProductSaveRequest {
 
     private String productDetail;
 
-    public Product toEntity(Seller seller){
+    public Product toEntity(Seller seller) {
         return Product.builder()
                 .title(this.title)
                 .image(this.image)

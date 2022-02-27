@@ -1,6 +1,5 @@
 package com.todayhouse;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.global.common.BaseResponse;
 import org.springframework.beans.factory.annotation.Autowired;

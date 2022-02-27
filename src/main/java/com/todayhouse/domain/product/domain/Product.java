@@ -79,7 +79,7 @@ public class Product {
     }
 
     public void setSeller(Seller seller) {
-        if(seller == null)
+        if (seller == null)
             throw new SellerNotSettingException();
         if (this.seller != null) return;
         this.seller = seller;
@@ -87,7 +87,7 @@ public class Product {
         seller.getProducts().add(this);
     }
 
-    public void updateProduct(ProductUpdateRequest request){
+    public void updateProduct(ProductUpdateRequest request) {
         this.title = request.getTitle();
         this.image = request.getImage();
         this.price = request.getPrice();
