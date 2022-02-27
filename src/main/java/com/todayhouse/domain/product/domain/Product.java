@@ -1,5 +1,6 @@
 package com.todayhouse.domain.product.domain;
 
+import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.exception.SellerNotSettingException;
 import com.todayhouse.domain.user.domain.Seller;
@@ -55,7 +56,12 @@ public class Product {
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "seller_id")
-    Seller seller;
+    private Seller seller;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee,
