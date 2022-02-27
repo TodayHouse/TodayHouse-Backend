@@ -11,5 +11,5 @@ import javax.validation.constraints.NotEmpty;
 public class CategorySaveRequest {
     @NotEmpty(message = "카테고리 이름을 입력해주세요.")
     private String name;
-    private String parentName;
+    private Long parentId;
 }

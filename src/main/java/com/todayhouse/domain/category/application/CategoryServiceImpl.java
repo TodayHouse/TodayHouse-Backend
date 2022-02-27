@@ -26,8 +26,8 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.existsByName(request.getName()))
             throw new CategoryExistException();
 
-        Category par = request.getParentName() == null ?
-                null : categoryRepository.findByName(request.getParentName()).orElseThrow(CategoryNotFoundException::new);
+        Category par = request.getParentId() == null ?
+                null : categoryRepository.findById(request.getParentId()).orElseThrow(CategoryNotFoundException::new);
         Category child = Category.builder().name(request.getName()).parent(par).build();
 
         return categoryRepository.save(child);
@@ -35,14 +35,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category updateCategory(CategoryUpdateRequest request) {
-        Category category = categoryRepository.findByName(request.getName()).orElseThrow(CategoryNotFoundException::new);
+        Category category = categoryRepository.findById(request.getId()).orElseThrow(CategoryNotFoundException::new);
         category.updateName(request.getChangeName());
         return category;
     }
 
     @Override
-    public void deleteCategory(String name) {
-        categoryRepository.deleteByName(name);
+    public void deleteCategory(Long id) {
+        categoryRepository.deleteById(id);
     }
 
     @Override
@@ -56,6 +56,12 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponse findAllByName(String name) {
         Category category = categoryRepository.findByName(name).orElseThrow(CategoryNotFoundException::new);
+        return new CategoryResponse(category);
+    }
+
+    @Override
+    public CategoryResponse findAllById(Long id) {
+        Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFoundException::new);
         return new CategoryResponse(category);
     }
 

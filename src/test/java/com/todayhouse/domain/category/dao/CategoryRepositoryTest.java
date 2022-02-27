@@ -104,13 +104,13 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void category_이름으로_삭제() {
+    void category_Id로_삭제() {
         Category par = Category.builder().name("par").build();
         em.persist(par);
         em.flush();
         em.clear();
 
-        categoryRepository.deleteByName("par");
+        categoryRepository.deleteById(par.getId());
 
         List<Category> categories = em.getEntityManager().createQuery("select c from Category c", Category.class).getResultList();
         assertEquals(0, categories.size());

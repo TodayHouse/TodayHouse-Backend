@@ -12,6 +12,4 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findByDepth(int depth);
 
     boolean existsByName(String name);
-
-    void deleteByName(String name);
 }

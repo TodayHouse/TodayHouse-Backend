@@ -28,9 +28,9 @@ public class CategoryController {
     }
 
     // 해당 카테고리의 모든 하위 카테고리
-    @GetMapping("/{name}")
-    public BaseResponse findSubAll(@PathVariable String name) {
-        return new BaseResponse(categoryService.findAllByName(name));
+    @GetMapping("/{id}")
+    public BaseResponse findSubAll(@PathVariable Long id) {
+        return new BaseResponse(categoryService.findAllById(id));
     }
 
     @PatchMapping
@@ -39,9 +39,9 @@ public class CategoryController {
         return new BaseResponse(new CategoryUpdateResponse(category));
     }
 
-    @DeleteMapping("/{name}")
-    public BaseResponse deleteCategory(@PathVariable String name) {
-        categoryService.deleteCategory(name);
+    @DeleteMapping("/{id}")
+    public BaseResponse deleteCategory(@PathVariable Long id) {
+        categoryService.deleteCategory(id);
         return new BaseResponse();
     }
 }

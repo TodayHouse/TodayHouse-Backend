@@ -46,10 +46,10 @@ class CategoryServiceImplTest {
 
     @Test
     void 잘못된_부모_카테고리() {
-        CategorySaveRequest request = CategorySaveRequest.builder().name("c1").parentName("p1").build();
+        CategorySaveRequest request = CategorySaveRequest.builder().name("c1").parentId(1L).build();
 
         when(categoryRepository.existsByName("c1")).thenReturn(false);
-        when(categoryRepository.findByName("p1")).thenReturn(Optional.ofNullable(null));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(null));
 
         assertThrows(CategoryNotFoundException.class, () -> categoryService.addCategory(request));
     }
@@ -57,9 +57,9 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("category 업데이트")
     void updateCategory() {
-        CategoryUpdateRequest request = CategoryUpdateRequest.builder().name("old").changeName("new").build();
+        CategoryUpdateRequest request = CategoryUpdateRequest.builder().id(1L).changeName("new").build();
         Category old = Category.builder().name("old").build();
-        when(categoryRepository.findByName("old")).thenReturn(Optional.ofNullable(old));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(old));
 
         Category category = categoryService.updateCategory(request);
         assertThat(category.getName()).isEqualTo("new");
@@ -69,11 +69,11 @@ class CategoryServiceImplTest {
     @DisplayName("category 삭제")
     void deleteCategory() {
         String name = "c";
-        doNothing().when(categoryRepository).deleteByName(name);
+        doNothing().when(categoryRepository).deleteById(anyLong());
 
-        categoryService.deleteCategory(name);
+        categoryService.deleteCategory(1L);
 
-        verify(categoryRepository).deleteByName(name);
+        verify(categoryRepository).deleteById(anyLong());
     }
 
     @Test

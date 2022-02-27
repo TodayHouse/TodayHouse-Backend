@@ -36,13 +36,15 @@ class CategoryControllerTest extends IntegrationBase {
     @Autowired
     ObjectMapper objectMapper;
 
+    Category p1, c1, c2, cc1;
+
     @BeforeAll
     void setUp() {
         categoryRepository.deleteAll();
-        Category p1 = Category.builder().name("p1").build();
-        Category c1 = Category.builder().name("c1").parent(p1).build();
-        Category c2 = Category.builder().name("c2").parent(p1).build();
-        Category cc1 = Category.builder().name("cc1").parent(c1).build();
+        p1 = Category.builder().name("p1").build();
+        c1 = Category.builder().name("c1").parent(p1).build();
+        c2 = Category.builder().name("c2").parent(p1).build();
+        cc1 = Category.builder().name("cc1").parent(c1).build();
 
         categoryRepository.save(p1);
     }
@@ -52,7 +54,7 @@ class CategoryControllerTest extends IntegrationBase {
     @DisplayName("새 카테고리 저장")
     void saveCategory() throws Exception {
         String url = "http://localhost:8080/categories";
-        CategorySaveRequest request = CategorySaveRequest.builder().parentName("c2").name("cc2").build();
+        CategorySaveRequest request = CategorySaveRequest.builder().parentId(c2.getId()).name("cc2").build();
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -78,7 +80,7 @@ class CategoryControllerTest extends IntegrationBase {
     @Test
     @DisplayName("특정 하위 카테고리 찾기")
     void findAllSub() throws Exception {
-        String url = "http://localhost:8080/categories/c1";
+        String url = "http://localhost:8080/categories/" + c1.getId();
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -88,7 +90,7 @@ class CategoryControllerTest extends IntegrationBase {
     @WithMockUser(roles = "ADMIN")
     @DisplayName("카테고리 수정")
     void updateCategoryName() throws Exception {
-        CategoryUpdateRequest request = CategoryUpdateRequest.builder().name("c2").changeName("newc2").build();
+        CategoryUpdateRequest request = CategoryUpdateRequest.builder().id(c2.getId()).changeName("newc2").build();
         String url = "http://localhost:8080/categories";
         MvcResult mvcResult = mockMvc.perform(patch(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -106,7 +108,7 @@ class CategoryControllerTest extends IntegrationBase {
     @WithMockUser(roles = "ADMIN")
     @DisplayName("카테고리 삭제")
     void deleteCategory() throws Exception {
-        String url = "http://localhost:8080/categories/p1";
+        String url = "http://localhost:8080/categories/" + p1.getId();
         mockMvc.perform(delete(url))
                 .andExpect(status().isOk());
 

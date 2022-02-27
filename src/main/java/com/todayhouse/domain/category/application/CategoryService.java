@@ -14,7 +14,9 @@ public interface CategoryService {
 
     CategoryResponse findAllByName(String name);
 
+    CategoryResponse findAllById(Long id);
+
     List<CategoryResponse> findAll();
 
-    void deleteCategory(String name);
+    void deleteCategory(Long id);
 }
