@@ -50,6 +50,10 @@ public enum BaseResponseStatus {
     INVALID_AUTH(false, 2303, "올바르지 않은 권한입니다."),
     INVALID_REQUEST(false, 2304, "올바르지 않은 요청입니다."),
 
+    // category
+    SAME_CATEGORY_EXIST(false, 2404, "같은 카테고리가 존재합니다."),
+    CATEGORY_NOT_FOUND(false,2405, "해당 카테고리를 찾을 수 없습니다."),
+
     // 3000 : Database / Server 오류
     // common
     DATABASE_ERROR(false, 3000, "데이터베이스 연결에 실패하였습니다."),

@@ -94,4 +94,30 @@ class CategoryRepositoryTest extends DataJpaBase {
 
         assertTrue(flag);
     }
+
+    @Test
+    void category_이름으로_삭제(){
+        Category par = Category.builder().name("par").build();
+        em.persist(par);
+        em.flush();
+        em.clear();
+
+        categoryRepository.deleteByName("par");
+
+        List<Category> categories = em.getEntityManager().createQuery("select c from Category c", Category.class).getResultList();
+        assertEquals(0,categories.size());
+    }
+
+    @Test
+    void depth로_찾기(){
+        Category par = Category.builder().name("par").build();
+        Category ch = Category.builder().name("ch").parent(par).build();
+
+        em.persist(par);
+        em.flush();
+        em.clear();
+
+        List<Category> categories = categoryRepository.findByDepth(1);
+        assertEquals("ch", categories.get(0).getName());
+    }
 }
