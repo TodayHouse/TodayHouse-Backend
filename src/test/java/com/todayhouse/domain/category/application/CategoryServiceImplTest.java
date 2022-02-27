@@ -66,6 +66,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
+    @DisplayName("category 삭제")
     void deleteCategory() {
         String name = "c";
         doNothing().when(categoryRepository).deleteByName(name);
@@ -76,6 +77,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
+    @DisplayName("모든 category 찾기")
     void findAll() {
         Category c1 = Category.builder().name("c1").build();
         Category c2 = Category.builder().name("c2").build();
@@ -91,5 +93,22 @@ class CategoryServiceImplTest {
         assertTrue(find.stream().anyMatch(c -> c.getName().equals("c1")));
         assertTrue(find.stream().anyMatch(c -> c.getName().equals("c2") &&
                 c.getSubCategory().get(0).getName().equals("c3")));
+    }
+
+    @Test
+    void 특정_카테고리_찾기(){
+        Category c1 = Category.builder().name("c1").build();
+        Category c2 = Category.builder().name("c2").build();
+        Category c3 = Category.builder().name("c3").parent(c2).build();
+        List<Category> list = new ArrayList<>();
+        list.add(c1);
+        list.add(c2);
+        list.add(c3);
+
+        when(categoryRepository.findByName("c2")).thenReturn(Optional.ofNullable(c2));
+
+        CategoryResponse find = categoryService.findAllByName("c2");
+        assertThat(find.getName()).isEqualTo("c2");
+        assertThat(find.getSubCategory().get(0).getName()).isEqualTo("c3");
     }
 }

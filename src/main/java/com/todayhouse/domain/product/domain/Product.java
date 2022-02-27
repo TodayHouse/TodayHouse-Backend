@@ -65,7 +65,7 @@ public class Product {
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee,
-                   boolean specialPrice, String productDetail, int sales, Seller seller) {
+                   boolean specialPrice, String productDetail, int sales, Seller seller, Category category) {
         this.title = title;
         this.image = image;
         this.price = price;
@@ -74,6 +74,7 @@ public class Product {
         this.specialPrice = specialPrice;
         this.productDetail = productDetail;
         this.sales = sales;
+        this.category = category;
         setSeller(seller);
     }
 

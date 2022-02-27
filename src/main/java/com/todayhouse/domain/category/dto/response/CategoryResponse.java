@@ -21,8 +21,9 @@ public class CategoryResponse {
     public CategoryResponse(Category category) {
         this.id = category.getId();
         this.name = category.getName();
-        if (!category.getChildren().isEmpty())
+        if (!category.getChildren().isEmpty()) {
             this.subCategory = category.getChildren().stream()
                     .map(c -> new CategoryResponse(c)).collect(Collectors.toList());
+        }
     }
 }

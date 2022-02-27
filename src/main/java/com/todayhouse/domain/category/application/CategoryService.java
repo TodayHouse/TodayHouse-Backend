@@ -10,6 +10,7 @@ import java.util.List;
 public interface CategoryService {
     Category addCategory(CategorySaveRequest request);
     Category updateCategory(CategoryUpdateRequest request);
+    CategoryResponse findAllByName(String name);
     List<CategoryResponse> findAll();
     void deleteCategory(String name);
 }

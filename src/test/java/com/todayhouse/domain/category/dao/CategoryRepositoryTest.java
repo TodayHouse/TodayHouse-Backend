@@ -2,7 +2,9 @@ package com.todayhouse.domain.category.dao;
 
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.category.domain.Category;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
@@ -11,6 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)//@BeforeAll 사용
 class CategoryRepositoryTest extends DataJpaBase {
 
     @Autowired
@@ -18,6 +21,11 @@ class CategoryRepositoryTest extends DataJpaBase {
 
     @Autowired
     TestEntityManager em;
+
+    @BeforeAll
+    void setUp(){
+        categoryRepository.deleteAll();
+    }
 
     @Test
     void category_저장() {
