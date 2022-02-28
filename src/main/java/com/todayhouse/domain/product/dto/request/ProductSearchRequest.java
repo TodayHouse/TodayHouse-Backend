@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 public class ProductSearchRequest {
     private String brand;
+    private Long categoryId;
     private Integer priceFrom;
     private Integer priceTo;
     private boolean deliveryFee;

@@ -30,6 +30,7 @@ public class ProductController {
     }
 
     //?page=0&size=4&sort=price,DESC&sort=id,DESC 형식으로 작성
+    //ProductSearchRequest은 선택사항
     @GetMapping
     public BaseResponse findProductsPagination(@RequestBody(required = false) ProductSearchRequest productSearch,
                                                Pageable pageable) {

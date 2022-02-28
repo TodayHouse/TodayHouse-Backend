@@ -19,4 +19,5 @@ public class ProductUpdateRequest {
     private boolean specialPrice;
     private String productDetail;
     private int sales;
+    private Long categoryId;
 }

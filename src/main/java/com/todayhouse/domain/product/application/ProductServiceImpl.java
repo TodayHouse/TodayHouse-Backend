@@ -1,5 +1,8 @@
 package com.todayhouse.domain.product.application;
 
+import com.todayhouse.domain.category.dao.CategoryRepository;
+import com.todayhouse.domain.category.domain.Category;
+import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
@@ -26,16 +29,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
     private final CustomProductRepository customProductRepository;
 
     @Override
     public Product saveProductRequest(ProductSaveRequest request) {
+        Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(CategoryNotFoundException::new);
         // jwt로 seller 찾기
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         if (user.getSeller() == null)
             throw new SellerNotFoundException();
-        Product product = request.toEntity(user.getSeller());
+        Product product = request.toEntity(user.getSeller(), category);
         return productRepository.save(product);
     }
 
@@ -53,8 +58,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product updateProduct(ProductUpdateRequest request) {
+        Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(CategoryNotFoundException::new);
         Product product = getValidProduct(request.getId());
-        product.updateProduct(request);
+        product.updateProduct(request, category);
         return productRepository.save(product);
     }
 

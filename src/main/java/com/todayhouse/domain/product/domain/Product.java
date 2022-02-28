@@ -87,7 +87,7 @@ public class Product {
         seller.getProducts().add(this);
     }
 
-    public void updateProduct(ProductUpdateRequest request) {
+    public void updateProduct(ProductUpdateRequest request, Category category) {
         this.title = request.getTitle();
         this.image = request.getImage();
         this.price = request.getPrice();
@@ -96,6 +96,7 @@ public class Product {
         this.specialPrice = request.isSpecialPrice();
         this.productDetail = request.getProductDetail();
         this.sales = request.getSales();
+        this.category = category;
     }
 
     @Override

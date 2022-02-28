@@ -2,6 +2,9 @@ package com.todayhouse.domain.product.dao;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.JPQLQuery;
+import com.todayhouse.domain.category.domain.Category;
+import com.todayhouse.domain.category.domain.QCategory;
+import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.domain.QProduct;
 import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
@@ -11,6 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class ProductRepositoryImpl extends QuerydslRepositorySupport
@@ -54,5 +58,31 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
             query.where(qProduct.deliveryFee.gt(0));
         if (productSearch.isSpecialPrice())
             query.where(qProduct.specialPrice.isTrue());
+
+        List<Long> ids = getCategoryIds(productSearch.getCategoryId());
+
+        if (ids != null)
+            query.where(qProduct.category.id.in(ids));
     }
+
+    private List<Long> getCategoryIds(Long categoryId) {
+        if (categoryId == null) return null;
+
+        QCategory qCategory = QCategory.category;
+
+        Category category = from(qCategory).where(qCategory.id.eq(categoryId)).fetchOne();
+        if (category == null) throw new CategoryNotFoundException();
+
+        List<Long> ids = new LinkedList<>();
+        getIds(category, ids);
+        return ids;
+    }
+
+    private void getIds(Category category, List<Long> ids) {
+        ids.add(category.getId());
+        for (Category c : category.getChildren()) {
+            getIds(c, ids);
+        }
+    }
+
 }

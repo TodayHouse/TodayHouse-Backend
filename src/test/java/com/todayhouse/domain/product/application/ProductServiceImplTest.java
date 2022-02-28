@@ -1,5 +1,7 @@
 package com.todayhouse.domain.product.application;
 
+import com.todayhouse.domain.category.dao.CategoryRepository;
+import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
@@ -40,6 +42,9 @@ class ProductServiceImplTest {
     @Mock
     CustomProductRepository customProductRepository;
 
+    @Mock
+    CategoryRepository categoryRepository;
+
     @AfterEach
     public void clearSecurityContext() {
         SecurityContextHolder.clearContext();
@@ -53,8 +58,9 @@ class ProductServiceImplTest {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
         User user = User.builder().email(email).seller(seller).build();
-        ProductSaveRequest request = ProductSaveRequest.builder().build();
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).build();
 
+        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
@@ -75,6 +81,7 @@ class ProductServiceImplTest {
 //    }
 
     @Test
+    @DisplayName("product id로 찾기")
     void findOne() {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
@@ -85,15 +92,18 @@ class ProductServiceImplTest {
     }
 
     @Test
+    @DisplayName("product 수정")
     void updateProduct() {
-        ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).build();
+        ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).categoryId(1L).build();
         Product product = getValidProduct(request.getId());
+        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(productRepository.save(product)).thenReturn(product);
 
         assertThat(productService.updateProduct(request)).isEqualTo(product);
     }
 
     @Test
+    @DisplayName("product id로 삭제")
     void removeProduct() {
         getValidProduct(1L);
         doNothing().when(productRepository).deleteById(1L);
