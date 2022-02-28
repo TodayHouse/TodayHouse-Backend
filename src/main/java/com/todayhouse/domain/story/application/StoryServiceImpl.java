@@ -10,7 +10,7 @@ import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
 import com.todayhouse.domain.story.exception.StoryNotFoundException;
 import com.todayhouse.domain.user.application.CustomUserDetailService;
 import com.todayhouse.domain.user.domain.User;
-import com.todayhouse.infra.S3Storage.service.FileUploadService;
+import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class StoryServiceImpl implements StoryService{
 
     private final StoryRepository storyRepository;
-    private final FileUploadService fileUploadService;
+    private final FileService fileService;
     private final ImageService imageService;
     private final CustomUserDetailService customUserDetailService;
 
@@ -35,7 +35,7 @@ public class StoryServiceImpl implements StoryService{
     public Long save(List<MultipartFile> multipartFile, StoryCreateRequest request) {
         List<String> fileName = new ArrayList<>();
         if (!multipartFile.isEmpty()){
-            fileName = fileUploadService.upload(multipartFile);
+            fileName = fileService.upload(multipartFile);
         }
         User user = (User) customUserDetailService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         Long id = storyRepository.save(request.toEntity(user)).getId();
@@ -45,19 +45,23 @@ public class StoryServiceImpl implements StoryService{
 
     @Override
     public StoryGetDetailResponse findById(Long id){
-        return new StoryGetDetailResponse(getStory(id));
+        return new StoryGetDetailResponse(this.getStory(id));
     }
 
-    @Override
-    public Story getStory(Long id) {
+    private Story getStory(Long id) {
         return storyRepository.findById(id).orElseThrow(StoryNotFoundException::new);
     }
 
     @Override
     public List<StoryGetListResponse> findAllDesc() {
         return storyRepository.findAllByOrderByIdDesc().stream()
-                .map(StoryGetListResponse::new)
+                .map(story -> new StoryGetListResponse(story, imageService.getThumbnailUrl(story)))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getImageInStory(Long id){
+        return this.getStory(id).getImageList().stream().map(image -> image.getFileName()).collect(Collectors.toList());
     }
 
     @Override
@@ -69,7 +73,8 @@ public class StoryServiceImpl implements StoryService{
 
     @Override
     public void delete(Long id){
-        Story story = storyRepository.findById(id).orElseThrow(StoryNotFoundException::new);
+        Story story = this.getStory(id);
+        imageService.delete(story.getImageList().stream().map(image -> image.getFileName()).collect(Collectors.toList()));
         storyRepository.delete(story);
     }
 }

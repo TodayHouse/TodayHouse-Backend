@@ -1,5 +1,6 @@
 package com.todayhouse.domain.story.domain;
 
+import com.todayhouse.domain.image.domain.Image;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseTimeEntity;
 import lombok.AccessLevel;
@@ -8,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -42,6 +45,9 @@ public class Story extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Image> imageList = new ArrayList<>();
 
     @Builder
     public Story(String title, String content, Integer liked, Category category, User user){

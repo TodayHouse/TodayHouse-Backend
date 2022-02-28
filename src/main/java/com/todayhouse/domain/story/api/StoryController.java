@@ -35,6 +35,11 @@ public class StoryController {
         return new BaseResponse<>(storyService.findAllDesc());
     }
 
+    @GetMapping("/{id}/images")
+    public BaseResponse<List<String>> getImageInStory(@PathVariable Long id){
+        return new BaseResponse<>(storyService.getImageInStory(id));
+    }
+
     @PatchMapping("/{id}")
     public BaseResponse<Long> update(@PathVariable Long id, @RequestBody StoryUpdateRequest request){
         return new BaseResponse<>(storyService.update(id, request));

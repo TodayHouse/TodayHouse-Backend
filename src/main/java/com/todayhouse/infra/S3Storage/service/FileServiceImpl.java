@@ -1,11 +1,10 @@
 package com.todayhouse.infra.S3Storage.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import com.todayhouse.global.error.BaseException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,14 +12,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.todayhouse.global.error.BaseResponseStatus.*;
 
 @RequiredArgsConstructor
 @Service
-public class FileUploadServiceImpl implements FileUploadService{
+public class FileServiceImpl implements FileService {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
@@ -56,5 +57,26 @@ public class FileUploadServiceImpl implements FileUploadService{
         } catch (StringIndexOutOfBoundsException e){
             throw new BaseException(INVALID_FILE_EXTENSION_EXCEPTION);
         }
+    }
+
+    @Override
+    public byte[] getImage(String fileName){
+        try {
+            return IOUtils.toByteArray(amazonS3.getObject(new GetObjectRequest(bucketName, fileName)).getObjectContent());
+        } catch (IOException e){
+            throw new BaseException(IMAGE_FILE_IO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public void delete(List<String> fileName){
+        ArrayList<DeleteObjectsRequest.KeyVersion> keys = new ArrayList<>();
+        fileName.forEach(file -> keys.add(new DeleteObjectsRequest.KeyVersion(file)));
+        amazonS3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(keys));
+    }
+
+    @Override
+    public void deleteOne(String fileName){
+        amazonS3.deleteObject(bucketName, fileName);
     }
 }

@@ -5,8 +5,6 @@ import com.todayhouse.domain.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import javax.validation.constraints.NotNull;
 
@@ -29,6 +27,3 @@ public class StoryCreateRequest {
                 .build();
     }
 }
-/*
-SecurityContextHolder.getContext().getAuthentication().getName()
- */

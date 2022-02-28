@@ -58,13 +58,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and()
                 .authorizeRequests() // 요청에 대한 사용권한 체크
-                .antMatchers(HttpMethod.POST, "/follows", "/sellers", "/products", "/stories")
+                .antMatchers(HttpMethod.POST, "/follows", "/sellers", "/products", "/stories/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin post 요청만 허용
-                .antMatchers(HttpMethod.DELETE, "/follows", "/products", "/stories")
+                .antMatchers(HttpMethod.DELETE, "/follows", "/products", "/stories/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin delete 요청만 허용
                 .antMatchers(HttpMethod.PUT, "/products")
                 .hasAnyRole("USER", "ADMIN")
-                .antMatchers(HttpMethod.PATCH, "/stories")
+                .antMatchers(HttpMethod.PATCH, "/stories/**")
                 .hasAnyRole("USER", "ADMIN")
                 .antMatchers("/users/password/new", "/users/signup", "/oauth2/**")
                 .hasAnyRole("GUEST") // guest 요청만 허용
