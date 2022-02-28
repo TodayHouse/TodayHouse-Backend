@@ -16,7 +16,7 @@ public class ProductSearchResponse {
     long size;
     boolean empty;
 
-    public ProductSearchResponse (Page<ProductResponse> pages){
+    public ProductSearchResponse(Page<ProductResponse> pages) {
         this.content = pages.getContent();
         this.totalElements = pages.getTotalElements();
         this.totalPages = pages.getTotalPages();

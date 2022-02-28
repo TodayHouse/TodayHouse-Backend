@@ -1,27 +1,26 @@
 package com.todayhouse.domain.product.application;
 
+import com.todayhouse.domain.category.dao.CategoryRepository;
+import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
-import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
-import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.LinkedList;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -43,6 +42,9 @@ class ProductServiceImplTest {
     @Mock
     CustomProductRepository customProductRepository;
 
+    @Mock
+    CategoryRepository categoryRepository;
+
     @AfterEach
     public void clearSecurityContext() {
         SecurityContextHolder.clearContext();
@@ -56,8 +58,9 @@ class ProductServiceImplTest {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
         User user = User.builder().email(email).seller(seller).build();
-        ProductSaveRequest request = ProductSaveRequest.builder().build();
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).build();
 
+        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
@@ -78,6 +81,7 @@ class ProductServiceImplTest {
 //    }
 
     @Test
+    @DisplayName("product id로 찾기")
     void findOne() {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
@@ -88,15 +92,18 @@ class ProductServiceImplTest {
     }
 
     @Test
+    @DisplayName("product 수정")
     void updateProduct() {
-        ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).build();
+        ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).categoryId(1L).build();
         Product product = getValidProduct(request.getId());
+        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(productRepository.save(product)).thenReturn(product);
 
         assertThat(productService.updateProduct(request)).isEqualTo(product);
     }
 
     @Test
+    @DisplayName("product id로 삭제")
     void removeProduct() {
         getValidProduct(1L);
         doNothing().when(productRepository).deleteById(1L);
@@ -114,7 +121,7 @@ class ProductServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
     }
 
-    private Product getValidProduct(Long id){
+    private Product getValidProduct(Long id) {
         String email = "email@test.com";
         SecurityContextSetting(email);
         Seller seller = Seller.builder().build();

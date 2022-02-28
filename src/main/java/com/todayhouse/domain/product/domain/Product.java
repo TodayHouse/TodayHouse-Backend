@@ -1,5 +1,6 @@
 package com.todayhouse.domain.product.domain;
 
+import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.exception.SellerNotSettingException;
 import com.todayhouse.domain.user.domain.Seller;
@@ -55,11 +56,16 @@ public class Product {
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "seller_id")
-    Seller seller;
+    private Seller seller;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee,
-                   boolean specialPrice, String productDetail, int sales, Seller seller) {
+                   boolean specialPrice, String productDetail, int sales, Seller seller, Category category) {
         this.title = title;
         this.image = image;
         this.price = price;
@@ -68,11 +74,12 @@ public class Product {
         this.specialPrice = specialPrice;
         this.productDetail = productDetail;
         this.sales = sales;
+        this.category = category;
         setSeller(seller);
     }
 
     public void setSeller(Seller seller) {
-        if(seller == null)
+        if (seller == null)
             throw new SellerNotSettingException();
         if (this.seller != null) return;
         this.seller = seller;
@@ -80,7 +87,7 @@ public class Product {
         seller.getProducts().add(this);
     }
 
-    public void updateProduct(ProductUpdateRequest request){
+    public void updateProduct(ProductUpdateRequest request, Category category) {
         this.title = request.getTitle();
         this.image = request.getImage();
         this.price = request.getPrice();
@@ -89,6 +96,7 @@ public class Product {
         this.specialPrice = request.isSpecialPrice();
         this.productDetail = request.getProductDetail();
         this.sales = request.getSales();
+        this.category = category;
     }
 
     @Override

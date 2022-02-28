@@ -5,6 +5,6 @@ import com.todayhouse.global.error.BaseResponseStatus;
 
 public class WrongPasswordException extends BaseException {
     public WrongPasswordException() {
-        super(BaseResponseStatus. WRONG_PASSWORD);
+        super(BaseResponseStatus.WRONG_PASSWORD);
     }
 }
