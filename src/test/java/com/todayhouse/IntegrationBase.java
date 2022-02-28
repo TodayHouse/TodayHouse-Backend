@@ -15,6 +15,7 @@ public abstract class IntegrationBase {
     @Autowired
     ObjectMapper objectMapper;
 
+    // MvcResult를 BaseResponse로 변환
     public BaseResponse getResponseFromMvcResult(MvcResult mvcResult) throws Exception {
         String contentAsString = mvcResult.getResponse().getContentAsString();
         return objectMapper.readValue(contentAsString, BaseResponse.class);

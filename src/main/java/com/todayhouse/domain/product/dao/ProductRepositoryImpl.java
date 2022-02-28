@@ -43,6 +43,7 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
         return new PageImpl<>(products, pageable, total);
     }
 
+    // ProductSearchRequest의 조건 where절에 추가
     private void makeProductSearchQuery(JPQLQuery<Product> query, ProductSearchRequest productSearch) {
         if (productSearch == null) return;
 
@@ -65,6 +66,7 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
             query.where(qProduct.category.id.in(ids));
     }
 
+    // 해당 카테고리 id와 모든 하위 카테고리 id를 list에 추가
     private List<Long> getCategoryIds(Long categoryId) {
         if (categoryId == null) return null;
 
