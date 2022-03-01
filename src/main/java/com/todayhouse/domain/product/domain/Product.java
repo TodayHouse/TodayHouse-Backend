@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -63,9 +64,12 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<Option> options;
+
     @Builder
-    public Product(String title, String image, int price, int discountRate, int deliveryFee,
-                   boolean specialPrice, String productDetail, int sales, Seller seller, Category category) {
+    public Product(String title, String image, int price, int discountRate, int deliveryFee, boolean specialPrice,
+                   String productDetail, int sales, Seller seller, Category category) {
         this.title = title;
         this.image = image;
         this.price = price;
