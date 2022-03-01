@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
+import com.todayhouse.domain.category.dao.CategoryRepository;
+import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
@@ -25,7 +27,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,6 +55,9 @@ class ProductControllerTest extends IntegrationBase {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    CategoryRepository categoryRepository;
 
     @Autowired
     MockMvc mockMvc;
@@ -79,7 +84,7 @@ class ProductControllerTest extends IntegrationBase {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
         ProductSaveRequest request = ProductSaveRequest.builder()
-                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).image("img.jpg")
+                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).image("img.jpg").categoryId(1L)
                 .build();
 
         MvcResult mvcResult = mockMvc.perform(post(url)
@@ -169,7 +174,7 @@ class ProductControllerTest extends IntegrationBase {
     void updateProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
-        ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).title("new").build();
+        ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).title("new").categoryId(2L).build();
 
         mockMvc.perform(put(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -222,6 +227,38 @@ class ProductControllerTest extends IntegrationBase {
         assertThat(response.getTotalElements()).isEqualTo(1);
         assertThat(products.get(0).getDeliveryFee()).isEqualTo(2000);
         assertThat(products.get(0).isSpecialPrice()).isTrue();
+    }
+
+    @Test
+    @DisplayName("하위카테고리 제품 찾기")
+    void getSubAll() throws Exception {
+        Category air = categoryRepository.findByName("에어컨").orElse(null);
+        Category laptop = categoryRepository.findByName("노트북").orElse(null);
+        Category desktop = categoryRepository.findByName("컴퓨터").orElse(null);
+        Seller seller = sellerRepository.findById(1L).orElse(null);
+        productRepository.save(Product.builder().title("air").category(air).seller(seller).build());
+        productRepository.save(Product.builder().title("lap").category(laptop).seller(seller).build());
+        productRepository.save(Product.builder().title("desk").category(desktop).seller(seller).build());
+
+        String url = "http://localhost:8080/products";
+        Long id = categoryRepository.findByName("컴퓨터/노트북").orElse(null).getId();
+        ProductSearchRequest productSearch = ProductSearchRequest.builder().categoryId(id).build();
+
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(productSearch)))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
+        ProductSearchResponse response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
+        });
+        List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
+        });
+        assertThat(products.size()).isEqualTo(2);
+        assertTrue(products.stream().anyMatch(p -> p.getTitle().equals("lap")));
+        assertTrue(products.stream().anyMatch(p -> p.getTitle().equals("desk")));
     }
 
     public static class CustomPageImpl<T> extends PageImpl<T> {

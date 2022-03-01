@@ -1,38 +1,42 @@
 package com.todayhouse.domain.product.dto.request;
 
-import com.sun.istack.NotNull;
+import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.user.domain.Seller;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ProductSaveRequest {
-    @NotBlank
+    @NotBlank(message = "title을 입력해주세요")
     private String title;
 
-    @NotBlank
+    @NotBlank(message = "image를 입력해주세요")
     private String image;
 
-    @NotNull
+    @NotNull(message = "price를 입력해주세요")
     private int price;
 
-    @NotNull
+    @NotNull(message = "discountRate를 입력해주세요")
     private int discountRate;
 
-    @NotNull
+    @NotNull(message = "deliveryFee를 입력해주세요")
     private int deliveryFee;
 
-    @NotNull
+    @NotNull(message = "specialPrice를 입력해주세요")
     private boolean specialPrice;
+
+    @NotNull(message = "categoryId를 입력해주세요")
+    private Long categoryId;
 
     private String productDetail;
 
-    public Product toEntity(Seller seller){
+    public Product toEntity(Seller seller, Category category) {
         return Product.builder()
                 .title(this.title)
                 .image(this.image)
@@ -42,6 +46,7 @@ public class ProductSaveRequest {
                 .specialPrice(this.specialPrice)
                 .productDetail(this.productDetail)
                 .sales(0)
-                .seller(seller).build();
+                .seller(seller)
+                .category(category).build();
     }
 }
