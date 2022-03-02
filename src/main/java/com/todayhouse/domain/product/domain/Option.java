@@ -1,5 +1,7 @@
 package com.todayhouse.domain.product.domain;
 
+import com.todayhouse.domain.product.exception.OptionExistException;
+import com.todayhouse.domain.product.exception.ProductExistException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,13 +46,19 @@ public class Option {
     }
 
     public void setParent(Option option) {
-        if (parent != null || option == null) return;
+        if (parent != null)
+            throw new OptionExistException();
+
+        if (option == null) return;
         this.parent = option;
         option.getChildren().add(this);
     }
 
     public void setProduct(Product product) {
-        if (this.product != null || product == null) return;
+        if (this.product != null)
+            throw new ProductExistException();
+
+        if (product == null) return;
         this.product = product;
         product.getOptions().add(this);
     }

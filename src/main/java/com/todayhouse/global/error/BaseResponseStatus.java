@@ -37,6 +37,7 @@ public enum BaseResponseStatus {
     POST_PRODUCT_EMPTY_DELIVERY(false, 2103, "배송비를 입력해주세요."),
     PRODUCT_NOT_FOUND(false, 2104, "상품을 찾을 수 없습니다."),
     SELLER_NOT_SETTING(false, 2105, "Product에 Seller가 설정되지 않았습니다."),
+    PRODUCT_EXIST(false, 2106, "상품을 이미 설정했습니다."),
 
     // story
     POST_STORY_EMPTY_TITLE(false, 2200, "제목을 입력해주세요."),
@@ -53,6 +54,9 @@ public enum BaseResponseStatus {
     // category
     SAME_CATEGORY_EXIST(false, 2404, "같은 카테고리가 존재합니다."),
     CATEGORY_NOT_FOUND(false,2405, "해당 카테고리를 찾을 수 없습니다. 부모 카테고리가 없다면 parentId를 지워주세요"),
+
+    // option
+    PARENT_OPTION_EXIST(false, 2406, "상위 옵션을 이미 설정했습니다."),
 
     // 3000 : Database / Server 오류
     // common
@@ -79,7 +83,7 @@ public enum BaseResponseStatus {
     private final String message;
 
     // BaseResponse 에서 각 해당하는 코드, 메시지를 생성자로 매핑해줍니다.
-    private BaseResponseStatus(boolean isSuccess, int code, String message) {
+    BaseResponseStatus(boolean isSuccess, int code, String message) {
         this.isSuccess = isSuccess;
         this.code = code;
         this.message = message;

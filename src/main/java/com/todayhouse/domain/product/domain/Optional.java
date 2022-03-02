@@ -1,5 +1,6 @@
 package com.todayhouse.domain.product.domain;
 
+import com.todayhouse.domain.product.exception.ProductExistException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,7 +35,10 @@ public class Optional {
     }
 
     public void setProduct(Product product) {
-        if (this.product != null || product == null) return;
+        if (this.product != null)
+            throw new ProductExistException();
+
+        if (product == null) return;
         this.product = product;
         product.getOptionals().add(this);
     }

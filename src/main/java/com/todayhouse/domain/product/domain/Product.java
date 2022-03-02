@@ -12,8 +12,25 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+@NamedEntityGraphs({
+        // option, sub-option과 outer-join
+        @NamedEntityGraph(
+                name = "product-option-option",
+                attributeNodes = @NamedAttributeNode(value = "options", subgraph = "option-option"),
+                subgraphs = @NamedSubgraph(
+                        name = "option-option",
+                        attributeNodes = @NamedAttributeNode("children")
+                )
+        ),
+        // optional과 outer-join
+        @NamedEntityGraph(
+                name = "product-optional",
+                attributeNodes = @NamedAttributeNode("optionals")
+        )
+})
 @Entity
 @Getter
 @EntityListeners(AuditingEntityListener.class)
@@ -65,16 +82,15 @@ public class Product {
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Option> options;
+    private List<Option> options = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Optional> optionals;
+    private List<Optional> optionals = new ArrayList<>();
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee, boolean specialPrice,
