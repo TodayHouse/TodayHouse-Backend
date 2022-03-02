@@ -46,6 +46,12 @@ public class Product {
 
     private int sales;
 
+    private String option1;
+
+    private String option2;
+
+    private String optional;
+
     @Column(name = "created_at")
     @CreatedDate
     private LocalDateTime createdAt;
@@ -66,6 +72,9 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Option> options;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<Optional> optionals;
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee, boolean specialPrice,

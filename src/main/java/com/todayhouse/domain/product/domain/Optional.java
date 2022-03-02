@@ -6,13 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.LinkedList;
-import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Option {
+public class Optional {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,31 +25,17 @@ public class Option {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Option parent;
-
-    @OneToMany(mappedBy = "parent")
-    private List<Option> children = new LinkedList<>();
-
     @Builder
-    public Option(String content, int price, int stock, Product product, Option parent) {
+    public Optional(String content, int price, int stock, Product product) {
         this.content = content;
         this.price = price;
         this.stock = stock;
         setProduct(product);
-        setParent(parent);
-    }
-
-    public void setParent(Option option) {
-        if (parent != null || option == null) return;
-        this.parent = option;
-        option.getChildren().add(this);
     }
 
     public void setProduct(Product product) {
         if (this.product != null || product == null) return;
         this.product = product;
-        product.getOptions().add(this);
+        product.getOptionals().add(this);
     }
 }
