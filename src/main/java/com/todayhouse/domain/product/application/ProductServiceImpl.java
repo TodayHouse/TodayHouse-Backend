@@ -30,7 +30,6 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-    private final CustomProductRepository customProductRepository;
 
     @Override
     public Product saveProductRequest(ProductSaveRequest request) {
@@ -46,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> findAll(ProductSearchRequest productSearch, Pageable pageable) {
-        Page<ProductResponse> response = customProductRepository.findAll(productSearch, pageable)
+        Page<ProductResponse> response = productRepository.findAll(productSearch, pageable)
                 .map(p -> new ProductResponse(p));
         return response;
     }

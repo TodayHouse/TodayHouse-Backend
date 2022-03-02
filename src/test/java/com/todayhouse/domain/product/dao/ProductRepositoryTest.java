@@ -22,9 +22,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class ProductRepositoryTest extends DataJpaBase {
 
     @Autowired
-    CustomProductRepository customProductRepository;
-
-    @Autowired
     ProductRepository productRepository;
 
     @Autowired
@@ -46,7 +43,7 @@ class ProductRepositoryTest extends DataJpaBase {
     void 가격_2000_이상_product_페이징() {
         PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
         ProductSearchRequest productSearch = ProductSearchRequest.builder().priceFrom(2000).build();
-        Page<Product> page = customProductRepository.findAll(productSearch, pageRequest);
+        Page<Product> page = productRepository.findAll(productSearch, pageRequest);
 
         System.out.println(page.getContent());
         assertThat(page.getTotalPages()).isEqualTo(1);
