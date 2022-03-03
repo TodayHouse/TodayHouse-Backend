@@ -1,22 +1,21 @@
 package com.todayhouse.domain.product.domain;
 
 import com.todayhouse.domain.product.exception.OptionExistException;
-import com.todayhouse.domain.product.exception.ProductExistException;
+import com.todayhouse.domain.product.exception.StockNotEnoughException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.LinkedList;
-import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Option {
+public class ChildOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "option_id")
     private Long id;
 
     private String content;
@@ -26,26 +25,18 @@ public class Option {
     private int stock;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private Option parent;
-
-    @OneToMany(mappedBy = "parent")
-    private List<Option> children = new LinkedList<>();
+    private ParentOption parent;
 
     @Builder
-    public Option(String content, int price, int stock, Product product, Option parent) {
+    public ChildOption(String content, int price, int stock, Product product, ParentOption parent) {
         this.content = content;
         this.price = price;
         this.stock = stock;
-        setProduct(product);
         setParent(parent);
     }
 
-    public void setParent(Option option) {
+    public void setParent(ParentOption option) {
         if (parent != null)
             throw new OptionExistException();
 
@@ -54,12 +45,18 @@ public class Option {
         option.getChildren().add(this);
     }
 
-    public void setProduct(Product product) {
-        if (this.product != null)
-            throw new ProductExistException();
+    public void addStock(int count) {
+        if (stock - count < 0)
+            throw new StockNotEnoughException();
 
-        if (product == null) return;
-        this.product = product;
-        product.getOptions().add(this);
+        stock += count;
+    }
+
+    public void changePrice(int price) {
+        this.price = price;
+    }
+
+    public void changeContent(String content) {
+        this.content = content;
     }
 }

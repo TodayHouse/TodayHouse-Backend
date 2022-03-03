@@ -38,6 +38,7 @@ public enum BaseResponseStatus {
     PRODUCT_NOT_FOUND(false, 2104, "상품을 찾을 수 없습니다."),
     SELLER_NOT_SETTING(false, 2105, "Product에 Seller가 설정되지 않았습니다."),
     PRODUCT_EXIST(false, 2106, "상품을 이미 설정했습니다."),
+    STOCK_NOT_ENOUGH(false, 2107, "상품 수량이 0보다 작을 수 없습니다."),
 
     // story
     POST_STORY_EMPTY_TITLE(false, 2200, "제목을 입력해주세요."),

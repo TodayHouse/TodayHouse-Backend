@@ -16,19 +16,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 @NamedEntityGraphs({
+        // seller와 outer-join
+        @NamedEntityGraph(
+                name = "product.seller",
+                attributeNodes = @NamedAttributeNode("seller")
+        ),
         // option, sub-option과 outer-join
         @NamedEntityGraph(
-                name = "product-option-option",
-                attributeNodes = @NamedAttributeNode(value = "options", subgraph = "option-option"),
+                name = "product.parent.child",
+                attributeNodes = @NamedAttributeNode(value = "options", subgraph = "parent.child"),
                 subgraphs = @NamedSubgraph(
-                        name = "option-option",
+                        name = "parent.child",
                         attributeNodes = @NamedAttributeNode("children")
                 )
         ),
-        // optional과 outer-join
+        // selection-option과 outer-join
         @NamedEntityGraph(
-                name = "product-optional",
-                attributeNodes = @NamedAttributeNode("optionals")
+                name = "product.selection",
+                attributeNodes = @NamedAttributeNode("selectionOptions")
         )
 })
 @Entity
@@ -78,7 +83,7 @@ public class Product {
     private LocalDateTime modifiedAt;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
@@ -87,10 +92,10 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Option> options = new ArrayList<>();
+    private List<ParentOption> options = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Optional> optionals = new ArrayList<>();
+    private List<SelectionOption> selectionOptions = new ArrayList<>();
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee, boolean specialPrice,

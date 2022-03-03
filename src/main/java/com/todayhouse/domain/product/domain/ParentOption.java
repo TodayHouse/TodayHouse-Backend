@@ -1,17 +1,20 @@
 package com.todayhouse.domain.product.domain;
 
 import com.todayhouse.domain.product.exception.ProductExistException;
+import com.todayhouse.domain.product.exception.StockNotEnoughException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.LinkedList;
+import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Optional {
+public class ParentOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,8 +29,11 @@ public class Optional {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private List<ChildOption> children = new LinkedList<>();
+
     @Builder
-    public Optional(String content, int price, int stock, Product product) {
+    public ParentOption(String content, int price, int stock, Product product, ParentOption parent) {
         this.content = content;
         this.price = price;
         this.stock = stock;
@@ -40,6 +46,21 @@ public class Optional {
 
         if (product == null) return;
         this.product = product;
-        product.getOptionals().add(this);
+        product.getOptions().add(this);
+    }
+
+    public void addStock(int count) {
+        if (stock - count < 0)
+            throw new StockNotEnoughException();
+
+        stock += count;
+    }
+
+    public void changePrice(int price) {
+        this.price = price;
+    }
+
+    public void changeContent(String content) {
+        this.content = content;
     }
 }
