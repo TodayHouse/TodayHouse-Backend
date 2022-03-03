@@ -7,6 +7,10 @@ import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 @Getter
 @Builder
@@ -19,7 +23,6 @@ public class ProductSaveRequest {
     @NotBlank(message = "image를 입력해주세요")
     private String image;
 
-    @NotNull(message = "price를 입력해주세요")
     private int price;
 
     @NotNull(message = "discountRate를 입력해주세요")
@@ -36,8 +39,18 @@ public class ProductSaveRequest {
 
     private String productDetail;
 
+    private String option1;
+
+    private String option2;
+
+    private String selectionOption;
+
+    private Set<ParentOptionRequest> options;
+
+    private Set<SelectionOptionRequest> selectionOptions;
+
     public Product toEntity(Seller seller, Category category) {
-        return Product.builder()
+        Product product = Product.builder()
                 .title(this.title)
                 .image(this.image)
                 .price(this.price)
@@ -47,6 +60,19 @@ public class ProductSaveRequest {
                 .productDetail(this.productDetail)
                 .sales(0)
                 .seller(seller)
-                .category(category).build();
+                .category(category)
+                .option1(this.option1)
+                .option2(this.option2)
+                .selectionOption(this.selectionOption)
+                .build();
+
+        Optional.ofNullable(options)
+                .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
+                .forEach(parentRequest -> parentRequest.toEntity(product));
+
+        Optional.ofNullable(selectionOptions)
+                .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
+                .forEach(selectionRequest -> selectionRequest.toEntity(product));
+        return product;
     }
 }

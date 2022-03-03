@@ -5,6 +5,8 @@ import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.product.dto.request.ChildOptionRequest;
+import com.todayhouse.domain.product.dto.request.ParentOptionRequest;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
@@ -21,9 +23,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -38,9 +43,6 @@ class ProductServiceImplTest {
 
     @Mock
     ProductRepository productRepository;
-
-    @Mock
-    CustomProductRepository customProductRepository;
 
     @Mock
     CategoryRepository categoryRepository;
@@ -58,7 +60,16 @@ class ProductServiceImplTest {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
         User user = User.builder().email(email).seller(seller).build();
-        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).build();
+
+        Set<ChildOptionRequest> child = new LinkedHashSet<>();
+        ChildOptionRequest c1 = ChildOptionRequest.builder().content("c1").build();
+        ChildOptionRequest c2 = ChildOptionRequest.builder().content("c2").build();
+        child.add(c1);
+        child.add(c2);
+        ParentOptionRequest p1 = ParentOptionRequest.builder().content("p1").childOptionRequests(child).build();
+        Set<ParentOptionRequest> parent = new LinkedHashSet<>();
+        parent.add(p1);
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).options(parent).build();
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));

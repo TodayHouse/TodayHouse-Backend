@@ -12,6 +12,9 @@ public class ProductResponse {
     private String brand;
     private String title;
     private String image;
+    private String Option1;
+    private String Option2;
+    private String SelectionOption;
     private int price;
     private int deliveryFee;
     private int discountRate;

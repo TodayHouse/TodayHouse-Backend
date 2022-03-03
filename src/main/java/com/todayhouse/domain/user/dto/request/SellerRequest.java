@@ -12,22 +12,22 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class SellerRequest {
-    @Email
+    @Email(message = "email을 입력해주세요")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "brand를 입력해주세요")
     private String brand;
 
-    @NotBlank
+    @NotBlank(message = "companyName을 입력해주세요")
     private String companyName;
 
-    @NotBlank
+    @NotBlank(message = "representative를 입력해주세요")
     private String representative;
 
-    @NotBlank
+    @NotBlank(message = "customerCenter를 입력해주세요")
     private String customerCenter;
 
-    @NotNull
+    @NotNull(message = "registrationNum를 입력해주세요")
     private int registrationNum;
 
     public Seller toEntity() {

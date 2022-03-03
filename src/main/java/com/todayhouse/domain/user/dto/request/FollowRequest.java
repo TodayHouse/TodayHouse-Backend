@@ -9,9 +9,9 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class FollowRequest {
-    @NotNull
+    @NotNull(message = "fromId를 입력해주세요")
     private Long fromId;
 
-    @NotNull
+    @NotNull(message = "toId를 입력해주세요")
     private Long toId;
 }
