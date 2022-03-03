@@ -16,11 +16,11 @@ public class SelectionOption {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String content;
-
     private int price;
 
     private int stock;
+
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
@@ -28,9 +28,9 @@ public class SelectionOption {
 
     @Builder
     public SelectionOption(String content, int price, int stock, Product product) {
-        this.content = content;
         this.price = price;
         this.stock = stock;
+        this.content = content;
         setProduct(product);
     }
 

@@ -12,30 +12,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-@NamedEntityGraphs({
-        // seller와 outer-join
-        @NamedEntityGraph(
-                name = "product.seller",
-                attributeNodes = @NamedAttributeNode("seller")
-        ),
-        // option, sub-option과 outer-join
-        @NamedEntityGraph(
-                name = "product.parent.child",
-                attributeNodes = @NamedAttributeNode(value = "options", subgraph = "parent.child"),
-                subgraphs = @NamedSubgraph(
-                        name = "parent.child",
-                        attributeNodes = @NamedAttributeNode("children")
-                )
-        ),
-        // selection-option과 outer-join
-        @NamedEntityGraph(
-                name = "product.selection",
-                attributeNodes = @NamedAttributeNode("selectionOptions")
-        )
-})
 @Entity
 @Getter
 @EntityListeners(AuditingEntityListener.class)
@@ -72,7 +51,7 @@ public class Product {
 
     private String option2;
 
-    private String optional;
+    private String selectionOption;
 
     @Column(name = "created_at")
     @CreatedDate
@@ -92,14 +71,14 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<ParentOption> options = new ArrayList<>();
+    private Set<ParentOption> options = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<SelectionOption> selectionOptions = new ArrayList<>();
+    private Set<SelectionOption> selectionOptions = new LinkedHashSet<>();
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee, boolean specialPrice,
-                   String productDetail, int sales, Seller seller, Category category) {
+                   String productDetail, int sales, Seller seller, Category category, String option1, String option2, String selectionOption) {
         this.title = title;
         this.image = image;
         this.price = price;
@@ -109,6 +88,9 @@ public class Product {
         this.productDetail = productDetail;
         this.sales = sales;
         this.category = category;
+        this.option1 = option1;
+        this.option2 = option2;
+        this.selectionOption = selectionOption;
         setSeller(seller);
     }
 

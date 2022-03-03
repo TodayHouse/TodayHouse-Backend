@@ -8,8 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -30,13 +30,13 @@ public class ParentOption {
     private Product product;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<ChildOption> children = new LinkedList<>();
+    private Set<ChildOption> children = new LinkedHashSet<>();
 
     @Builder
-    public ParentOption(String content, int price, int stock, Product product, ParentOption parent) {
-        this.content = content;
+    public ParentOption(String content, int price, int stock, Product product) {
         this.price = price;
         this.stock = stock;
+        this.content = content;
         setProduct(product);
     }
 

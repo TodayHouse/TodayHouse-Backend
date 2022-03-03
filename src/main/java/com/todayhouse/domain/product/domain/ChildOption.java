@@ -29,10 +29,10 @@ public class ChildOption {
     private ParentOption parent;
 
     @Builder
-    public ChildOption(String content, int price, int stock, Product product, ParentOption parent) {
-        this.content = content;
+    public ChildOption(String content, int price, int stock, ParentOption parent) {
         this.price = price;
         this.stock = stock;
+        this.content = content;
         setParent(parent);
     }
 
