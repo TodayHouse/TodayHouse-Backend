@@ -3,6 +3,7 @@ package com.todayhouse.domain.product.dto.request;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 @Getter
 @Builder
@@ -20,4 +21,6 @@ public class ProductUpdateRequest {
     private String productDetail;
     private int sales;
     private Long categoryId;
+    private Set<ParentOptionRequest> options;
+    private Set<SelectionOptionRequest> selectionOptions;
 }

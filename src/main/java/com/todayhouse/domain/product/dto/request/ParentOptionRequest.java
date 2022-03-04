@@ -17,16 +17,16 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ParentOptionRequest {
-    @NotNull
+    @NotNull(message = "price를 입력해주세요.")
     private int price;
 
-    @NotNull
+    @NotNull(message = "stock을 입력해주세요.")
     private int stock;
 
-    @NotBlank
+    @NotBlank(message = "content를 입력해주세요.")
     private String content;
 
-    private Set<ChildOptionRequest> childOptionRequests;
+    private Set<ChildOptionRequest> childOptions;
 
     public ParentOption toEntityWithChild(Product product) {
         ParentOption parent = ParentOption.builder()
@@ -36,7 +36,7 @@ public class ParentOptionRequest {
                 .product(product)
                 .build();
 
-        Optional.ofNullable(childOptionRequests)
+        Optional.ofNullable(childOptions)
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
                 .map(childRequest -> childRequest.toEntity(parent)).collect(Collectors.toSet());
         return parent;
