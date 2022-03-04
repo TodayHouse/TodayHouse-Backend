@@ -3,7 +3,6 @@ package com.todayhouse.domain.product.application;
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
-import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
@@ -39,7 +38,7 @@ public class ProductServiceImpl implements ProductService {
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         if (user.getSeller() == null)
             throw new SellerNotFoundException();
-        Product product = request.toEntity(user.getSeller(), category);
+        Product product = request.toEntityWithParentAndSelection(user.getSeller(), category);
         return productRepository.save(product);
     }
 

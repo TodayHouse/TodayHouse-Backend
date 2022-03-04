@@ -10,9 +10,9 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
-import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
-import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
-import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
+import com.todayhouse.domain.product.dto.request.*;
+import com.todayhouse.domain.product.dto.response.ChildOptionResponse;
+import com.todayhouse.domain.product.dto.response.ParentOptionResponse;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.domain.user.dao.SellerRepository;
@@ -34,9 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -75,6 +73,8 @@ class ProductControllerTest extends IntegrationBase {
         userRepository.save(user1);
         Product product1 = Product.builder().title("p1").seller(seller1).build();
         productRepository.save(product1);
+        Product product = productRepository.findById(0L).orElse(null);
+        System.out.println(product.toString());
     }
 
 
@@ -83,8 +83,17 @@ class ProductControllerTest extends IntegrationBase {
     void saveProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
+        Set<ChildOptionRequest> child = new LinkedHashSet<>();
+        ChildOptionRequest c1 = ChildOptionRequest.builder().content("c1").build();
+        ChildOptionRequest c2 = ChildOptionRequest.builder().content("c2").build();
+        child.add(c1);
+        child.add(c2);
+        ParentOptionRequest p1 = ParentOptionRequest.builder().content("p1").childOptionRequests(child).build();
+        Set<ParentOptionRequest> parent = new LinkedHashSet<>();
+        parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
                 .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).image("img.jpg").categoryId(1L)
+                .options(parent)
                 .build();
 
         MvcResult mvcResult = mockMvc.perform(post(url)
@@ -95,8 +104,16 @@ class ProductControllerTest extends IntegrationBase {
                 .andDo(print())
                 .andReturn();
 
-        Product product = objectMapper.convertValue(getResponseFromMvcResult(mvcResult).getResult(), Product.class);
-        assertThat(product.getTitle()).isEqualTo("new");
+        ProductResponse productResponse = objectMapper.convertValue(getResponseFromMvcResult(mvcResult).getResult(), ProductResponse.class);
+        Set<ParentOptionResponse> parents = objectMapper.readValue(objectMapper.writeValueAsString(productResponse.getOptions()), new TypeReference<>() {
+        });
+        List<ParentOptionResponse> list = new ArrayList<>(parents);
+        Set<ChildOptionResponse> children = objectMapper.readValue(objectMapper.writeValueAsString(list.get(0).getChildOptions()), new TypeReference<>() {
+        });
+        assertThat(productResponse.getTitle()).isEqualTo("new");
+        assertThat(list.get(0).getContent()).isEqualTo("p1");
+        assertThat(list.size()).isEqualTo(1);
+        assertThat(children.size()).isEqualTo(2);
     }
 
     @Test
@@ -122,7 +139,7 @@ class ProductControllerTest extends IntegrationBase {
         assertThat(response.getTotalElements()).isEqualTo(4);
         Long tmp = 0L;
         for (ProductResponse p : products) {
-            assertThat(p.getId()).isGreaterThan(tmp);
+            assertThat(p.getId()).isGreaterThanOrEqualTo(tmp);
             tmp = p.getId();
         }
     }
@@ -158,7 +175,7 @@ class ProductControllerTest extends IntegrationBase {
     @Test
     @DisplayName("product 찾았다")
     void findProduct() throws Exception {
-        String url = "http://localhost:8080/products/1";
+        String url = "http://localhost:8080/products/0";
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -174,7 +191,7 @@ class ProductControllerTest extends IntegrationBase {
     void updateProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
-        ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).title("new").categoryId(2L).build();
+        ProductUpdateRequest request = ProductUpdateRequest.builder().id(0L).title("new").categoryId(2L).build();
 
         mockMvc.perform(put(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -191,7 +208,7 @@ class ProductControllerTest extends IntegrationBase {
     @Test
     @DisplayName("product 삭제")
     void deleteProduct() throws Exception {
-        String url = "http://localhost:8080/products/1";
+        String url = "http://localhost:8080/products/0";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
 
         mockMvc.perform(delete(url)

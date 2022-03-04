@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -39,9 +40,9 @@ public class ProductSaveRequest {
 
     private String productDetail;
 
-    private String option1;
+    private String option;
 
-    private String option2;
+    private String childOption;
 
     private String selectionOption;
 
@@ -49,7 +50,8 @@ public class ProductSaveRequest {
 
     private Set<SelectionOptionRequest> selectionOptions;
 
-    public Product toEntity(Seller seller, Category category) {
+    // ChildOption 까지 entity로 변환
+    public Product toEntityWithParentAndSelection(Seller seller, Category category) {
         Product product = Product.builder()
                 .title(this.title)
                 .image(this.image)
@@ -61,18 +63,18 @@ public class ProductSaveRequest {
                 .sales(0)
                 .seller(seller)
                 .category(category)
-                .option1(this.option1)
-                .option2(this.option2)
+                .option1(this.option)
+                .option2(this.childOption)
                 .selectionOption(this.selectionOption)
                 .build();
 
         Optional.ofNullable(options)
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
-                .forEach(parentRequest -> parentRequest.toEntity(product));
+                .map(parentRequest -> parentRequest.toEntityWithChild(product)).collect(Collectors.toSet());
 
         Optional.ofNullable(selectionOptions)
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
-                .forEach(selectionRequest -> selectionRequest.toEntity(product));
+                .map(selectionRequest -> selectionRequest.toEntity(product)).collect(Collectors.toSet());
         return product;
     }
 }
