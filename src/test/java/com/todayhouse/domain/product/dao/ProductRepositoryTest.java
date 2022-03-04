@@ -73,7 +73,7 @@ class ProductRepositoryTest extends DataJpaBase {
 
     @Test
     void product_삭제() {
-        productRepository.deleteById(1L);
+        productRepository.deleteById(0L);
 
         List<Product> list = productRepository.findAll();
         assertThat(list.size()).isEqualTo(2);
@@ -81,11 +81,18 @@ class ProductRepositoryTest extends DataJpaBase {
 
     @Test
     void product_하나_찾기() {
-        Product product = productRepository.findByIdWithOptionsAndSeller(2L).orElse(null);
+        Product product = productRepository.findByIdWithOptionsAndSeller(1L).orElse(null);
 
         assertThat(product.getSeller().getBrand()).isEqualTo(product.getBrand());
         assertThat(product.getTitle()).isEqualTo("p2");
         assertThat(product.getOptions().size()).isEqualTo(2);
         assertTrue(product.getOptions().stream().allMatch(op -> op.getChildren().size() == 2)); //childOption 모두 2개
+    }
+
+    @Test
+    void product_id는_0부터(){
+        Product product = productRepository.findByIdWithOptionsAndSeller(0L).orElse(null);
+
+        assertThat(product.getTitle()).isEqualTo("p1");
     }
 }
