@@ -5,9 +5,7 @@ import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
-import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
-import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
-import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
+import com.todayhouse.domain.product.dto.request.*;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
@@ -21,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
 
 @Service
 @Transactional
@@ -72,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
     private Product getValidProduct(Long id) {
         String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(jwtEmail).orElseThrow(UserNotFoundException::new);
-        Product product = productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
+        Product product = productRepository.findByIdWithOptionsAndSeller(id).orElseThrow(ProductNotFoundException::new);
         if (!user.getSeller().equals(product.getSeller()))
             throw new InvalidRequestException();
         return product;

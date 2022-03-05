@@ -58,6 +58,9 @@ public enum BaseResponseStatus {
 
     // option
     PARENT_OPTION_EXIST(false, 2406, "상위 옵션을 이미 설정했습니다."),
+    PARENT_OPTION_NOT_FOUND(false, 2407, "상위 옵션을 찾을 수 없습니다."),
+    CHILD_OPTION_NOT_FOUND(false, 2408, "하위 옵션을 찾을 수 없습니다."),
+    SELECTION_OPTION_NOT_FOUND(false, 2409, "선택 옵션을 찾을 수 없습니다."),
 
     // 3000 : Database / Server 오류
     // common

@@ -21,6 +21,4 @@ public class ProductUpdateRequest {
     private int deliveryFee;
     private int discountRate;
     private boolean specialPrice;
-    private Set<ParentOptionSaveRequest> options;
-    private Set<SelectionOptionSaveRequest> selectionOptions;
 }

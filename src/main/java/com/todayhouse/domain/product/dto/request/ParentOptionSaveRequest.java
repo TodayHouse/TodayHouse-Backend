@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ParentOptionSaveRequest {
+    private Long productId;
+
     @NotNull(message = "price를 입력해주세요.")
     private int price;
 
@@ -40,5 +42,14 @@ public class ParentOptionSaveRequest {
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
                 .map(childRequest -> childRequest.toEntity(parent)).collect(Collectors.toSet());
         return parent;
+    }
+
+    public ParentOption toEntity(Product product){
+        return ParentOption.builder()
+                .price(this.price)
+                .stock(this.stock)
+                .content(this.content)
+                .product(product)
+                .build();
     }
 }

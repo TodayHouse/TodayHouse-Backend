@@ -12,6 +12,8 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class SelectionOptionSaveRequest {
+    private Long productId;
+
     @NotNull(message = "가격을 입력해주세요. selectionOptions 불필요시 selectionOptions를 제거해주세요.")
     private int price;
 

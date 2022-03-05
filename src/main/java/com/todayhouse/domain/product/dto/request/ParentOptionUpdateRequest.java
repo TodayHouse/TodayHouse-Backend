@@ -29,19 +29,12 @@ public class ParentOptionUpdateRequest {
     @NotBlank(message = "content를 입력해주세요.")
     private String content;
 
-    private Set<ChildOptionSaveRequest> childOptions;
-
-    public ParentOption toEntityWithChild(Product product) {
-        ParentOption parent = ParentOption.builder()
+    public ParentOption toEntity (Product product) {
+        return ParentOption.builder()
                 .price(this.price)
                 .stock(this.stock)
                 .content(this.content)
                 .product(product)
                 .build();
-
-        Optional.ofNullable(childOptions)
-                .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
-                .map(childRequest -> childRequest.toEntity(parent)).collect(Collectors.toSet());
-        return parent;
     }
 }
