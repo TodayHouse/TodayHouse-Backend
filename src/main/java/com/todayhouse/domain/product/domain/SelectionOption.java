@@ -1,5 +1,6 @@
 package com.todayhouse.domain.product.domain;
 
+import com.todayhouse.domain.product.dto.request.SelectionOptionUpdateRequest;
 import com.todayhouse.domain.product.exception.ProductExistException;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -41,5 +42,11 @@ public class SelectionOption {
         if (product == null) return;
         this.product = product;
         product.getSelectionOptions().add(this);
+    }
+
+    public void update(SelectionOptionUpdateRequest request){
+        this.price = request.getPrice();
+        this.stock = request.getStock();
+        this.content = request.getContent();
     }
 }

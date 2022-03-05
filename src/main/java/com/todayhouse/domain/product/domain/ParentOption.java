@@ -1,5 +1,7 @@
 package com.todayhouse.domain.product.domain;
 
+import com.todayhouse.domain.product.dto.request.ChildOptionUpdateRequest;
+import com.todayhouse.domain.product.dto.request.ParentOptionUpdateRequest;
 import com.todayhouse.domain.product.exception.ProductExistException;
 import com.todayhouse.domain.product.exception.StockNotEnoughException;
 import lombok.AccessLevel;
@@ -29,7 +31,7 @@ public class ParentOption {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ChildOption> children = new LinkedHashSet<>();
 
     @Builder
@@ -38,6 +40,12 @@ public class ParentOption {
         this.stock = stock;
         this.content = content;
         setProduct(product);
+    }
+
+    public void update(ParentOptionUpdateRequest request){
+        this.price = request.getPrice();
+        this.stock = request.getStock();
+        this.content = request.getContent();
     }
 
     public void setProduct(Product product) {

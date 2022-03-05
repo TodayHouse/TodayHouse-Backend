@@ -1,5 +1,7 @@
 package com.todayhouse.domain.product.domain;
 
+import com.todayhouse.domain.product.dto.request.ChildOptionUpdateRequest;
+import com.todayhouse.domain.product.dto.request.SelectionOptionUpdateRequest;
 import com.todayhouse.domain.product.exception.OptionExistException;
 import com.todayhouse.domain.product.exception.StockNotEnoughException;
 import lombok.AccessLevel;
@@ -34,6 +36,12 @@ public class ChildOption {
         this.stock = stock;
         this.content = content;
         setParent(parent);
+    }
+
+    public void update(ChildOptionUpdateRequest request){
+        this.price = request.getPrice();
+        this.stock = request.getStock();
+        this.content = request.getContent();
     }
 
     public void setParent(ParentOption option) {

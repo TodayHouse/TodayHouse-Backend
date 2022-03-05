@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ParentOptionRequest {
+public class ParentOptionSaveRequest {
     @NotNull(message = "price를 입력해주세요.")
     private int price;
 
@@ -26,7 +26,7 @@ public class ParentOptionRequest {
     @NotBlank(message = "content를 입력해주세요.")
     private String content;
 
-    private Set<ChildOptionRequest> childOptions;
+    private Set<ChildOptionSaveRequest> childOptions;
 
     public ParentOption toEntityWithChild(Product product) {
         ParentOption parent = ParentOption.builder()

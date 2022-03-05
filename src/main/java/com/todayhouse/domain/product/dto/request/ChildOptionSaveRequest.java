@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ChildOptionRequest {
+public class ChildOptionSaveRequest {
     @NotNull(message = "price를 입력해주세요. childOptions 불필요시 childOptions를 제거해주세요.")
     private int price;
 

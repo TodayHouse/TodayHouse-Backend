@@ -12,15 +12,15 @@ import java.util.Set;
 public class ProductUpdateRequest {
     @NotNull(message = "id를 입력해주세요.")
     private Long id;
+    private Long categoryId;
     private String title;
     private String image;
-    private int price;
-    private int discountRate;
-    private int deliveryFee;
-    private boolean specialPrice;
     private String productDetail;
+    private int price;
     private int sales;
-    private Long categoryId;
-    private Set<ParentOptionRequest> options;
-    private Set<SelectionOptionRequest> selectionOptions;
+    private int deliveryFee;
+    private int discountRate;
+    private boolean specialPrice;
+    private Set<ParentOptionSaveRequest> options;
+    private Set<SelectionOptionSaveRequest> selectionOptions;
 }

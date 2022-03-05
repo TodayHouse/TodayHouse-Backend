@@ -83,13 +83,13 @@ class ProductControllerTest extends IntegrationBase {
     void saveProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
-        Set<ChildOptionRequest> child = new LinkedHashSet<>();
-        ChildOptionRequest c1 = ChildOptionRequest.builder().content("c1").build();
-        ChildOptionRequest c2 = ChildOptionRequest.builder().content("c2").build();
+        Set<ChildOptionSaveRequest> child = new LinkedHashSet<>();
+        ChildOptionSaveRequest c1 = ChildOptionSaveRequest.builder().content("c1").build();
+        ChildOptionSaveRequest c2 = ChildOptionSaveRequest.builder().content("c2").build();
         child.add(c1);
         child.add(c2);
-        ParentOptionRequest p1 = ParentOptionRequest.builder().content("p1").childOptionRequests(child).build();
-        Set<ParentOptionRequest> parent = new LinkedHashSet<>();
+        ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
+        Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
                 .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).image("img.jpg").categoryId(1L)
