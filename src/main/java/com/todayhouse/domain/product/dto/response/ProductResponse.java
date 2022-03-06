@@ -51,7 +51,7 @@ public class ProductResponse {
 
         this.options = Optional.ofNullable(product.getOptions())
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
-                .map(parentOption -> new ParentOptionResponse(parentOption)).collect(Collectors.toSet());
+                .map(parentOption -> new ParentOptionResponse(parentOption, true)).collect(Collectors.toSet());
 
         this.selectionOptions = Optional.ofNullable(product.getSelectionOptions())
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)

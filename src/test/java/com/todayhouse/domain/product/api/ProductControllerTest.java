@@ -22,10 +22,9 @@ import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +33,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -42,7 +43,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)//@BeforeAll 사용
 class ProductControllerTest extends IntegrationBase {
 
     @Autowired
@@ -66,15 +66,22 @@ class ProductControllerTest extends IntegrationBase {
     @Autowired
     JwtTokenProvider jwtTokenProvider;
 
-    @BeforeAll
+    @PersistenceContext
+    EntityManager em;
+
+    Seller seller1;
+    Product product1;
+
+    @BeforeEach
     void setUp() {
-        Seller seller1 = Seller.builder().email("seller1@email.com").brand("user1").build();
+        seller1 = Seller.builder().email("seller1@email.com").brand("user1").build();
         User user1 = User.builder().email("user1@email.com").seller(seller1).build();
         userRepository.save(user1);
-        Product product1 = Product.builder().title("p1").seller(seller1).build();
+        product1 = Product.builder().title("p1").seller(seller1).build();
         productRepository.save(product1);
-        Product product = productRepository.findById(0L).orElse(null);
-        System.out.println(product.toString());
+
+        em.flush();
+        em.clear();
     }
 
 
@@ -120,10 +127,9 @@ class ProductControllerTest extends IntegrationBase {
     @DisplayName("product id 오름차순 페이징")
     void findProductsPaginationASC() throws Exception {
         String url = "http://localhost:8080/products?page=0&size=2&sort=id,ASC";
-        Seller seller = sellerRepository.findById(1L).orElse(null);
-        productRepository.save(Product.builder().seller(seller).build());
-        productRepository.save(Product.builder().seller(seller).build());
-        productRepository.save(Product.builder().seller(seller).build());
+        productRepository.save(Product.builder().seller(seller1).build());
+        productRepository.save(Product.builder().seller(seller1).build());
+        productRepository.save(Product.builder().seller(seller1).build());
 
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
@@ -148,10 +154,9 @@ class ProductControllerTest extends IntegrationBase {
     @DisplayName("product price, id 내림차순 페이징")
     void findProductsPaginationDesc() throws Exception {
         String url = "http://localhost:8080/products?page=0&size=4&sort=price,DESC&sort=id,DESC";
-        Seller seller = sellerRepository.findById(1L).orElse(null);
-        productRepository.save(Product.builder().price(100).seller(seller).build());
-        productRepository.save(Product.builder().price(2000).seller(seller).build());
-        productRepository.save(Product.builder().price(100).seller(seller).build());
+        productRepository.save(Product.builder().price(100).seller(seller1).build());
+        productRepository.save(Product.builder().price(2000).seller(seller1).build());
+        productRepository.save(Product.builder().price(100).seller(seller1).build());
 
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
@@ -175,7 +180,7 @@ class ProductControllerTest extends IntegrationBase {
     @Test
     @DisplayName("product 찾았다")
     void findProduct() throws Exception {
-        String url = "http://localhost:8080/products/0";
+        String url = "http://localhost:8080/products/" + product1.getId();
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -191,7 +196,7 @@ class ProductControllerTest extends IntegrationBase {
     void updateProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
-        ProductUpdateRequest request = ProductUpdateRequest.builder().id(0L).title("new").categoryId(2L).build();
+        ProductUpdateRequest request = ProductUpdateRequest.builder().id(product1.getId()).title("new").categoryId(2L).build();
 
         mockMvc.perform(put(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -208,7 +213,8 @@ class ProductControllerTest extends IntegrationBase {
     @Test
     @DisplayName("product 삭제")
     void deleteProduct() throws Exception {
-        String url = "http://localhost:8080/products/0";
+        String url = "http://localhost:8080/products/" + product1.getId();
+        System.out.println(product1.getId());
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
 
         mockMvc.perform(delete(url)
@@ -216,6 +222,9 @@ class ProductControllerTest extends IntegrationBase {
                 .andExpect(status().isOk());
 
         List<Product> products = productRepository.findAll();
+        for (Product p : products) {
+            System.out.println(p.toString());
+        }
         assertThat(products.size()).isEqualTo(0);
     }
 
@@ -224,10 +233,9 @@ class ProductControllerTest extends IntegrationBase {
     void findProductsPaginationBrand() throws Exception {
         String url = "http://localhost:8080/products?page=0&size=4&sort=id,DESC";
         ProductSearchRequest productSearch = ProductSearchRequest.builder().specialPrice(true).deliveryFee(true).build();
-        Seller seller = sellerRepository.findById(1L).orElse(null);
-        productRepository.save(Product.builder().specialPrice(true).deliveryFee(2000).seller(seller).build());
-        productRepository.save(Product.builder().specialPrice(false).deliveryFee(1000).seller(seller).build());
-        productRepository.save(Product.builder().specialPrice(true).seller(seller).build());
+        productRepository.save(Product.builder().specialPrice(true).deliveryFee(2000).seller(seller1).build());
+        productRepository.save(Product.builder().specialPrice(false).deliveryFee(1000).seller(seller1).build());
+        productRepository.save(Product.builder().specialPrice(true).seller(seller1).build());
 
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -252,10 +260,9 @@ class ProductControllerTest extends IntegrationBase {
         Category air = categoryRepository.findByName("에어컨").orElse(null);
         Category laptop = categoryRepository.findByName("노트북").orElse(null);
         Category desktop = categoryRepository.findByName("컴퓨터").orElse(null);
-        Seller seller = sellerRepository.findById(1L).orElse(null);
-        productRepository.save(Product.builder().title("air").category(air).seller(seller).build());
-        productRepository.save(Product.builder().title("lap").category(laptop).seller(seller).build());
-        productRepository.save(Product.builder().title("desk").category(desktop).seller(seller).build());
+        productRepository.save(Product.builder().title("air").category(air).seller(seller1).build());
+        productRepository.save(Product.builder().title("lap").category(laptop).seller(seller1).build());
+        productRepository.save(Product.builder().title("desk").category(desktop).seller(seller1).build());
 
         String url = "http://localhost:8080/products";
         Long id = categoryRepository.findByName("컴퓨터/노트북").orElse(null).getId();

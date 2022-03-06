@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@ToString
 public class ParentOptionResponse {
     private Long id;
     private int price;
@@ -23,14 +22,15 @@ public class ParentOptionResponse {
     private String content;
     private Set<ChildOptionResponse> childOptions;
 
-    public ParentOptionResponse(ParentOption parentOption) {
+    public ParentOptionResponse(ParentOption parentOption, boolean withChildren) {
         this.id = parentOption.getId();
         this.price = parentOption.getPrice();
         this.stock = parentOption.getStock();
         this.content = parentOption.getContent();
 
-        this.childOptions = Optional.ofNullable(parentOption.getChildren())
-                .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
-                .map(childOption -> new ChildOptionResponse(childOption)).collect(Collectors.toSet());
+        if (withChildren)
+            this.childOptions = Optional.ofNullable(parentOption.getChildren())
+                    .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
+                    .map(childOption -> new ChildOptionResponse(childOption)).collect(Collectors.toSet());
     }
 }

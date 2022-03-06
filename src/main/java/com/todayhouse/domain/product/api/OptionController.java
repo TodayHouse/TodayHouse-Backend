@@ -28,7 +28,7 @@ public class OptionController {
     @PostMapping("/parent")
     public BaseResponse saveParentOption(@Valid @RequestBody ParentOptionSaveRequest request) {
         ParentOption parentOption = optionService.saveParentOption(request);
-        return new BaseResponse(new ParentOptionResponse(parentOption));
+        return new BaseResponse(new ParentOptionResponse(parentOption, false));
     }
 
     @PostMapping("/child")
@@ -48,7 +48,7 @@ public class OptionController {
         Set<ParentOption> parents = optionService.findParentOptionsByProductId(productId);
         Set<ParentOptionResponse> response = Optional.ofNullable(parents)
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
-                .map(parentOption -> new ParentOptionResponse(parentOption)).collect(Collectors.toSet());
+                .map(parentOption -> new ParentOptionResponse(parentOption, false)).collect(Collectors.toSet());
         return new BaseResponse(response);
     }
 
@@ -70,19 +70,19 @@ public class OptionController {
         return new BaseResponse(response);
     }
 
-    @PatchMapping("/parents")
+    @PatchMapping("/parent")
     public BaseResponse updateParentOption(@Valid @RequestBody ParentOptionUpdateRequest request) {
         ParentOption parentOption = optionService.updateParentOption(request);
-        return new BaseResponse(new ParentOptionResponse(parentOption));
+        return new BaseResponse(new ParentOptionResponse(parentOption, false));
     }
 
-    @PatchMapping("/children")
+    @PatchMapping("/child")
     public BaseResponse updateChildOption(@Valid @RequestBody ChildOptionUpdateRequest request) {
         ChildOption childOption = optionService.updateChildOption(request);
         return new BaseResponse(new ChildOptionResponse(childOption));
     }
 
-    @PatchMapping("/selections")
+    @PatchMapping("/selection")
     public BaseResponse updateSelectionOption(@Valid @RequestBody SelectionOptionUpdateRequest request) {
         SelectionOption selectionOption = optionService.updateSelectionOption(request);
         return new BaseResponse(new SelectionOptionResponse(selectionOption));
