@@ -22,6 +22,7 @@ public class ParentOptionResponse {
     private String content;
     private Set<ChildOptionResponse> childOptions;
 
+    // childOption을 변환하여 보낼 것인지 경정 가능
     public ParentOptionResponse(ParentOption parentOption, boolean withChildren) {
         this.id = parentOption.getId();
         this.price = parentOption.getPrice();

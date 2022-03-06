@@ -56,6 +56,7 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
         return new PageImpl<>(products, pageable, total);
     }
 
+    // product를 seller, 모든 option과 left join
     @Override
     public Optional<Product> findByIdWithOptionsAndSeller(Long id) {
         QProduct qProduct = QProduct.product;

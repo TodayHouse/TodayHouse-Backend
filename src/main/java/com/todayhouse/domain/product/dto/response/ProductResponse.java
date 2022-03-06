@@ -33,6 +33,7 @@ public class ProductResponse {
     private Set<ParentOptionResponse> parentOptions;
     private Set<SelectionOptionResponse> selectionOptions;
 
+    // null safe로 parent, child, selection option 모두 response type으로 변경
     public ProductResponse(Product product) {
         this.id = product.getId();
         this.sellerId = product.getId();
