@@ -59,7 +59,7 @@ public class OptionControllerTest extends IntegrationBase {
         Seller seller = Seller.builder().brand("brand").build();
         em.persist(seller);
 
-        product = Product.builder().seller(seller).option1("p1").option2("c1").selectionOption("s1").build();
+        product = Product.builder().seller(seller).parentOption("p1").childOption("c1").selectionOption("s1").build();
         parentOption = ParentOption.builder().product(product).content("ppp").build();
         childOption = ChildOption.builder().parent(parentOption).content("ccc").price(10000).stock(1).build();
 

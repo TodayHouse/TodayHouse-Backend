@@ -41,7 +41,7 @@ public class OptionRepositoryTest extends DataJpaBase {
         Seller seller = Seller.builder().brand("testBrand").build();
         em.persist(seller);
 
-        Product product = Product.builder().seller(seller).option1("o1").option2("o2").selectionOption("sp").build();
+        Product product = Product.builder().seller(seller).parentOption("o1").childOption("o2").selectionOption("sp").build();
 
         ParentOption p1 = ParentOption.builder().content("p1").product(product).build();
         ChildOption p1c1 = ChildOption.builder().content("p1c1").parent(p1).build();

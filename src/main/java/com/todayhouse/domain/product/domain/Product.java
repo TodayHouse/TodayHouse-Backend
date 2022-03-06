@@ -21,10 +21,10 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @SequenceGenerator(
-        name="PROC_SEQ_GEN", //시퀀스 제너레이터 이름
-        sequenceName="PROC_SEQ", //시퀀스 이름
-        initialValue=0, //시작값
-        allocationSize=1 //메모리를 통해 할당할 범위 사이즈
+        name = "PROC_SEQ_GEN", //시퀀스 제너레이터 이름
+        sequenceName = "PROC_SEQ", //시퀀스 이름
+        initialValue = 0, //시작값
+        allocationSize = 1 //메모리를 통해 할당할 범위 사이즈
 )
 public class Product {
     @Id
@@ -53,9 +53,9 @@ public class Product {
 
     private int sales;
 
-    private String option1;
+    private String parentOption;
 
-    private String option2;
+    private String childOption;
 
     private String selectionOption;
 
@@ -84,7 +84,7 @@ public class Product {
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee, boolean specialPrice,
-                   String productDetail, int sales, Seller seller, Category category, String option1, String option2, String selectionOption) {
+                   String productDetail, int sales, Seller seller, Category category, String parentOption, String childOption, String selectionOption) {
         this.title = title;
         this.image = image;
         this.price = price;
@@ -94,8 +94,8 @@ public class Product {
         this.productDetail = productDetail;
         this.sales = sales;
         this.category = category;
-        this.option1 = option1;
-        this.option2 = option2;
+        this.parentOption = parentOption;
+        this.childOption = childOption;
         this.selectionOption = selectionOption;
         setSeller(seller);
     }

@@ -1,6 +1,5 @@
 package com.todayhouse.domain.product.domain;
 
-import com.todayhouse.domain.product.dto.request.ChildOptionUpdateRequest;
 import com.todayhouse.domain.product.dto.request.ParentOptionUpdateRequest;
 import com.todayhouse.domain.product.exception.ProductExistException;
 import com.todayhouse.domain.product.exception.StockNotEnoughException;
@@ -42,7 +41,7 @@ public class ParentOption {
         setProduct(product);
     }
 
-    public void update(ParentOptionUpdateRequest request){
+    public void update(ParentOptionUpdateRequest request) {
         this.price = request.getPrice();
         this.stock = request.getStock();
         this.content = request.getContent();

@@ -40,13 +40,13 @@ public class ProductSaveRequest {
 
     private String productDetail;
 
-    private String option;
+    private String parentOption;
 
     private String childOption;
 
     private String selectionOption;
 
-    private Set<ParentOptionSaveRequest> options;
+    private Set<ParentOptionSaveRequest> parentOptions;
 
     private Set<SelectionOptionSaveRequest> selectionOptions;
 
@@ -63,12 +63,12 @@ public class ProductSaveRequest {
                 .sales(0)
                 .seller(seller)
                 .category(category)
-                .option1(this.option)
-                .option2(this.childOption)
+                .parentOption(this.parentOption)
+                .childOption(this.childOption)
                 .selectionOption(this.selectionOption)
                 .build();
 
-        Optional.ofNullable(options)
+        Optional.ofNullable(parentOptions)
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
                 .map(parentRequest -> parentRequest.toEntityWithChild(product)).collect(Collectors.toSet());
 

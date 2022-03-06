@@ -100,7 +100,7 @@ class ProductControllerTest extends IntegrationBase {
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
                 .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).image("img.jpg").categoryId(1L)
-                .options(parent)
+                .parentOptions(parent)
                 .build();
 
         MvcResult mvcResult = mockMvc.perform(post(url)
@@ -112,7 +112,7 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         ProductResponse productResponse = objectMapper.convertValue(getResponseFromMvcResult(mvcResult).getResult(), ProductResponse.class);
-        Set<ParentOptionResponse> parents = objectMapper.readValue(objectMapper.writeValueAsString(productResponse.getOptions()), new TypeReference<>() {
+        Set<ParentOptionResponse> parents = objectMapper.readValue(objectMapper.writeValueAsString(productResponse.getParentOptions()), new TypeReference<>() {
         });
         List<ParentOptionResponse> list = new ArrayList<>(parents);
         Set<ChildOptionResponse> children = objectMapper.readValue(objectMapper.writeValueAsString(list.get(0).getChildOptions()), new TypeReference<>() {

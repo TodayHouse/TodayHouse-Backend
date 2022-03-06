@@ -67,7 +67,7 @@ class ProductServiceImplTest {
         ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
         Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
-        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).options(parent).build();
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).parentOptions(parent).build();
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
