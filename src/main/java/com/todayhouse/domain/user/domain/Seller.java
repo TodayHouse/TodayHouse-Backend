@@ -34,6 +34,9 @@ public class Seller {
     @Column(name = "registration_num")
     private String registrationNum;
 
+    @Column(name = "business_address")
+    private String businessAddress;
+
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Product> products = new ArrayList<>();
@@ -48,6 +51,7 @@ public class Seller {
                 ", customerCenter='" + customerCenter + '\'' +
                 ", email='" + email + '\'' +
                 ", registrationNum='" + registrationNum + '\'' +
+                ", businessAddress='" + businessAddress + '\'' +
                 '}';
     }
 }

@@ -54,7 +54,7 @@ class SellerControllerTest extends IntegrationBase {
         userRepository.save(User.builder().email(userEmail).build());
 
         SellerRequest request = SellerRequest.builder()
-                .companyName("a").email(sellerEmail).brand("brand").customerCenter("a").registrationNum(10).representative("a")
+                .companyName("a").email(sellerEmail).brand("brand").customerCenter("a").registrationNum("010").representative("a").businessAddress("address")
                 .build();
         String jwt = tokenProvider.createToken(userEmail, Collections.singletonList(Role.USER));
 
@@ -77,7 +77,7 @@ class SellerControllerTest extends IntegrationBase {
         userRepository.save(User.builder().email(userEmail).seller(seller).build());
 
         SellerRequest request = SellerRequest.builder()
-                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum(10).representative("a")
+                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum("010").representative("a").businessAddress("address")
                 .build();
         String jwt = tokenProvider.createToken(userEmail, Collections.singletonList(Role.USER));
 
@@ -96,7 +96,7 @@ class SellerControllerTest extends IntegrationBase {
         userRepository.save(User.builder().email(userEmail).build());
 
         SellerRequest request = SellerRequest.builder()
-                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum(10).representative("a")
+                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum("010").representative("a").businessAddress("address")
                 .build();
 
         mockMvc.perform(post(url)

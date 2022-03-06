@@ -27,8 +27,12 @@ public class SellerRequest {
     @NotBlank(message = "customerCenter를 입력해주세요")
     private String customerCenter;
 
-    @NotNull(message = "registrationNum를 입력해주세요")
-    private int registrationNum;
+
+    @NotBlank(message = "registrationNum를 입력해주세요")
+    private String registrationNum;
+
+    @NotBlank(message = "businessAddress를 입력해주세요")
+    private String businessAddress;
 
     public Seller toEntity() {
         return Seller.builder()
@@ -37,7 +41,8 @@ public class SellerRequest {
                 .companyName(this.companyName)
                 .customerCenter(this.customerCenter)
                 .representative(this.representative)
-                .registrationNum(this.representative)
+                .registrationNum(this.registrationNum)
+                .businessAddress(this.businessAddress)
                 .build();
     }
 }

@@ -18,6 +18,7 @@ public class SellerResponse {
     private String representative;
     private String customerCenter;
     private String registrationNum;
+    private String businessAddress;
 
     public SellerResponse(Seller seller) {
         this.id = seller.getId();
@@ -27,6 +28,7 @@ public class SellerResponse {
         this.representative = seller.getRepresentative();
         this.customerCenter = seller.getCustomerCenter();
         this.registrationNum = seller.getRegistrationNum();
+        this.businessAddress = seller.getBusinessAddress();
     }
 
 }
