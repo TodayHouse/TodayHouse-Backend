@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class StoryServiceImpl implements StoryService{
+public class StoryServiceImpl implements StoryService {
 
     private final StoryRepository storyRepository;
     private final FileService fileService;
@@ -34,17 +34,17 @@ public class StoryServiceImpl implements StoryService{
     @Override
     public Long save(List<MultipartFile> multipartFile, StoryCreateRequest request) {
         List<String> fileName = new ArrayList<>();
-        if (!multipartFile.isEmpty()){
+        if (!multipartFile.isEmpty()) {
             fileName = fileService.upload(multipartFile);
         }
         User user = (User) customUserDetailService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-        Long id = storyRepository.save(request.toEntity(user)).getId();
-        imageService.save(fileName, this.getStory(id));
-        return id;
+        Story story = storyRepository.save(request.toEntity(user));
+        imageService.save(fileName, story);
+        return story.getId();
     }
 
     @Override
-    public StoryGetDetailResponse findById(Long id){
+    public StoryGetDetailResponse findById(Long id) {
         return new StoryGetDetailResponse(this.getStory(id));
     }
 
@@ -55,24 +55,24 @@ public class StoryServiceImpl implements StoryService{
     @Override
     public List<StoryGetListResponse> findAllDesc() {
         return storyRepository.findAllByOrderByIdDesc().stream()
-                .map(story -> new StoryGetListResponse(story, imageService.getThumbnailUrl(story)))
+                .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<String> getImageInStory(Long id){
+    public List<String> getImageInStory(Long id) {
         return this.getStory(id).getImageList().stream().map(image -> image.getFileName()).collect(Collectors.toList());
     }
 
     @Override
-    public Long update(Long id, StoryUpdateRequest request){
+    public Long update(Long id, StoryUpdateRequest request) {
         Story story = storyRepository.findById(id).orElseThrow(StoryNotFoundException::new);
         story.update(request.getTitle(), request.getContent(), request.getCategory());
         return id;
     }
 
     @Override
-    public void delete(Long id){
+    public void delete(Long id) {
         Story story = this.getStory(id);
         imageService.delete(story.getImageList().stream().map(image -> image.getFileName()).collect(Collectors.toList()));
         storyRepository.delete(story);

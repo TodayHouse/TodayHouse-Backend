@@ -12,22 +12,19 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name="type")
 public class Image extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "file_name", nullable = false)
     private String fileName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Story story;
-
     @Builder
-    public Image(String fileName, Story story){
+    public Image(String fileName){
         this.fileName = fileName;
-        this.story = story;
     }
 }

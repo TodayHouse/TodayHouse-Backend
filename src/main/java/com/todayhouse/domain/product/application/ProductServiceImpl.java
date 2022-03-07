@@ -3,6 +3,8 @@ package com.todayhouse.domain.product.application;
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
+import com.todayhouse.domain.image.application.ImageService;
+import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
@@ -16,32 +18,39 @@ import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.InvalidRequestException;
 import com.todayhouse.domain.user.exception.SellerNotFoundException;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
+import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
+    private final FileService fileService;
+    private final ImageService imageService;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductImageRepository productImageRepository;
     private final CustomProductRepository customProductRepository;
 
     @Override
-    public Product saveProductRequest(ProductSaveRequest request) {
+    public Long saveProductRequest(List<MultipartFile> multipartFile, ProductSaveRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(CategoryNotFoundException::new);
         // jwt로 seller 찾기
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         if (user.getSeller() == null)
             throw new SellerNotFoundException();
-        Product product = request.toEntity(user.getSeller(), category);
-        return productRepository.save(product);
+        return saveEntity(multipartFile, request, user, category);
     }
 
     @Override
@@ -51,16 +60,17 @@ public class ProductServiceImpl implements ProductService {
         return response;
     }
 
+    // product 와 image left join
     @Override
-    public Product findOne(Long id) {
-        return productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
+    public Product findByIdWithImage(Long id) {
+        return productRepository.findByIdWithImages(id).orElseThrow(ProductNotFoundException::new);
     }
 
     @Override
     public Product updateProduct(ProductUpdateRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(CategoryNotFoundException::new);
         Product product = getValidProduct(request.getId());
-        product.updateProduct(request, category);
+        product.update(request, category);
         return productRepository.save(product);
     }
 
@@ -78,5 +88,19 @@ public class ProductServiceImpl implements ProductService {
         if (!user.getSeller().equals(product.getSeller()))
             throw new InvalidRequestException();
         return product;
+    }
+
+    // product, image, filename 저장
+    private Long saveEntity(List<MultipartFile> multipartFile, ProductSaveRequest request,
+                            User user, Category category) {
+        List<String> fileName = new ArrayList<>();
+        String first = null;
+        if (!multipartFile.isEmpty()) {
+            fileName = fileService.upload(multipartFile);
+            first = fileName.get(0);
+        }
+        Product product = productRepository.save(request.toEntity(user.getSeller(), category, first));
+        imageService.save(fileName, product);
+        return product.getId();
     }
 }

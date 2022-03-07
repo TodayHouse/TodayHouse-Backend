@@ -87,7 +87,7 @@ class ProductServiceImplTest {
         Product product = Product.builder().seller(seller).build();
         when(productRepository.findById(1L)).thenReturn(Optional.ofNullable(product));
 
-        Product result = productService.findOne(1L);
+        Product result = productService.findByIdWithImage(1L);
         assertThat(result).isEqualTo(product);
     }
 

@@ -1,6 +1,7 @@
 package com.todayhouse.domain.product.domain;
 
 import com.todayhouse.domain.category.domain.Category;
+import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.exception.SellerNotSettingException;
 import com.todayhouse.domain.user.domain.Seller;
@@ -12,6 +13,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -63,6 +66,9 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> imageList = new ArrayList<>();
+
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee,
                    boolean specialPrice, String productDetail, int sales, Seller seller, Category category) {
@@ -87,7 +93,7 @@ public class Product {
         seller.getProducts().add(this);
     }
 
-    public void updateProduct(ProductUpdateRequest request, Category category) {
+    public void update(ProductUpdateRequest request, Category category) {
         this.title = request.getTitle();
         this.image = request.getImage();
         this.price = request.getPrice();

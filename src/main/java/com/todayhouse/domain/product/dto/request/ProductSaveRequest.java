@@ -16,9 +16,6 @@ public class ProductSaveRequest {
     @NotBlank(message = "title을 입력해주세요")
     private String title;
 
-    @NotBlank(message = "image를 입력해주세요")
-    private String image;
-
     @NotNull(message = "price를 입력해주세요")
     private int price;
 
@@ -36,16 +33,16 @@ public class ProductSaveRequest {
 
     private String productDetail;
 
-    public Product toEntity(Seller seller, Category category) {
+    public Product toEntity(Seller seller, Category category, String image) {
         return Product.builder()
                 .title(this.title)
-                .image(this.image)
                 .price(this.price)
                 .discountRate(this.discountRate)
                 .deliveryFee(this.deliveryFee)
                 .specialPrice(this.specialPrice)
                 .productDetail(this.productDetail)
                 .sales(0)
+                .image(image)
                 .seller(seller)
                 .category(category).build();
     }

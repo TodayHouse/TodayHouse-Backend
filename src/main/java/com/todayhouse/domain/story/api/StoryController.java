@@ -21,32 +21,32 @@ public class StoryController {
 
     @PostMapping
     public BaseResponse<Long> create(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFile,
-                                     @RequestPart(value = "request") StoryCreateRequest request){
+                                     @RequestPart(value = "request") StoryCreateRequest request) {
         return new BaseResponse<>(storyService.save(multipartFile, request));
     }
 
     @GetMapping("/{id}")
-    public BaseResponse<StoryGetDetailResponse> findById(@PathVariable Long id){
+    public BaseResponse<StoryGetDetailResponse> findById(@PathVariable Long id) {
         return new BaseResponse<>(storyService.findById(id));
     }
 
     @GetMapping
-    public BaseResponse<List<StoryGetListResponse>> findAllDesc(){
+    public BaseResponse<List<StoryGetListResponse>> findAllDesc() {
         return new BaseResponse<>(storyService.findAllDesc());
     }
 
     @GetMapping("/{id}/images")
-    public BaseResponse<List<String>> getImageInStory(@PathVariable Long id){
+    public BaseResponse<List<String>> findImageInStory(@PathVariable Long id) {
         return new BaseResponse<>(storyService.getImageInStory(id));
     }
 
     @PatchMapping("/{id}")
-    public BaseResponse<Long> update(@PathVariable Long id, @RequestBody StoryUpdateRequest request){
+    public BaseResponse<Long> update(@PathVariable Long id, @RequestBody StoryUpdateRequest request) {
         return new BaseResponse<>(storyService.update(id, request));
     }
 
-    @DeleteMapping("{id}")
-    public BaseResponse<String> delete(@PathVariable Long id){
+    @DeleteMapping("/{id}")
+    public BaseResponse<String> delete(@PathVariable Long id) {
         storyService.delete(id);
         return new BaseResponse<>("해당 스토리가 삭제되었습니다.");
     }

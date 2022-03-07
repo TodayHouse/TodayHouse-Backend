@@ -6,16 +6,17 @@ import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
-import com.todayhouse.domain.product.dto.response.ProductSaveResponse;
 import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -24,9 +25,9 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public BaseResponse saveProduct(@Valid @RequestBody ProductSaveRequest request) {
-        Product product = productService.saveProductRequest(request);
-        return new BaseResponse(new ProductSaveResponse(product));
+    public BaseResponse createProduct(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFile,
+                                      @RequestPart(value = "request") @Valid @RequestBody ProductSaveRequest request) {
+        return new BaseResponse(productService.saveProductRequest(multipartFile, request));
     }
 
     //?page=0&size=4&sort=price,DESC&sort=id,DESC 형식으로 작성
@@ -39,8 +40,8 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public BaseResponse findProduct(@PathVariable Long id) {
-        Product product = productService.findOne(id);
+    public BaseResponse findProductWithImage(@PathVariable Long id) {
+        Product product = productService.findByIdWithImage(id);
         return new BaseResponse(new ProductResponse(product));
     }
 
@@ -50,7 +51,7 @@ public class ProductController {
         return new BaseResponse(new ProductResponse(product));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public BaseResponse deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return new BaseResponse(Collections.singletonMap("id", id));
