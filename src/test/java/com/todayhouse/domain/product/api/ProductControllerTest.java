@@ -84,7 +84,7 @@ class ProductControllerTest extends IntegrationBase {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
         ProductSaveRequest request = ProductSaveRequest.builder()
-                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).image("img.jpg").categoryId(1L)
+                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryId(1L)
                 .build();
 
         MvcResult mvcResult = mockMvc.perform(post(url)
@@ -95,7 +95,8 @@ class ProductControllerTest extends IntegrationBase {
                 .andDo(print())
                 .andReturn();
 
-        Product product = objectMapper.convertValue(getResponseFromMvcResult(mvcResult).getResult(), Product.class);
+        Long id = objectMapper.convertValue(getResponseFromMvcResult(mvcResult).getResult(), Long.class);
+        Product product = productRepository.findById(id).orElse(null);
         assertThat(product.getTitle()).isEqualTo("new");
     }
 

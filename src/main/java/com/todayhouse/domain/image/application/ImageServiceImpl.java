@@ -27,16 +27,16 @@ public class ImageServiceImpl implements ImageService {
     private final ProductImageRepository productImageRepository;
 
     @Override
-    public void save(List<String> fileName, Story story) {
-        storyImageRepository.saveAll(fileName
+    public void save(List<String> fileNames, Story story) {
+        storyImageRepository.saveAll(fileNames
                 .stream()
                 .map(file -> new StoryImage(file, story))
                 .collect(Collectors.toList()));
     }
 
     @Override
-    public void save(List<String> fileName, Product product) {
-        productImageRepository.saveAll(fileName
+    public void save(List<String> fileNames, Product product) {
+        productImageRepository.saveAll(fileNames
                 .stream()
                 .map(file -> new ProductImage(file, product))
                 .collect(Collectors.toList()));
@@ -58,14 +58,14 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void delete(List<String> fileName) {
-        fileService.delete(fileName);
+    public void delete(List<String> fileNames) {
+        fileService.delete(fileNames);
     }
 
     @Override
     @Transactional(readOnly = true)
     public String findThumbnailUrl(Story story) {
-        StoryImage image = storyImageRepository.findFirstByStoryOrderByCreatedAtDesc(story).orElseGet(null);
+        StoryImage image = storyImageRepository.findFirstByStoryOrderByCreatedAtDesc(story).orElse(null);
         if (image == null) return null;
         return image.getFileName();
     }
@@ -73,7 +73,7 @@ public class ImageServiceImpl implements ImageService {
     @Override
     @Transactional(readOnly = true)
     public String findThumbnailUrl(Product product) {
-        ProductImage image = productImageRepository.findFirstByProductOrderByCreatedAtDesc(product).orElseGet(null);
+        ProductImage image = productImageRepository.findFirstByProductOrderByCreatedAtDesc(product).orElse(null);
         if (image == null) return null;
         return image.getFileName();
     }

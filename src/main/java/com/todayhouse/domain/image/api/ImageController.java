@@ -20,23 +20,23 @@ public class ImageController {
     private final FileService fileService;
 
     @GetMapping(value = "/{file}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> getImage(@PathVariable String file){
+    public ResponseEntity<byte[]> getImage(@PathVariable String file) {
         return new ResponseEntity<>(imageService.getImage(file), HttpStatus.OK);
     }
 
     @GetMapping
-    public BaseResponse<List<String>> getAll(){
+    public BaseResponse<List<String>> getAll() {
         return new BaseResponse<>(imageService.findStoryImageAll());
     }
 
-    @DeleteMapping("{file}")
-    public BaseResponse<String> deleteOneFile(@PathVariable String file){
+    @DeleteMapping("/{file}")
+    public BaseResponse<String> deleteOneFile(@PathVariable String file) {
         fileService.deleteOne(file);
         return new BaseResponse<>("File deleted : " + file);
     }
 
     @DeleteMapping
-    public BaseResponse<String> deleteFile(@RequestParam List<String> file){
+    public BaseResponse<String> deleteFiles(@RequestParam List<String> file) {
         fileService.delete(file);
         return new BaseResponse<>("File deleted : " + file);
     }

@@ -62,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
 
     // product 와 image left join
     @Override
-    public Product findByIdWithImage(Long id) {
+    public Product findByIdWithImages(Long id) {
         return productRepository.findByIdWithImages(id).orElseThrow(ProductNotFoundException::new);
     }
 
@@ -91,16 +91,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // product, image, filename 저장
-    private Long saveEntity(List<MultipartFile> multipartFile, ProductSaveRequest request,
+    private Long saveEntity(List<MultipartFile> multipartFiles, ProductSaveRequest request,
                             User user, Category category) {
-        List<String> fileName = new ArrayList<>();
+        List<String> fileNames = new ArrayList<>();
         String first = null;
-        if (!multipartFile.isEmpty()) {
-            fileName = fileService.upload(multipartFile);
-            first = fileName.get(0);
+        if (multipartFiles != null && !multipartFiles.isEmpty()) {
+            fileNames = fileService.upload(multipartFiles);
+            first = fileNames.get(0);
         }
         Product product = productRepository.save(request.toEntity(user.getSeller(), category, first));
-        imageService.save(fileName, product);
+        imageService.save(fileNames, product);
         return product.getId();
     }
 }

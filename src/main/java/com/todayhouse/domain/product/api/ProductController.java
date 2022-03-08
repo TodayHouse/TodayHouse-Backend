@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -25,7 +24,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public BaseResponse createProduct(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFile,
+    public BaseResponse<Long> createProduct(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFile,
                                       @RequestPart(value = "request") @Valid @RequestBody ProductSaveRequest request) {
         return new BaseResponse(productService.saveProductRequest(multipartFile, request));
     }
@@ -41,7 +40,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public BaseResponse findProductWithImage(@PathVariable Long id) {
-        Product product = productService.findByIdWithImage(id);
+        Product product = productService.findByIdWithImages(id);
         return new BaseResponse(new ProductResponse(product));
     }
 
@@ -54,6 +53,6 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public BaseResponse deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
-        return new BaseResponse(Collections.singletonMap("id", id));
+        return new BaseResponse("삭제되었습니다.");
     }
 }

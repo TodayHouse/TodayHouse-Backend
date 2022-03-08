@@ -23,6 +23,7 @@ public class Story extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "story_id")
     private Long id;
 
     @Column(nullable = false)
@@ -47,7 +48,7 @@ public class Story extends BaseTimeEntity {
     private User user;
 
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<StoryImage> imageList = new ArrayList<>();
+    private final List<StoryImage> images = new ArrayList<>();
 
     @Builder
     public Story(String title, String content, Integer liked, Category category, User user) {

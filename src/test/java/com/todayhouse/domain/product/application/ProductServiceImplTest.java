@@ -2,6 +2,7 @@ package com.todayhouse.domain.product.application;
 
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
+import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
@@ -10,6 +11,7 @@ import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.infra.S3Storage.service.FileService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,10 +19,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -32,6 +38,12 @@ class ProductServiceImplTest {
 
     @InjectMocks
     ProductServiceImpl productService;
+
+    @Mock
+    FileService fileService;
+
+    @Mock
+    ImageService imageService;
 
     @Mock
     UserRepository userRepository;
@@ -59,13 +71,18 @@ class ProductServiceImplTest {
         Product product = Product.builder().seller(seller).build();
         User user = User.builder().email(email).seller(seller).build();
         ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).build();
+        MultipartFile multipartFile = new MockMultipartFile("data", "filename.txt", "text/plain", "bytes".getBytes());
+        List<MultipartFile> list = new ArrayList<>();
+        list.add(multipartFile);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
         when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(fileService.upload(list)).thenReturn(List.of("data"));
+        doNothing().when(imageService).save(anyList(), any(Product.class));
 
-        Product result = productService.saveProductRequest(request);
-        assertThat(result).isEqualTo(product);
+        Long id = productService.saveProductRequest(list, request);
+        assertThat(id).isEqualTo(product.getId());
     }
 
 //    @Test
@@ -85,9 +102,9 @@ class ProductServiceImplTest {
     void findOne() {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
-        when(productRepository.findById(1L)).thenReturn(Optional.ofNullable(product));
+        when(productRepository.findByIdWithImages(1L)).thenReturn(Optional.ofNullable(product));
 
-        Product result = productService.findByIdWithImage(1L);
+        Product result = productService.findByIdWithImages(1L);
         assertThat(result).isEqualTo(product);
     }
 
