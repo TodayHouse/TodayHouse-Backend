@@ -12,9 +12,13 @@ public interface ImageService {
 
     byte[] getImage(String fileName);
 
-    void deleteOne(String fileName);
+    void deleteStoryImage(String fileName);
 
-    void delete(List<String> fileName);
+    void deleteProductImage(String fileName);
+
+    void deleteStoryImages(List<String> fileNames);
+
+    void deleteProductImages(List<String> fileNames);
 
     String findThumbnailUrl(Story story);
 

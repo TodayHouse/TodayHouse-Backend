@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -138,4 +139,25 @@ class ImageServiceImplTest {
         assertTrue(result.contains("a"));
         assertTrue(result.contains("b"));
     }
+
+    @Test
+    @DisplayName("Story image 리스트로 삭제")
+    void deleteStoryImages() {
+        List<String> list = List.of("a", "b", "c");
+        doNothing().when(storyImageRepository).deleteByFileName(anyString());
+        doNothing().when(fileService).delete(anyList());
+
+        imageService.deleteStoryImages(list);
+    }
+
+    @Test
+    @DisplayName("Product image 리스트로 삭제")
+    void deleteProductImages() {
+        List<String> list = List.of("a", "b", "c");
+        doNothing().when(productImageRepository).deleteByFileName(anyString());
+        doNothing().when(fileService).delete(anyList());
+
+        imageService.deleteProductImages(list);
+    }
+
 }

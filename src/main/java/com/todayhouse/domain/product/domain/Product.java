@@ -67,7 +67,7 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductImage> imageList = new ArrayList<>();
+    private List<ProductImage> images = new ArrayList<>();
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee,

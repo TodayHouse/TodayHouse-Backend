@@ -53,12 +53,28 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void deleteOne(String fileName) {
+    public void deleteStoryImage(String fileName) {
+        storyImageRepository.deleteByFileName(fileName);
         fileService.deleteOne(fileName);
     }
 
     @Override
-    public void delete(List<String> fileNames) {
+    public void deleteProductImage(String fileName) {
+        productImageRepository.deleteByFileName(fileName);
+        fileService.deleteOne(fileName);
+    }
+
+    @Override
+    public void deleteStoryImages(List<String> fileNames) {
+        for(String fileName : fileNames)
+            storyImageRepository.deleteByFileName(fileName);
+        fileService.delete(fileNames);
+    }
+
+    @Override
+    public void deleteProductImages(List<String> fileNames) {
+        for(String fileName : fileNames)
+            productImageRepository.deleteByFileName(fileName);
         fileService.delete(fileNames);
     }
 

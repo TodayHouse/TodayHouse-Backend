@@ -74,7 +74,7 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public void delete(Long id) {
         Story story = this.getStory(id);
-        imageService.delete(story.getImages().stream().map(image -> image.getFileName()).collect(Collectors.toList()));
+        imageService.deleteProductImages(story.getImages().stream().map(image -> image.getFileName()).collect(Collectors.toList()));
         storyRepository.delete(story);
     }
 }

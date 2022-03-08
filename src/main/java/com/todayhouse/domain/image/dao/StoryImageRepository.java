@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface StoryImageRepository extends JpaRepository<StoryImage, Long> {
     Optional<StoryImage> findFirstByStoryOrderByCreatedAtDesc(Story story);
+    void deleteByFileName(String fileName);
 }
