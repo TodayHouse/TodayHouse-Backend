@@ -6,7 +6,6 @@ import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
-import com.todayhouse.domain.product.dto.response.ProductSaveResponse;
 import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,7 @@ public class ProductController {
     @PostMapping
     public BaseResponse saveProduct(@Valid @RequestBody ProductSaveRequest request) {
         Product product = productService.saveProductRequest(request);
-        return new BaseResponse(new ProductSaveResponse(product));
+        return new BaseResponse(new ProductResponse(product));
     }
 
     //?page=0&size=4&sort=price,DESC&sort=id,DESC 형식으로 작성

@@ -12,6 +12,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -45,6 +47,12 @@ public class Product {
 
     private int sales;
 
+    private String parentOption;
+
+    private String childOption;
+
+    private String selectionOption;
+
     @Column(name = "created_at")
     @CreatedDate
     private LocalDateTime createdAt;
@@ -54,18 +62,23 @@ public class Product {
     private LocalDateTime modifiedAt;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ParentOption> options = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SelectionOption> selectionOptions = new LinkedHashSet<>();
+
     @Builder
-    public Product(String title, String image, int price, int discountRate, int deliveryFee,
-                   boolean specialPrice, String productDetail, int sales, Seller seller, Category category) {
+    public Product(String title, String image, int price, int discountRate, int deliveryFee, boolean specialPrice,
+                   String productDetail, int sales, Seller seller, Category category, String parentOption, String childOption, String selectionOption) {
         this.title = title;
         this.image = image;
         this.price = price;
@@ -75,6 +88,9 @@ public class Product {
         this.productDetail = productDetail;
         this.sales = sales;
         this.category = category;
+        this.parentOption = parentOption;
+        this.childOption = childOption;
+        this.selectionOption = selectionOption;
         setSeller(seller);
     }
 
