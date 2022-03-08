@@ -8,9 +8,7 @@ import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
-import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
-import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
-import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
+import com.todayhouse.domain.product.dto.request.*;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
@@ -40,7 +38,6 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
-    private final CustomProductRepository customProductRepository;
 
     @Override
     public Long saveProductRequest(List<MultipartFile> multipartFile, ProductSaveRequest request) {
@@ -55,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> findAll(ProductSearchRequest productSearch, Pageable pageable) {
-        Page<ProductResponse> response = customProductRepository.findAll(productSearch, pageable)
+        Page<ProductResponse> response = productRepository.findAll(productSearch, pageable)
                 .map(p -> new ProductResponse(p));
         return response;
     }
@@ -84,7 +81,7 @@ public class ProductServiceImpl implements ProductService {
     private Product getValidProduct(Long id) {
         String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(jwtEmail).orElseThrow(UserNotFoundException::new);
-        Product product = productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
+        Product product = productRepository.findByIdWithOptionsAndSeller(id).orElseThrow(ProductNotFoundException::new);
         if (!user.getSeller().equals(product.getSeller()))
             throw new InvalidRequestException();
         return product;
@@ -99,7 +96,7 @@ public class ProductServiceImpl implements ProductService {
             fileNames = fileService.upload(multipartFiles);
             first = fileNames.get(0);
         }
-        Product product = productRepository.save(request.toEntity(user.getSeller(), category, first));
+        Product product = productRepository.save(request.toEntityWithParentAndSelection(user.getSeller(), category, first));
         imageService.save(fileNames, product);
         return product.getId();
     }

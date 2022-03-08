@@ -6,6 +6,8 @@ import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.product.dto.request.ChildOptionSaveRequest;
+import com.todayhouse.domain.product.dto.request.ParentOptionSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
@@ -27,7 +29,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,9 +56,6 @@ class ProductServiceImplTest {
     ProductRepository productRepository;
 
     @Mock
-    CustomProductRepository customProductRepository;
-
-    @Mock
     CategoryRepository categoryRepository;
 
     @AfterEach
@@ -70,10 +71,19 @@ class ProductServiceImplTest {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
         User user = User.builder().email(email).seller(seller).build();
-        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).build();
         MultipartFile multipartFile = new MockMultipartFile("data", "filename.txt", "text/plain", "bytes".getBytes());
         List<MultipartFile> list = new ArrayList<>();
         list.add(multipartFile);
+
+        Set<ChildOptionSaveRequest> child = new LinkedHashSet<>();
+        ChildOptionSaveRequest c1 = ChildOptionSaveRequest.builder().content("c1").build();
+        ChildOptionSaveRequest c2 = ChildOptionSaveRequest.builder().content("c2").build();
+        child.add(c1);
+        child.add(c2);
+        ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
+        Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
+        parent.add(p1);
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).parentOptions(parent).build();
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
@@ -145,7 +155,7 @@ class ProductServiceImplTest {
         User user = User.builder().email(email).seller(seller).build();
         Product product = Product.builder().seller(seller).build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
-        when(productRepository.findById(id)).thenReturn(Optional.ofNullable(product));
+        when(productRepository.findByIdWithOptionsAndSeller(id)).thenReturn(Optional.ofNullable(product));
 
         return product;
     }

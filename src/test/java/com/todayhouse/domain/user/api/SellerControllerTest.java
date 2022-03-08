@@ -12,9 +12,7 @@ import com.todayhouse.domain.user.dto.request.SellerRequest;
 import com.todayhouse.domain.user.dto.response.SellerResponse;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,7 +26,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)//@BeforeAll 사용
 class SellerControllerTest extends IntegrationBase {
 
     @Autowired
@@ -49,11 +46,6 @@ class SellerControllerTest extends IntegrationBase {
     @Autowired
     UserRepository userRepository;
 
-    @BeforeAll
-    void setUp() {
-
-    }
-
     @Test
     void seller_저장() throws Exception {
         String url = "http://localhost:8080/sellers";
@@ -62,7 +54,7 @@ class SellerControllerTest extends IntegrationBase {
         userRepository.save(User.builder().email(userEmail).build());
 
         SellerRequest request = SellerRequest.builder()
-                .companyName("a").email(sellerEmail).brand("brand").customerCenter("a").registrationNum(10).representative("a")
+                .companyName("a").email(sellerEmail).brand("brand").customerCenter("a").registrationNum("010").representative("a").businessAddress("address")
                 .build();
         String jwt = tokenProvider.createToken(userEmail, Collections.singletonList(Role.USER));
 
@@ -85,7 +77,7 @@ class SellerControllerTest extends IntegrationBase {
         userRepository.save(User.builder().email(userEmail).seller(seller).build());
 
         SellerRequest request = SellerRequest.builder()
-                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum(10).representative("a")
+                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum("010").representative("a").businessAddress("address")
                 .build();
         String jwt = tokenProvider.createToken(userEmail, Collections.singletonList(Role.USER));
 
@@ -104,7 +96,7 @@ class SellerControllerTest extends IntegrationBase {
         userRepository.save(User.builder().email(userEmail).build());
 
         SellerRequest request = SellerRequest.builder()
-                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum(10).representative("a")
+                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum("010").representative("a").businessAddress("address")
                 .build();
 
         mockMvc.perform(post(url)
@@ -120,7 +112,8 @@ class SellerControllerTest extends IntegrationBase {
         String sellerEmail = "seller@email.com";
         Seller seller = Seller.builder().email(sellerEmail).build();
         User user = userRepository.save(User.builder().email(userEmail).seller(seller).build());
-        productRepository.save(Product.builder().title("p1").seller(seller).build());
+        Product product = Product.builder().title("p1").seller(seller).build();
+        productRepository.save(product);
 
         MvcResult mvcResult = mockMvc.perform(get(url + user.getId())
                         .contentType(MediaType.APPLICATION_JSON))

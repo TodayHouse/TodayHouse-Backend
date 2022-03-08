@@ -2,6 +2,7 @@ package com.todayhouse.domain.product.dto.request;
 
 import lombok.*;
 
+// 해당 변수로 product 정렬
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

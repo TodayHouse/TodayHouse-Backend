@@ -35,6 +35,8 @@ public enum BaseResponseStatus {
     PRODUCT_NOT_FOUND(false, 2101, "상품을 찾을 수 없습니다."),
     SELLER_NOT_SETTING(false, 2102, "Product에 Seller가 설정되지 않았습니다."),
     PRODUCT_IMAGE_FIXED(false, 2103, "설정된 image는 변경할 수 없습니다."),
+    PRODUCT_EXIST(false, 2104, "상품을 이미 설정했습니다."),
+    STOCK_NOT_ENOUGH(false, 2105, "상품 수량이 0보다 작을 수 없습니다."),
 
     // story
     POST_STORY_EMPTY_TITLE(false, 2200, "제목을 입력해주세요."),
@@ -51,6 +53,12 @@ public enum BaseResponseStatus {
     // category
     SAME_CATEGORY_EXIST(false, 2404, "같은 카테고리가 존재합니다."),
     CATEGORY_NOT_FOUND(false,2405, "해당 카테고리를 찾을 수 없습니다. 부모 카테고리가 없다면 parentId를 지워주세요"),
+
+    // option
+    PARENT_OPTION_EXIST(false, 2406, "상위 옵션을 이미 설정했습니다."),
+    PARENT_OPTION_NOT_FOUND(false, 2407, "상위 옵션을 찾을 수 없습니다."),
+    CHILD_OPTION_NOT_FOUND(false, 2408, "하위 옵션을 찾을 수 없습니다."),
+    SELECTION_OPTION_NOT_FOUND(false, 2409, "선택 옵션을 찾을 수 없습니다."),
 
     // 3000 : Database / Server 오류
     // common

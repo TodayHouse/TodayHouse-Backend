@@ -7,6 +7,11 @@ import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -15,6 +20,9 @@ import javax.validation.constraints.NotNull;
 public class ProductSaveRequest {
     @NotBlank(message = "title을 입력해주세요")
     private String title;
+
+    @NotBlank(message = "image를 입력해주세요")
+    private String image;
 
     @NotNull(message = "price를 입력해주세요")
     private int price;
@@ -33,8 +41,19 @@ public class ProductSaveRequest {
 
     private String productDetail;
 
-    public Product toEntity(Seller seller, Category category, String image) {
-        return Product.builder()
+    private String parentOption;
+
+    private String childOption;
+
+    private String selectionOption;
+
+    private Set<ParentOptionSaveRequest> parentOptions;
+
+    private Set<SelectionOptionSaveRequest> selectionOptions;
+
+    // ChildOption 까지 entity로 변환
+    public Product toEntityWithParentAndSelection(Seller seller, Category category, String image) {
+        Product product = Product.builder()
                 .title(this.title)
                 .price(this.price)
                 .discountRate(this.discountRate)
@@ -44,6 +63,19 @@ public class ProductSaveRequest {
                 .sales(0)
                 .image(image)
                 .seller(seller)
-                .category(category).build();
+                .category(category)
+                .parentOption(this.parentOption)
+                .childOption(this.childOption)
+                .selectionOption(this.selectionOption)
+                .build();
+
+        Optional.ofNullable(parentOptions)
+                .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
+                .map(parentRequest -> parentRequest.toEntityWithChild(product)).collect(Collectors.toSet());
+
+        Optional.ofNullable(selectionOptions)
+                .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
+                .map(selectionRequest -> selectionRequest.toEntity(product)).collect(Collectors.toSet());
+        return product;
     }
 }

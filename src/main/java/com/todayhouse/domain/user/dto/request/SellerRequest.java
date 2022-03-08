@@ -12,23 +12,27 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class SellerRequest {
-    @Email
+    @Email(message = "email을 입력해주세요")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "brand를 입력해주세요")
     private String brand;
 
-    @NotBlank
+    @NotBlank(message = "companyName을 입력해주세요")
     private String companyName;
 
-    @NotBlank
+    @NotBlank(message = "representative를 입력해주세요")
     private String representative;
 
-    @NotBlank
+    @NotBlank(message = "customerCenter를 입력해주세요")
     private String customerCenter;
 
-    @NotNull
-    private int registrationNum;
+
+    @NotBlank(message = "registrationNum를 입력해주세요")
+    private String registrationNum;
+
+    @NotBlank(message = "businessAddress를 입력해주세요")
+    private String businessAddress;
 
     public Seller toEntity() {
         return Seller.builder()
@@ -37,7 +41,8 @@ public class SellerRequest {
                 .companyName(this.companyName)
                 .customerCenter(this.customerCenter)
                 .representative(this.representative)
-                .registrationNum(this.representative)
+                .registrationNum(this.registrationNum)
+                .businessAddress(this.businessAddress)
                 .build();
     }
 }

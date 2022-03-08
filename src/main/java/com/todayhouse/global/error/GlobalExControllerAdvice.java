@@ -18,8 +18,8 @@ public class GlobalExControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public BaseResponse InvalidArgumentResponse(MethodArgumentNotValidException e){
-        log.error("Exception : {}", e.getMessage());
-        return new BaseResponse(e.getMessage());
+        log.error("Exception : {}, 입력값 : {}", e.getBindingResult().getFieldError(), e.getBindingResult().getFieldError());
+        return new BaseResponse(e.getBindingResult().getFieldError().getDefaultMessage());
     }
 
     // BaseException return
