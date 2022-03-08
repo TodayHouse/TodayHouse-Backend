@@ -20,15 +20,9 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@SequenceGenerator(
-        name = "PROC_SEQ_GEN", //시퀀스 제너레이터 이름
-        sequenceName = "PROC_SEQ", //시퀀스 이름
-        initialValue = 0, //시작값
-        allocationSize = 1 //메모리를 통해 할당할 범위 사이즈
-)
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PROC_SEQ_GEN")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String brand;
