@@ -2,10 +2,7 @@ package com.todayhouse.domain.user.application;
 
 import com.todayhouse.domain.email.dao.EmailVerificationTokenRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
-import com.todayhouse.domain.user.domain.Agreement;
-import com.todayhouse.domain.user.domain.AuthProvider;
-import com.todayhouse.domain.user.domain.Role;
-import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.domain.*;
 import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
@@ -105,13 +102,16 @@ public class UserServiceImpl implements UserService {
     //테스트 계정
     @PostConstruct
     private void preMember() {
-        userRepository.save(User.builder()
+        Seller seller = Seller.builder().brand("admin_brand").companyName("admin").build();
+
+        User user = userRepository.save(User.builder()
                 .authProvider(AuthProvider.LOCAL)
                 .email("admin@admin.com")
                 .password(new BCryptPasswordEncoder().encode("today123"))
                 .roles(Collections.singletonList(Role.ADMIN))
                 .agreement(Agreement.agreeAll())
                 .nickname("admin")
+                .seller(seller)
                 .build());
 
         userRepository.save(User.builder()
@@ -122,5 +122,7 @@ public class UserServiceImpl implements UserService {
                 .agreement(Agreement.agreeAll())
                 .nickname("user1")
                 .build());
+
+
     }
 }

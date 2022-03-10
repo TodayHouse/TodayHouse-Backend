@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, CustomProductRepository {
-    @Query("select distinct p from Product p left join fetch p.images where p.id = :id")
-    Optional<Product> findByIdWithImages(@Param("id") Long id);
+    @Query("select p from Product p join fetch p.seller where p.id = :id")
+    Optional<Product> findByIdWithSeller(@Param("id") Long id);
 }

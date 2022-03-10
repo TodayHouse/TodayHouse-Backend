@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface CustomProductRepository {
-    Page<Product> findAll(ProductSearchRequest productSearch, Pageable pageable);
+    Page<Product> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable);
 
-    Optional<Product> findByIdWithOptionsAndSeller(Long id);
+    Optional<Product> findByIdWithOptionsAndSellerAndImages(Long id);
 }
