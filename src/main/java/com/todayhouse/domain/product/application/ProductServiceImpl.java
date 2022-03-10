@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -57,7 +58,8 @@ public class ProductServiceImpl implements ProductService {
         Page<ProductResponse> page = productRepository.findAllWithSeller(productSearch, pageable)
                 .map(p -> {
                     ProductResponse response = new ProductResponse(p);
-                    response.setImages(List.of(fileService.getImage(p.getImage())));
+                    if(StringUtils.hasText(p.getImage()))
+                        response.setImages(List.of(fileService.getImage(p.getImage())));
                     return response;
                 });
         return page;
