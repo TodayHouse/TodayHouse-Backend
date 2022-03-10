@@ -51,7 +51,7 @@ public class ProductServiceImpl implements ProductService {
         return saveEntity(multipartFiles, request, user, category);
     }
 
-    // seller와 join한 모든 product
+    // seller와 join한 모든 product, 대표 이미지
     @Override
     public Page<ProductResponse> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable) {
         Page<ProductResponse> page = productRepository.findAllWithSeller(productSearch, pageable)
@@ -63,7 +63,7 @@ public class ProductServiceImpl implements ProductService {
         return page;
     }
 
-    // product 와 image left join
+    // product 와 image, 모든 options, seller left join
     @Override
     public Product findByIdWithOptionsAndSellerAndImages(Long id) {
         return productRepository.findByIdWithOptionsAndSellerAndImages(id).orElseThrow(ProductNotFoundException::new);

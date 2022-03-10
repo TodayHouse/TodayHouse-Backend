@@ -107,7 +107,7 @@ class ProductServiceImplTest {
     void findOne() {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
-        when(productRepository.findByIdWithSeller(1L)).thenReturn(Optional.ofNullable(product));
+        when(productRepository.findByIdWithOptionsAndSellerAndImages(1L)).thenReturn(Optional.ofNullable(product));
 
         Product result = productService.findByIdWithOptionsAndSellerAndImages(1L);
         assertThat(result).isEqualTo(product);
@@ -150,7 +150,7 @@ class ProductServiceImplTest {
         User user = User.builder().email(email).seller(seller).build();
         Product product = Product.builder().seller(seller).build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
-        when(productRepository.findByIdWithOptionsAndSellerAndImages(id)).thenReturn(Optional.ofNullable(product));
+        when(productRepository.findByIdWithSeller(id)).thenReturn(Optional.ofNullable(product));
 
         return product;
     }
