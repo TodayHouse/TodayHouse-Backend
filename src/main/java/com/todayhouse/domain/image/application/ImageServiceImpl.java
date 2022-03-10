@@ -6,14 +6,11 @@ import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.image.domain.StoryImage;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.story.domain.Story;
-import com.todayhouse.global.error.BaseException;
-import com.todayhouse.global.error.BaseResponseStatus;
 import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,11 +42,7 @@ public class ImageServiceImpl implements ImageService {
     @Override
     @Transactional(readOnly = true)
     public byte[] getImage(String fileName) {
-        try {
-            return fileService.getImage(fileName);
-        } catch (IOException e) {
-            throw new BaseException(BaseResponseStatus.IMAGE_FILE_IO_EXCEPTION);
-        }
+        return fileService.getImage(fileName);
     }
 
     @Override
@@ -66,14 +59,14 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void deleteStoryImages(List<String> fileNames) {
-        for(String fileName : fileNames)
+        for (String fileName : fileNames)
             storyImageRepository.deleteByFileName(fileName);
         fileService.delete(fileNames);
     }
 
     @Override
     public void deleteProductImages(List<String> fileNames) {
-        for(String fileName : fileNames)
+        for (String fileName : fileNames)
             productImageRepository.deleteByFileName(fileName);
         fileService.delete(fileNames);
     }

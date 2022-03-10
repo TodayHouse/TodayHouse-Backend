@@ -9,7 +9,7 @@ public interface FileService {
 
     List<String> upload(List<MultipartFile> multipartFile);
 
-    byte[] getImage(String fileName) throws IOException;
+    byte[] getImage(String fileName);
 
     void delete(List<String> fileName);
 
