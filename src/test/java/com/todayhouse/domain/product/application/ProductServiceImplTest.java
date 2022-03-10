@@ -3,7 +3,6 @@ package com.todayhouse.domain.product.application;
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.application.ImageService;
-import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ChildOptionSaveRequest;
@@ -27,11 +26,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -112,9 +107,9 @@ class ProductServiceImplTest {
     void findOne() {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
-        when(productRepository.findByIdWithImages(1L)).thenReturn(Optional.ofNullable(product));
+        when(productRepository.findByIdWithSeller(1L)).thenReturn(Optional.ofNullable(product));
 
-        Product result = productService.findByIdWithImages(1L);
+        Product result = productService.findByIdWithOptionsAndSellerAndImages(1L);
         assertThat(result).isEqualTo(product);
     }
 
@@ -155,7 +150,7 @@ class ProductServiceImplTest {
         User user = User.builder().email(email).seller(seller).build();
         Product product = Product.builder().seller(seller).build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
-        when(productRepository.findByIdWithOptionsAndSeller(id)).thenReturn(Optional.ofNullable(product));
+        when(productRepository.findByIdWithOptionsAndSellerAndImages(id)).thenReturn(Optional.ofNullable(product));
 
         return product;
     }

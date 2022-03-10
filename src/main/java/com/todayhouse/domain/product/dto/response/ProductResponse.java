@@ -17,7 +17,6 @@ public class ProductResponse {
     private Long sellerId;
     private String brand;
     private String title;
-    private String image;
     private String option1;
     private String option2;
     private String selectionOption;
@@ -27,9 +26,9 @@ public class ProductResponse {
     private int deliveryFee;
     private int discountRate;
     private boolean specialPrice;
+    private List<byte[]> images;
     private Set<ParentOptionResponse> parentOptions;
     private Set<SelectionOptionResponse> selectionOptions;
-    private List<String> images;
 
     // null safe로 parent, child, selection option 모두 response type으로 변경
     public ProductResponse(Product product) {
@@ -37,7 +36,6 @@ public class ProductResponse {
         this.sellerId = product.getId();
         this.brand = product.getBrand();
         this.title = product.getTitle();
-        this.image = product.getImage();
         this.option1 = product.getParentOption();
         this.option2 = product.getChildOption();
         this.selectionOption = product.getSelectionOption();
@@ -47,15 +45,15 @@ public class ProductResponse {
         this.discountRate = product.getDiscountRate();
         this.specialPrice = product.isSpecialPrice();
         this.productDetail = product.getProductDetail();
-
         this.parentOptions = Optional.ofNullable(product.getOptions())
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
                 .map(parentOption -> new ParentOptionResponse(parentOption, true)).collect(Collectors.toSet());
         this.selectionOptions = Optional.ofNullable(product.getSelectionOptions())
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
                 .map(selectionOption -> new SelectionOptionResponse(selectionOption)).collect(Collectors.toSet());
-        this.images = Optional.ofNullable(product.getImages())
-                .orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
-                .map(productImage -> productImage.getFileName()).collect(Collectors.toList());
+    }
+
+    public void setImages(List<byte[]> images){
+        this.images = images;
     }
 }

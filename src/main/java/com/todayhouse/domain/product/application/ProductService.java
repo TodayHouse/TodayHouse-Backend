@@ -14,9 +14,9 @@ import java.util.List;
 public interface ProductService {
     Long saveProductRequest(List<MultipartFile> multipartFile, ProductSaveRequest request);
 
-    Page<ProductResponse> findAll(ProductSearchRequest productSearch, Pageable pageable);
+    Page<ProductResponse> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable);
 
-    Product findByIdWithImages(Long id);
+    Product findByIdWithOptionsAndSellerAndImages(Long id);
 
     Product updateProduct(ProductUpdateRequest request);
 

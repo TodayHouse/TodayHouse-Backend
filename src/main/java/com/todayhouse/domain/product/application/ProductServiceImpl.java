@@ -5,10 +5,11 @@ import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
-import com.todayhouse.domain.product.dao.CustomProductRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
-import com.todayhouse.domain.product.dto.request.*;
+import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
+import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
+import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
@@ -40,27 +41,32 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageRepository productImageRepository;
 
     @Override
-    public Long saveProductRequest(List<MultipartFile> multipartFile, ProductSaveRequest request) {
+    public Long saveProductRequest(List<MultipartFile> multipartFiles, ProductSaveRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(CategoryNotFoundException::new);
         // jwt로 seller 찾기
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         if (user.getSeller() == null)
             throw new SellerNotFoundException();
-        return saveEntity(multipartFile, request, user, category);
+        return saveEntity(multipartFiles, request, user, category);
     }
 
+    // seller와 join한 모든 product
     @Override
-    public Page<ProductResponse> findAll(ProductSearchRequest productSearch, Pageable pageable) {
-        Page<ProductResponse> response = productRepository.findAll(productSearch, pageable)
-                .map(p -> new ProductResponse(p));
-        return response;
+    public Page<ProductResponse> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable) {
+        Page<ProductResponse> page = productRepository.findAllWithSeller(productSearch, pageable)
+                .map(p -> {
+                    ProductResponse response = new ProductResponse(p);
+                    response.setImages(List.of(fileService.getImage(p.getImage())));
+                    return response;
+                });
+        return page;
     }
 
     // product 와 image left join
     @Override
-    public Product findByIdWithImages(Long id) {
-        return productRepository.findByIdWithImages(id).orElseThrow(ProductNotFoundException::new);
+    public Product findByIdWithOptionsAndSellerAndImages(Long id) {
+        return productRepository.findByIdWithOptionsAndSellerAndImages(id).orElseThrow(ProductNotFoundException::new);
     }
 
     @Override
@@ -81,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
     private Product getValidProduct(Long id) {
         String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(jwtEmail).orElseThrow(UserNotFoundException::new);
-        Product product = productRepository.findByIdWithOptionsAndSeller(id).orElseThrow(ProductNotFoundException::new);
+        Product product = productRepository.findByIdWithSeller(id).orElseThrow(ProductNotFoundException::new);
         if (!user.getSeller().equals(product.getSeller()))
             throw new InvalidRequestException();
         return product;
@@ -93,6 +99,7 @@ public class ProductServiceImpl implements ProductService {
         List<String> fileNames = new ArrayList<>();
         String first = null;
         if (multipartFiles != null && !multipartFiles.isEmpty()) {
+            System.out.println(multipartFiles.size());
             fileNames = fileService.upload(multipartFiles);
             first = fileNames.get(0);
         }

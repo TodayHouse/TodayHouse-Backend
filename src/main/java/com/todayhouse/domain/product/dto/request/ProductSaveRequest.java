@@ -21,9 +21,6 @@ public class ProductSaveRequest {
     @NotBlank(message = "title을 입력해주세요")
     private String title;
 
-    @NotBlank(message = "image를 입력해주세요")
-    private String image;
-
     @NotNull(message = "price를 입력해주세요")
     private int price;
 
