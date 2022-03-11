@@ -3,6 +3,7 @@ package com.todayhouse.domain.product.application;
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.application.ImageService;
+import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ChildOptionSaveRequest;
@@ -52,6 +53,9 @@ class ProductServiceImplTest {
 
     @Mock
     CategoryRepository categoryRepository;
+
+    @Mock
+    ProductImageRepository productImageRepository;
 
     @AfterEach
     public void clearSecurityContext() {
@@ -126,13 +130,25 @@ class ProductServiceImplTest {
 
     @Test
     @DisplayName("product id로 삭제")
-    void removeProduct() {
+    void deleteProduct() {
         getValidProduct(1L);
         doNothing().when(productRepository).deleteById(1L);
-
         productService.deleteProduct(1L);
 
         verify(productRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("product image 삭제")
+    void deleteProductImage() {
+        String fileName = "file.jpg";
+        doNothing().when(productImageRepository).deleteByFileName(fileName);
+        doNothing().when(fileService).deleteOne(fileName);
+
+        productService.deleteProductImage(fileName);
+
+        verify(productImageRepository).deleteByFileName(fileName);
+        verify(fileService).deleteOne(fileName);
     }
 
     private void SecurityContextSetting(String email) {

@@ -24,12 +24,12 @@ import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
-import com.todayhouse.infra.S3Storage.service.FileService;
+import com.todayhouse.infra.S3Storage.service.FileServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +46,8 @@ import java.util.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -80,8 +82,8 @@ class ProductControllerTest extends IntegrationBase {
     @PersistenceContext
     EntityManager em;
 
-    @Mock
-    FileService fileService;
+    @MockBean
+    FileServiceImpl fileService;
 
     Seller seller1;
     Product product1;
@@ -201,6 +203,14 @@ class ProductControllerTest extends IntegrationBase {
     @Test
     @DisplayName("product 찾았다")
     void findProduct() throws Exception {
+        ProductImage img1 = ProductImage.builder().product(product1).fileName("test1.jpg").build();
+        ProductImage img2 = ProductImage.builder().product(product1).fileName("test2.jpg").build();
+        productImageRepository.save(img1);
+        productImageRepository.save(img2);
+        em.flush();
+        em.clear();
+        when(fileService.getImage(anyString())).thenReturn(new byte[10]);
+
         String url = "http://localhost:8080/products/" + product1.getId();
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
@@ -234,19 +244,27 @@ class ProductControllerTest extends IntegrationBase {
     @Test
     @DisplayName("product 삭제")
     void deleteProduct() throws Exception {
+        String fileName = "test/jpg";
+        ProductImage img = ProductImage.builder().product(product1).fileName(fileName).build();
+        productImageRepository.save(img);
+        em.flush();
+        em.clear();
+
         String url = "http://localhost:8080/products/" + product1.getId();
-        System.out.println(product1.getId());
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
+        doNothing().when(fileService).deleteOne(fileName);
 
         mockMvc.perform(delete(url)
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk());
 
         List<Product> products = productRepository.findAll();
+        List<ProductImage> images = productImageRepository.findAll();
         for (Product p : products) {
             System.out.println(p.toString());
         }
         assertThat(products.size()).isEqualTo(0);
+        assertThat(images.size()).isEqualTo(0);
     }
 
     @Test
@@ -304,6 +322,27 @@ class ProductControllerTest extends IntegrationBase {
         assertThat(products.size()).isEqualTo(2);
         assertTrue(products.stream().anyMatch(p -> p.getTitle().equals("lap")));
         assertTrue(products.stream().anyMatch(p -> p.getTitle().equals("desk")));
+    }
+
+    @Test
+    @DisplayName("product image 삭제")
+    void deleteProductImage() throws Exception {
+        String fileName = "test.jpg";
+        ProductImage img = ProductImage.builder().product(product1).fileName(fileName).build();
+        productImageRepository.save(img);
+        em.flush();
+        em.clear();
+
+        String url = "http://localhost:8080/products/images/" + fileName;
+        String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
+        doNothing().when(fileService).deleteOne(fileName);
+
+        mockMvc.perform(delete(url)
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk());
+
+        List<ProductImage> images = productImageRepository.findAll();
+        assertThat(images.size()).isEqualTo(0);
     }
 
     public static class CustomPageImpl<T> extends PageImpl<T> {

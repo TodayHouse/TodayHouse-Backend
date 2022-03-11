@@ -26,7 +26,7 @@ public class ImageController {
 
     @GetMapping
     public BaseResponse<List<String>> getAll() {
-        return new BaseResponse<>(imageService.findStoryImageAll());
+        return new BaseResponse<>(imageService.findStoryImageFileNamesAll());
     }
 
     @DeleteMapping("/{file}")
