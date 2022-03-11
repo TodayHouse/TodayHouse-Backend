@@ -1,6 +1,7 @@
 package com.todayhouse.domain.product.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.todayhouse.domain.image.dto.ImageResponse;
 import com.todayhouse.domain.product.domain.Product;
 import lombok.*;
 
@@ -26,7 +27,7 @@ public class ProductResponse {
     private int deliveryFee;
     private int discountRate;
     private boolean specialPrice;
-    private List<byte[]> images;
+    private List<ImageResponse> images;
     private Set<ParentOptionResponse> parentOptions;
     private Set<SelectionOptionResponse> selectionOptions;
 
@@ -53,7 +54,7 @@ public class ProductResponse {
                 .map(selectionOption -> new SelectionOptionResponse(selectionOption)).collect(Collectors.toSet());
     }
 
-    public void setImages(List<byte[]> images){
+    public void setImages(List<ImageResponse> images) {
         this.images = images;
     }
 }

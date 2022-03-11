@@ -5,6 +5,7 @@ import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
+import com.todayhouse.domain.image.dto.ImageResponse;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
@@ -58,8 +59,8 @@ public class ProductServiceImpl implements ProductService {
         Page<ProductResponse> page = productRepository.findAllWithSeller(productSearch, pageable)
                 .map(p -> {
                     ProductResponse response = new ProductResponse(p);
-                    if(StringUtils.hasText(p.getImage()))
-                        response.setImages(List.of(fileService.getImage(p.getImage())));
+                    if (StringUtils.hasText(p.getImage()))
+                        response.setImages(List.of(createImageResponse(p.getImage())));
                     return response;
                 });
         return page;
@@ -85,6 +86,12 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
+    @Override
+    public void deleteProductImage(String fileName) {
+        productImageRepository.deleteByFileName(fileName);
+        fileService.deleteOne(fileName);
+    }
+
     // product의 seller와 user의 seller가 같은지 확인
     private Product getValidProduct(Long id) {
         String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -101,12 +108,16 @@ public class ProductServiceImpl implements ProductService {
         List<String> fileNames = new ArrayList<>();
         String first = null;
         if (multipartFiles != null && !multipartFiles.isEmpty()) {
-            System.out.println(multipartFiles.size());
             fileNames = fileService.upload(multipartFiles);
             first = fileNames.get(0);
         }
         Product product = productRepository.save(request.toEntityWithParentAndSelection(user.getSeller(), category, first));
         imageService.save(fileNames, product);
         return product.getId();
+    }
+
+    private ImageResponse createImageResponse(String fileName) {
+        byte[] image = fileService.getImage(fileName);
+        return new ImageResponse(fileName, image);
     }
 }

@@ -8,13 +8,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
+import com.todayhouse.domain.image.dao.ProductImageRepository;
+import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.ChildOption;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.*;
-import com.todayhouse.domain.product.dto.response.ChildOptionResponse;
-import com.todayhouse.domain.product.dto.response.ParentOptionResponse;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.domain.user.dao.SellerRepository;
@@ -24,23 +24,29 @@ import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
+import com.todayhouse.infra.S3Storage.service.FileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -60,6 +66,9 @@ class ProductControllerTest extends IntegrationBase {
     CategoryRepository categoryRepository;
 
     @Autowired
+    ProductImageRepository productImageRepository;
+
+    @Autowired
     MockMvc mockMvc;
 
     @Autowired
@@ -70,6 +79,9 @@ class ProductControllerTest extends IntegrationBase {
 
     @PersistenceContext
     EntityManager em;
+
+    @Mock
+    FileService fileService;
 
     Seller seller1;
     Product product1;
@@ -86,7 +98,6 @@ class ProductControllerTest extends IntegrationBase {
         em.clear();
     }
 
-
     @Test
     @DisplayName("product 저장")
     void saveProduct() throws Exception {
@@ -101,21 +112,27 @@ class ProductControllerTest extends IntegrationBase {
         Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
-                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).image("img.jpg").categoryId(1L)
-                .parentOptions(parent)
                 .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryId(1L)
-                .build();
+                .parentOptions(parent).build();
+        MockMultipartFile json = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile image = new MockMultipartFile("file", "image.jpa", "image/jpeg", "<<jpeg data>>".getBytes(StandardCharsets.UTF_8));
 
-        MvcResult mvcResult = mockMvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
+        when(fileService.upload(anyList())).thenReturn(List.of("filename-1.jpeg"));
+
+        MvcResult mvcResult = mockMvc.perform(multipart(url)
+                        .file(image)
+                        .file(json)
+                        .contentType("multipart/mixed")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
 
         Long id = objectMapper.convertValue(getResponseFromMvcResult(mvcResult).getResult(), Long.class);
-        Product product = productRepository.findByIdWithOptionsAndSeller(id).orElse(null);
+        Product product = productRepository.findByIdWithOptionsAndSellerAndImages(id).orElse(null);
+        ProductImage productImage = productImageRepository.findFirstByProductOrderByCreatedAtDesc(product).orElse(null);
         assertThat(product.getTitle()).isEqualTo("new");
         Set<ParentOption> parents = product.getOptions();
         List<ParentOption> list = new ArrayList<>(parents);
@@ -124,6 +141,7 @@ class ProductControllerTest extends IntegrationBase {
         assertThat(list.get(0).getContent()).isEqualTo("p1");
         assertThat(list.size()).isEqualTo(1);
         assertThat(children.size()).isEqualTo(2);
+        assertThat(productImage).isNotNull();
     }
 
     @Test

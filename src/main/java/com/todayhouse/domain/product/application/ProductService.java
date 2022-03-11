@@ -21,4 +21,6 @@ public interface ProductService {
     Product updateProduct(ProductUpdateRequest request);
 
     void deleteProduct(Long id);
+
+    void deleteProductImage(String fileName);
 }

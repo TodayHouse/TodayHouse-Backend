@@ -106,7 +106,7 @@ class ProductServiceImplTest {
     @DisplayName("product id로 찾기")
     void findOne() {
         Seller seller = Seller.builder().build();
-        Product product = Product.builder().seller(seller).build();
+        Product product = Product.builder().seller(seller).image("aa.jpg").build();
         when(productRepository.findByIdWithOptionsAndSellerAndImages(1L)).thenReturn(Optional.ofNullable(product));
 
         Product result = productService.findByIdWithOptionsAndSellerAndImages(1L);
