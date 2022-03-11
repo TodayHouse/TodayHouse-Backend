@@ -46,18 +46,6 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void deleteStoryImage(String fileName) {
-        storyImageRepository.deleteByFileName(fileName);
-        fileService.deleteOne(fileName);
-    }
-
-    @Override
-    public void deleteProductImage(String fileName) {
-        productImageRepository.deleteByFileName(fileName);
-        fileService.deleteOne(fileName);
-    }
-
-    @Override
     public void deleteStoryImages(List<String> fileNames) {
         for (String fileName : fileNames)
             storyImageRepository.deleteByFileName(fileName);
@@ -89,14 +77,15 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> findStoryImageAll() {
+    public List<String> findStoryImageFileNamesAll() {
         return storyImageRepository.findAll().stream()
                 .map(image -> image.getFileName())
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<String> findProductImageAll() {
+    @Transactional(readOnly = true)
+    public List<String> findProductImageFileNamesAll() {
         return productImageRepository.findAll().stream()
                 .map(image -> image.getFileName())
                 .collect(Collectors.toList());

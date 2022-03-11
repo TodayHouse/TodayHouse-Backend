@@ -66,7 +66,7 @@ public class ProductServiceImpl implements ProductService {
         return page;
     }
 
-    // product 와 image, 모든 options, seller left join
+    // product 와 productImage, 모든 options, seller left join
     @Override
     public Product findByIdWithOptionsAndSellerAndImages(Long id) {
         return productRepository.findByIdWithOptionsAndSellerAndImages(id).orElseThrow(ProductNotFoundException::new);

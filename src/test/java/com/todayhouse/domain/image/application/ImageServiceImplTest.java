@@ -118,7 +118,7 @@ class ImageServiceImplTest {
         List<StoryImage> list = List.of(a, b);
         when(storyImageRepository.findAll()).thenReturn(list);
 
-        List<String> result = imageService.findStoryImageAll();
+        List<String> result = imageService.findStoryImageFileNamesAll();
 
         assertThat(result.size()).isEqualTo(2);
         assertTrue(result.contains("a"));
@@ -133,7 +133,7 @@ class ImageServiceImplTest {
         List<ProductImage> list = List.of(a, b);
         when(productImageRepository.findAll()).thenReturn(list);
 
-        List<String> result = imageService.findProductImageAll();
+        List<String> result = imageService.findProductImageFileNamesAll();
 
         assertThat(result.size()).isEqualTo(2);
         assertTrue(result.contains("a"));

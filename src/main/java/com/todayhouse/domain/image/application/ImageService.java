@@ -12,10 +12,6 @@ public interface ImageService {
 
     byte[] getImage(String fileName);
 
-    void deleteStoryImage(String fileName);
-
-    void deleteProductImage(String fileName);
-
     void deleteStoryImages(List<String> fileNames);
 
     void deleteProductImages(List<String> fileNames);
@@ -24,7 +20,7 @@ public interface ImageService {
 
     String findThumbnailUrl(Product product);
 
-    List<String> findStoryImageAll();
+    List<String> findStoryImageFileNamesAll();
 
-    List<String> findProductImageAll();
+    List<String> findProductImageFileNamesAll();
 }
