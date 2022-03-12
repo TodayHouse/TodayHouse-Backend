@@ -20,12 +20,17 @@ public class ProductImage extends Image {
     @Builder
     public ProductImage(String fileName, Product product) {
         super(fileName);
-        this.product = product;
+        setProduct(product);
     }
 
     public static class ProductImageBuilder extends ImageBuilder {
         ProductImageBuilder() {
             super();
         }
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+        product.getImages().add(this);
     }
 }

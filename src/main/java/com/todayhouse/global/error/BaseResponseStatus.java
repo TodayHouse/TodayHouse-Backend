@@ -74,6 +74,9 @@ public enum BaseResponseStatus {
     // story
     NOT_FOUND_STORY(false, 3300, "해당하는 스토리를 찾을 수 없습니다."),
 
+    // image
+    NOT_FOUND_IMAGE(false, 3400, "해당하는 이미지를 찾을 수 없습니다."),
+
     // 4000 : AWS S3 관련 오류
     IMAGE_FILE_IO_EXCEPTION(false, 4000, "이미지파일을 다루는 과정에서 오류가 발생하였습니다."),
     AMAZON_CLIENT_EXCEPTION(false, 4001, "아마존 서버에 업로드하는 과정에서 오류가 발생했습니다."),

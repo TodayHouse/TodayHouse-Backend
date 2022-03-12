@@ -4,6 +4,7 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
+import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ChildOptionSaveRequest;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
@@ -129,26 +131,20 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("product id로 삭제")
+    @DisplayName("product를 id로 삭제")
     void deleteProduct() {
+        ProductImage img1 = ProductImage.builder().product(mock(Product.class)).fileName("img1").build();
+        ProductImage img2 = ProductImage.builder().product(mock(Product.class)).fileName("img2").build();
+
         getValidProduct(1L);
         doNothing().when(productRepository).deleteById(1L);
+        when(productImageRepository.findByProductId(1L)).thenReturn(List.of(img1,img2));
+        doNothing().when(fileService).delete(anyList());
         productService.deleteProduct(1L);
 
         verify(productRepository).deleteById(1L);
-    }
-
-    @Test
-    @DisplayName("product image 삭제")
-    void deleteProductImage() {
-        String fileName = "file.jpg";
-        doNothing().when(productImageRepository).deleteByFileName(fileName);
-        doNothing().when(fileService).deleteOne(fileName);
-
-        productService.deleteProductImage(fileName);
-
-        verify(productImageRepository).deleteByFileName(fileName);
-        verify(fileService).deleteOne(fileName);
+        verify(productImageRepository).findByProductId(1L);
+        verify(fileService).delete(anyList());
     }
 
     private void SecurityContextSetting(String email) {

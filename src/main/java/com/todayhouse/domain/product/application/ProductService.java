@@ -14,6 +14,8 @@ import java.util.List;
 public interface ProductService {
     Long saveProductRequest(List<MultipartFile> multipartFile, ProductSaveRequest request);
 
+    Long saveProductImages(List<MultipartFile> multipartFiles, Long productId);
+
     Page<ProductResponse> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable);
 
     Product findByIdWithOptionsAndSellerAndImages(Long id);
@@ -21,6 +23,4 @@ public interface ProductService {
     Product updateProduct(ProductUpdateRequest request);
 
     void deleteProduct(Long id);
-
-    void deleteProductImage(String fileName);
 }

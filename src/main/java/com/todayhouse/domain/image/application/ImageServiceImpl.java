@@ -4,6 +4,7 @@ import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.dao.StoryImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.image.domain.StoryImage;
+import com.todayhouse.domain.image.exception.ImageNotFoundException;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.infra.S3Storage.service.FileService;
@@ -54,8 +55,15 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void deleteProductImages(List<String> fileNames) {
-        for (String fileName : fileNames)
+        for (String fileName : fileNames) {
+            ProductImage productImage = productImageRepository.findByFileName(fileName).orElseThrow(ImageNotFoundException::new);
+            Product product = productImage.getProduct();
             productImageRepository.deleteByFileName(fileName);
+
+            // 설정된 대표 이미지가 삭제될 경우 업데이트
+            productImageRepository.findFirstByProductOrderByCreatedAtAsc(product)
+                    .ifPresent(i -> product.updateImage(i.getFileName()));
+        }
         fileService.delete(fileNames);
     }
 
@@ -70,7 +78,7 @@ public class ImageServiceImpl implements ImageService {
     @Override
     @Transactional(readOnly = true)
     public String findThumbnailUrl(Product product) {
-        ProductImage image = productImageRepository.findFirstByProductOrderByCreatedAtDesc(product).orElse(null);
+        ProductImage image = productImageRepository.findFirstByProductOrderByCreatedAtAsc(product).orElse(null);
         if (image == null) return null;
         return image.getFileName();
     }

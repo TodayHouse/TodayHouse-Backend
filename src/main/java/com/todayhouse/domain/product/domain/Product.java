@@ -14,8 +14,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -119,6 +119,10 @@ public class Product {
         this.productDetail = request.getProductDetail();
         this.sales = request.getSales();
         this.category = category;
+    }
+
+    public void updateImage(String image) {
+        this.image = image;
     }
 
     @Override

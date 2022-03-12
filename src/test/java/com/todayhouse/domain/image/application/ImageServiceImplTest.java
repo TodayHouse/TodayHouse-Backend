@@ -6,6 +6,7 @@ import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.image.domain.StoryImage;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.story.domain.Story;
+import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.infra.S3Storage.service.FileService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ class ImageServiceImplTest {
     @DisplayName("product image file 이름 저장")
     void testSave() {
         List<String> files = List.of("file1", "file2", "file3");
-        Product product = Mockito.mock(Product.class);
+        Product product = Product.builder().title("test").seller(Mockito.mock(Seller.class)).build();
         List<ProductImage> lists = files.stream().map(file -> new ProductImage(file, product))
                 .collect(Collectors.toList());
         when(productImageRepository.saveAll(anyList())).thenReturn(anyList());
@@ -86,8 +87,8 @@ class ImageServiceImplTest {
     @DisplayName("Product filename 찾기")
     void testFindThumbnailUrl() {
         Product product = Mockito.mock(Product.class);
-        ProductImage test = ProductImage.builder().fileName("test").build();
-        when(productImageRepository.findFirstByProductOrderByCreatedAtDesc(any(Product.class))).thenReturn(Optional.ofNullable(test));
+        ProductImage test = ProductImage.builder().fileName("test").product(product).build();
+        when(productImageRepository.findFirstByProductOrderByCreatedAtAsc(any(Product.class))).thenReturn(Optional.ofNullable(test));
 
         assertThat(imageService.findThumbnailUrl(product)).isEqualTo(test.getFileName());
     }
@@ -105,7 +106,7 @@ class ImageServiceImplTest {
     @DisplayName("Product filename이 null")
     void findProductThumbnailUrlNull() {
         Product product = Mockito.mock(Product.class);
-        when(productImageRepository.findFirstByProductOrderByCreatedAtDesc(any(Product.class))).thenReturn(Optional.ofNullable(null));
+        when(productImageRepository.findFirstByProductOrderByCreatedAtAsc(any(Product.class))).thenReturn(Optional.ofNullable(null));
 
         assertThat(imageService.findThumbnailUrl(product)).isEqualTo(null);
     }
@@ -128,8 +129,9 @@ class ImageServiceImplTest {
     @Test
     @DisplayName("모든 product image 찾기")
     void findProductImageAll() {
-        ProductImage a = ProductImage.builder().fileName("a").build();
-        ProductImage b = ProductImage.builder().fileName("b").build();
+        Product product = Mockito.mock(Product.class);
+        ProductImage a = ProductImage.builder().fileName("a").product(product).build();
+        ProductImage b = ProductImage.builder().fileName("b").product(product).build();
         List<ProductImage> list = List.of(a, b);
         when(productImageRepository.findAll()).thenReturn(list);
 
@@ -154,10 +156,18 @@ class ImageServiceImplTest {
     @DisplayName("Product image 리스트로 삭제")
     void deleteProductImages() {
         List<String> list = List.of("a", "b", "c");
+        Product product = Product.builder().image("oldImg.jpg").seller(Mockito.mock(Seller.class)).build();
+
+        when(productImageRepository.findByFileName(anyString()))
+                .thenReturn(Optional.ofNullable(ProductImage.builder().product(product).fileName("oldImg.jpg").build()));
         doNothing().when(productImageRepository).deleteByFileName(anyString());
+        when(productImageRepository.findFirstByProductOrderByCreatedAtAsc(any(Product.class)))
+                .thenReturn(Optional.ofNullable(ProductImage.builder().product(product).fileName("newImg.jpg").build()));
         doNothing().when(fileService).delete(anyList());
 
         imageService.deleteProductImages(list);
+
+        assertThat(product.getImage()).isEqualTo("newImg.jpg");
     }
 
 }
