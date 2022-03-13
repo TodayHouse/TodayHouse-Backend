@@ -3,13 +3,15 @@ package com.todayhouse.domain.product.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.todayhouse.domain.image.dto.ImageResponse;
 import com.todayhouse.domain.product.domain.Product;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
-@Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor

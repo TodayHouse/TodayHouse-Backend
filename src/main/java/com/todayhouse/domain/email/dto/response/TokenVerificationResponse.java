@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-@Builder
 public class TokenVerificationResponse {
     private String email;
     private String token;
