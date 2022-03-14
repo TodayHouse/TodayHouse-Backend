@@ -7,13 +7,18 @@ import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface ProductService {
-    Product saveProductRequest(ProductSaveRequest request);
+    Long saveProductRequest(List<MultipartFile> multipartFile, ProductSaveRequest request);
 
-    Page<ProductResponse> findAll(ProductSearchRequest productSearch, Pageable pageable);
+    Long saveProductImages(List<MultipartFile> multipartFiles, Long productId);
 
-    Product findOne(Long id);
+    Page<ProductResponse> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable);
+
+    Product findByIdWithOptionsAndSellerAndImages(Long id);
 
     Product updateProduct(ProductUpdateRequest request);
 

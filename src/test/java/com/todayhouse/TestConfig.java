@@ -1,14 +1,14 @@
-package com.todayhouse.global.config;
+package com.todayhouse;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
-@Configuration
-public class DataBaseConfig {
+// repository test 시 EntityManager 주입
+@TestConfiguration
+public class TestConfig {
 
     @Bean
     public JPAQueryFactory jpaQueryFactory(EntityManager em) {

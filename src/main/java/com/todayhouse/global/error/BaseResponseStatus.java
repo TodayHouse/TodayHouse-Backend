@@ -31,14 +31,12 @@ public enum BaseResponseStatus {
     SELLER_NOT_FOUND(false, 2018, "입점을 하지 않았습니다."),
 
     // product
-    POST_PRODUCT_EMPTY_BRAND(false, 2100, "브랜드명을 입력해주세요."),
-    POST_PRODUCT_EMPTY_TITLE(false, 2101, "제목을 입력해주세요."),
-    POST_PRODUCT_EMPTY_PRICE(false, 2102, "가격을 입력해주세요."),
-    POST_PRODUCT_EMPTY_DELIVERY(false, 2103, "배송비를 입력해주세요."),
-    PRODUCT_NOT_FOUND(false, 2104, "상품을 찾을 수 없습니다."),
-    SELLER_NOT_SETTING(false, 2105, "Product에 Seller가 설정되지 않았습니다."),
-    PRODUCT_EXIST(false, 2106, "상품을 이미 설정했습니다."),
-    STOCK_NOT_ENOUGH(false, 2107, "상품 수량이 0보다 작을 수 없습니다."),
+    POST_PRODUCT_EMPTY_DELIVERY(false, 2100, "배송비를 입력해주세요."),
+    PRODUCT_NOT_FOUND(false, 2101, "상품을 찾을 수 없습니다."),
+    SELLER_NOT_SETTING(false, 2102, "Product에 Seller가 설정되지 않았습니다."),
+    PRODUCT_IMAGE_FIXED(false, 2103, "설정된 image는 변경할 수 없습니다."),
+    PRODUCT_EXIST(false, 2104, "상품을 이미 설정했습니다."),
+    STOCK_NOT_ENOUGH(false, 2105, "상품 수량이 0보다 작을 수 없습니다."),
 
     // story
     POST_STORY_EMPTY_TITLE(false, 2200, "제목을 입력해주세요."),
@@ -75,6 +73,9 @@ public enum BaseResponseStatus {
 
     // story
     NOT_FOUND_STORY(false, 3300, "해당하는 스토리를 찾을 수 없습니다."),
+
+    // image
+    NOT_FOUND_IMAGE(false, 3400, "해당하는 이미지를 찾을 수 없습니다."),
 
     // 4000 : AWS S3 관련 오류
     IMAGE_FILE_IO_EXCEPTION(false, 4000, "이미지파일을 다루는 과정에서 오류가 발생하였습니다."),

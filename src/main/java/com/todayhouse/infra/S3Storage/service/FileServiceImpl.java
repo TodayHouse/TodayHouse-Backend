@@ -27,10 +27,10 @@ public class FileServiceImpl implements FileService {
     private final AmazonS3 amazonS3;
 
     @Override
-    public List<String> upload(List<MultipartFile> multipartFile) {
+    public List<String> upload(List<MultipartFile> multipartFiles) {
         List<String> fileNameList = new ArrayList<>();
 
-        multipartFile.forEach(file -> {
+        multipartFiles.forEach(file -> {
             String fileName = createFileName(file.getOriginalFilename());
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentLength(file.getSize());
@@ -68,9 +68,9 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void delete(List<String> fileName) {
+    public void delete(List<String> fileNames) {
         ArrayList<DeleteObjectsRequest.KeyVersion> keys = new ArrayList<>();
-        fileName.forEach(file -> keys.add(new DeleteObjectsRequest.KeyVersion(file)));
+        fileNames.forEach(file -> keys.add(new DeleteObjectsRequest.KeyVersion(file)));
         amazonS3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(keys));
     }
 

@@ -67,7 +67,7 @@ class ProductRepositoryTest extends DataJpaBase {
     void 가격_2000_이상_product_페이징() {
         PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
         ProductSearchRequest productSearch = ProductSearchRequest.builder().priceFrom(2000).build();
-        Page<Product> page = productRepository.findAll(productSearch, pageRequest);
+        Page<Product> page = productRepository.findAllWithSeller(productSearch, pageRequest);
 
         assertThat(page.getTotalPages()).isEqualTo(1);
         assertThat(page.getTotalElements()).isEqualTo(2);
@@ -92,7 +92,7 @@ class ProductRepositoryTest extends DataJpaBase {
 
     @Test
     void product_하나_찾기() {
-        Product product = productRepository.findByIdWithOptionsAndSeller(product2.getId()).orElse(null);
+        Product product = productRepository.findByIdWithOptionsAndSellerAndImages(product2.getId()).orElse(null);
 
         assertThat(product.getSeller().getBrand()).isEqualTo(product.getBrand());
         assertThat(product.getTitle()).isEqualTo("p2");

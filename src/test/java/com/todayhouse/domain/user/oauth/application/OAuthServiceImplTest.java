@@ -91,17 +91,14 @@ class OAuthServiceImplTest {
         OAuthSignupRequest request = OAuthSignupRequest.builder().email(email).nickname("test")
                 .agreePICU(true).agreeTOS(true).agreePromotion(true).agreeAge(true)
                 .build();
-        UserSignupResponse result = UserSignupResponse.builder()
-                .agreePICU(true).agreeAge(true).agreeTOS(true).agreePromotion(true)
-                .email(email).nickname("test")
-                .build();
+
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(guest));
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(guest, "", null);
         when(jwtTokenProvider.getAuthentication(anyString())).thenReturn(auth);
 
         UserSignupResponse userSignupResponse = new UserSignupResponse(oAuthService.saveGuest(request, "jwt"));
 
-        assertThat(userSignupResponse.getEmail().equals(result.getEmail())).isTrue();
-        assertThat(userSignupResponse.getNickname().equals(result.getNickname())).isTrue();
+        assertThat(userSignupResponse.getEmail().equals(email)).isTrue();
+        assertThat(userSignupResponse.getNickname().equals("test")).isTrue();
     }
 }

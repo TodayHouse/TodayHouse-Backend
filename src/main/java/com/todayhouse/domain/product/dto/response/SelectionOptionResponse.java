@@ -1,10 +1,12 @@
 package com.todayhouse.domain.product.dto.response;
 
 import com.todayhouse.domain.product.domain.SelectionOption;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class SelectionOptionResponse {

@@ -63,7 +63,7 @@ public class User implements UserDetails {
     @Builder.Default
     private List<Role> roles = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "seller_id")
     private Seller seller;
 

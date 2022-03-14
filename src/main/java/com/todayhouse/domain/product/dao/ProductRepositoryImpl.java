@@ -31,16 +31,16 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
     @PersistenceContext
     EntityManager em;
 
-//    private final JPAQueryFactory jpaQueryFactory;
+    private final JPAQueryFactory jpaQueryFactory;
 
-    public ProductRepositoryImpl() {
+    public ProductRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
         super(Product.class);
-        //this.jpaQueryFactory = jpaQueryFactory;
+        this.jpaQueryFactory = jpaQueryFactory;
     }
 
     //product 페이징
     @Override
-    public Page<Product> findAll(ProductSearchRequest productSearch, Pageable pageable) {
+    public Page<Product> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable) {
         QProduct qProduct = QProduct.product;
         QSeller qSeller = QSeller.seller;
 
@@ -58,14 +58,12 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
 
     // product를 seller, 모든 option과 left join
     @Override
-    public Optional<Product> findByIdWithOptionsAndSeller(Long id) {
+    public Optional<Product> findByIdWithOptionsAndSellerAndImages(Long id) {
         QProduct qProduct = QProduct.product;
-
-        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(em);
 
         //seller, selectionOptions, parentOption-childOption 과 fetch join
         EntityGraph<Product> graph = em.createEntityGraph(Product.class);
-        graph.addAttributeNodes("seller", "selectionOptions");
+        graph.addAttributeNodes("seller", "selectionOptions", "images");
         Subgraph<ParentOption> options = graph.addSubgraph("options");
         options.addAttributeNodes("children");
 

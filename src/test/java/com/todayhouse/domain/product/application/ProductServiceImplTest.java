@@ -2,6 +2,9 @@ package com.todayhouse.domain.product.application;
 
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
+import com.todayhouse.domain.image.application.ImageService;
+import com.todayhouse.domain.image.dao.ProductImageRepository;
+import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ChildOptionSaveRequest;
@@ -11,20 +14,22 @@ import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.infra.S3Storage.service.FileService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,6 +42,12 @@ class ProductServiceImplTest {
     ProductServiceImpl productService;
 
     @Mock
+    FileService fileService;
+
+    @Mock
+    ImageService imageService;
+
+    @Mock
     UserRepository userRepository;
 
     @Mock
@@ -44,6 +55,9 @@ class ProductServiceImplTest {
 
     @Mock
     CategoryRepository categoryRepository;
+
+    @Mock
+    ProductImageRepository productImageRepository;
 
     @AfterEach
     public void clearSecurityContext() {
@@ -58,6 +72,9 @@ class ProductServiceImplTest {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).build();
         User user = User.builder().email(email).seller(seller).build();
+        MultipartFile multipartFile = new MockMultipartFile("data", "filename.txt", "text/plain", "bytes".getBytes());
+        List<MultipartFile> list = new ArrayList<>();
+        list.add(multipartFile);
 
         Set<ChildOptionSaveRequest> child = new LinkedHashSet<>();
         ChildOptionSaveRequest c1 = ChildOptionSaveRequest.builder().content("c1").build();
@@ -72,9 +89,11 @@ class ProductServiceImplTest {
         when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
         when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(fileService.upload(list)).thenReturn(List.of("data"));
+        doNothing().when(imageService).save(anyList(), any(Product.class));
 
-        Product result = productService.saveProductRequest(request);
-        assertThat(result).isEqualTo(product);
+        Long id = productService.saveProductRequest(list, request);
+        assertThat(id).isEqualTo(product.getId());
     }
 
 //    @Test
@@ -93,10 +112,10 @@ class ProductServiceImplTest {
     @DisplayName("product id로 찾기")
     void findOne() {
         Seller seller = Seller.builder().build();
-        Product product = Product.builder().seller(seller).build();
-        when(productRepository.findById(1L)).thenReturn(Optional.ofNullable(product));
+        Product product = Product.builder().seller(seller).image("aa.jpg").build();
+        when(productRepository.findByIdWithOptionsAndSellerAndImages(1L)).thenReturn(Optional.ofNullable(product));
 
-        Product result = productService.findOne(1L);
+        Product result = productService.findByIdWithOptionsAndSellerAndImages(1L);
         assertThat(result).isEqualTo(product);
     }
 
@@ -112,14 +131,20 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("product id로 삭제")
-    void removeProduct() {
+    @DisplayName("product를 id로 삭제")
+    void deleteProduct() {
+        ProductImage img1 = ProductImage.builder().product(mock(Product.class)).fileName("img1").build();
+        ProductImage img2 = ProductImage.builder().product(mock(Product.class)).fileName("img2").build();
+
         getValidProduct(1L);
         doNothing().when(productRepository).deleteById(1L);
-
+        when(productImageRepository.findByProductId(1L)).thenReturn(List.of(img1,img2));
+        doNothing().when(fileService).delete(anyList());
         productService.deleteProduct(1L);
 
         verify(productRepository).deleteById(1L);
+        verify(productImageRepository).findByProductId(1L);
+        verify(fileService).delete(anyList());
     }
 
     private void SecurityContextSetting(String email) {
@@ -137,7 +162,7 @@ class ProductServiceImplTest {
         User user = User.builder().email(email).seller(seller).build();
         Product product = Product.builder().seller(seller).build();
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
-        when(productRepository.findByIdWithOptionsAndSeller(id)).thenReturn(Optional.ofNullable(product));
+        when(productRepository.findByIdWithSeller(id)).thenReturn(Optional.ofNullable(product));
 
         return product;
     }

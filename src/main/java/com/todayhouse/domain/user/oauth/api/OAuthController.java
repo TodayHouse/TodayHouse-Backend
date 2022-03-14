@@ -26,8 +26,7 @@ public class OAuthController {
     @GetMapping("/email")
     public BaseResponse signupInfo(Authentication authentication) {
         String email = ((User) authentication.getPrincipal()).getEmail();
-        OAuthSignupInfoResponse response = OAuthSignupInfoResponse.builder()
-                .email(email).build();
+        OAuthSignupInfoResponse response = new OAuthSignupInfoResponse(email);
         return new BaseResponse(response);
     }
 

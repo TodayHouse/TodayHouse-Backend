@@ -21,9 +21,7 @@ public class ProductSaveRequest {
     @NotBlank(message = "title을 입력해주세요")
     private String title;
 
-    @NotBlank(message = "image를 입력해주세요")
-    private String image;
-
+    @NotNull(message = "price를 입력해주세요")
     private int price;
 
     @NotNull(message = "discountRate를 입력해주세요")
@@ -51,16 +49,16 @@ public class ProductSaveRequest {
     private Set<SelectionOptionSaveRequest> selectionOptions;
 
     // ChildOption 까지 entity로 변환
-    public Product toEntityWithParentAndSelection(Seller seller, Category category) {
+    public Product toEntityWithParentAndSelection(Seller seller, Category category, String image) {
         Product product = Product.builder()
                 .title(this.title)
-                .image(this.image)
                 .price(this.price)
                 .discountRate(this.discountRate)
                 .deliveryFee(this.deliveryFee)
                 .specialPrice(this.specialPrice)
                 .productDetail(this.productDetail)
                 .sales(0)
+                .image(image)
                 .seller(seller)
                 .category(category)
                 .parentOption(this.parentOption)

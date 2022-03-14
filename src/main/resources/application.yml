@@ -12,9 +12,10 @@
     hibernate:
       ddl-auto: create
     database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
     properties:
-      show-sql: true
-      format-sql: true
+      hibernate:
+        format_sql: true
   servlet:
     multipart:
       max-file-size: 10MB

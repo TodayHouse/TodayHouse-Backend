@@ -4,7 +4,6 @@ import com.todayhouse.domain.product.domain.ChildOption;
 import lombok.*;
 
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ChildOptionResponse {
