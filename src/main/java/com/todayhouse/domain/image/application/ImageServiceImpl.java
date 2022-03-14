@@ -12,7 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,18 +29,21 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void save(List<String> fileNames, Story story) {
-        storyImageRepository.saveAll(fileNames
-                .stream()
-                .map(file -> new StoryImage(file, story))
-                .collect(Collectors.toList()));
+
+        storyImageRepository.saveAll(
+                Optional.ofNullable(fileNames).orElseGet(Collections::emptyList)
+                        .stream().filter(Objects::nonNull)
+                        .map(file -> new StoryImage(file, story))
+                        .collect(Collectors.toList()));
     }
 
     @Override
     public void save(List<String> fileNames, Product product) {
-        productImageRepository.saveAll(fileNames
-                .stream()
-                .map(file -> new ProductImage(file, product))
-                .collect(Collectors.toList()));
+        productImageRepository.saveAll(
+                Optional.ofNullable(fileNames).orElseGet(Collections::emptyList)
+                        .stream().filter(Objects::nonNull)
+                        .map(file -> new ProductImage(file, product))
+                        .collect(Collectors.toList()));
     }
 
     @Override

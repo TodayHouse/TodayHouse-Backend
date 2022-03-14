@@ -5,7 +5,6 @@ import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
-import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.image.dto.ImageResponse;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
@@ -101,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long id) {
         getValidProduct(id);
         List<String> fileNames = productImageRepository.findByProductId(id)
-                .stream().map(i->i.getFileName()).collect(Collectors.toList());
+                .stream().map(i -> i.getFileName()).collect(Collectors.toList());
         fileService.delete(fileNames);
         productRepository.deleteById(id);
     }
@@ -121,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
                             User user, Category category) {
         List<String> fileNames = saveFiles(multipartFiles);
         String first = null;
-        if (!fileNames.isEmpty())
+        if (fileNames != null && !fileNames.isEmpty())
             first = fileNames.get(0);
         Product product = productRepository.save(request.toEntityWithParentAndSelection(user.getSeller(), category, first));
         imageService.save(fileNames, product);
