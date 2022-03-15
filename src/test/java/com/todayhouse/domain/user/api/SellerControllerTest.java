@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.Seller;
@@ -18,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Collections;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -30,6 +33,9 @@ class SellerControllerTest extends IntegrationBase {
 
     @Autowired
     SellerController sellerController;
+
+    @Autowired
+    SellerRepository sellerRepository;
 
     @Autowired
     ProductRepository productRepository;
@@ -46,8 +52,11 @@ class SellerControllerTest extends IntegrationBase {
     @Autowired
     UserRepository userRepository;
 
+    @PersistenceContext
+    EntityManager em;
+
     @Test
-    void seller_저장() throws Exception {
+    void seller_저장_후_seller_찾기() throws Exception {
         String url = "http://localhost:8080/sellers";
         String userEmail = "test@test.com";
         String sellerEmail = "seller@email.com";
@@ -65,7 +74,19 @@ class SellerControllerTest extends IntegrationBase {
                 .andExpect(status().isOk());
 
         User user = userRepository.findByEmail(userEmail).orElse(null);
+        Long sellerId = user.getSeller().getId();
+        em.flush();
+        em.clear();
+
+        MvcResult mvcResult = mockMvc.perform(get(url + "/" + sellerId))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        SellerResponse sellerResponse = objectMapper.convertValue(response.getResult(), SellerResponse.class);
         assertThat(user.getSeller().getEmail()).isEqualTo(sellerEmail);
+        assertThat(sellerResponse.getId()).isEqualTo(user.getSeller().getId());
     }
 
     @Test
@@ -115,7 +136,7 @@ class SellerControllerTest extends IntegrationBase {
         Product product = Product.builder().title("p1").seller(seller).build();
         productRepository.save(product);
 
-        MvcResult mvcResult = mockMvc.perform(get(url + user.getId())
+        MvcResult mvcResult = mockMvc.perform(get(url + user.getSeller().getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())

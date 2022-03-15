@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.application;
 
+import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SellerServiceImpl implements SellerService {
     private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
 
     @Override
     public Seller saveSellerRequest(SellerRequest request) {
@@ -31,8 +33,9 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public Seller findSeller(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    @Transactional(readOnly = true)
+    public Seller findSeller(Long sellerId) {
+        User user = userRepository.findByIdWithSeller(sellerId).orElseThrow(UserNotFoundException::new);
         Seller seller = user.getSeller();
         if (seller == null)
             throw new SellerNotFoundException();
