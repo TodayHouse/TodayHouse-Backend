@@ -57,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Long saveProductImages(List<MultipartFile> multipartFiles, Long productId) {
         Product product = getValidProduct(productId);
-        List<String> fileNames = fileService.upload(multipartFiles);
+        List<String> fileNames = fileService.uploadImages(multipartFiles);
         imageService.save(fileNames, product);
 
         if (product.getImage() == null && !fileNames.isEmpty())
@@ -129,7 +129,7 @@ public class ProductServiceImpl implements ProductService {
 
     private List<String> saveFiles(List<MultipartFile> multipartFiles) {
         if (multipartFiles != null && !multipartFiles.isEmpty()) {
-            return fileService.upload(multipartFiles);
+            return fileService.uploadImages(multipartFiles);
         }
         return null;
     }

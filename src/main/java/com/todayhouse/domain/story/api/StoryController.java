@@ -7,10 +7,19 @@ import com.todayhouse.domain.story.dto.response.StoryGetDetailResponse;
 import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+import static java.util.Objects.isNull;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,9 +29,20 @@ public class StoryController {
     private final StoryService storyService;
 
     @PostMapping
-    public BaseResponse<Long> create(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFile,
+    public BaseResponse<Long> saveStory(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFile,
                                      @RequestPart(value = "request") StoryCreateRequest request) {
-        return new BaseResponse<>(storyService.save(multipartFile, request));
+        return new BaseResponse<>(storyService.saveStory(multipartFile, request));
+    }
+
+    @PostMapping("/{id}/image")
+    public BaseResponse<Long> saveImage(@RequestPart(value = "file", required = false) MultipartFile multipartFile,
+                                        @PathVariable Long id){
+        return new BaseResponse<>(storyService.saveImage(multipartFile, id));
+    }
+
+    @GetMapping
+    public BaseResponse<Slice<StoryGetListResponse>> findAllDesc(@PageableDefault (sort="id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return new BaseResponse<>(storyService.findAllDesc(pageable));
     }
 
     @GetMapping("/{id}")
@@ -30,14 +50,26 @@ public class StoryController {
         return new BaseResponse<>(storyService.findById(id));
     }
 
-    @GetMapping
-    public BaseResponse<List<StoryGetListResponse>> findAllDesc() {
-        return new BaseResponse<>(storyService.findAllDesc());
+    @GetMapping("/user")
+    public BaseResponse<Slice<StoryGetListResponse>> findByUser(@RequestParam(required = false) String nickname,
+                                                                @PageableDefault (sort="id", direction = Sort.Direction.DESC) Pageable pageable){
+        if (isNull(nickname)) return new BaseResponse<>(storyService.findByUser(pageable));
+        else return new BaseResponse<>(storyService.findByUserNickname(nickname, pageable));
+    }
+
+    @GetMapping("/images")
+    public BaseResponse<List<String>> getStoryImageFileNamesAll() {
+        return new BaseResponse<>(storyService.getStoryImageFileNamesAll());
     }
 
     @GetMapping("/{id}/images")
-    public BaseResponse<List<String>> findImageInStory(@PathVariable Long id) {
+    public BaseResponse<List<String>> getImageInStory(@PathVariable Long id) {
         return new BaseResponse<>(storyService.getImageInStory(id));
+    }
+
+    @GetMapping(value = "/images/{file}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable String file) {
+        return new ResponseEntity<>(storyService.getImage(file), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
@@ -47,7 +79,13 @@ public class StoryController {
 
     @DeleteMapping("/{id}")
     public BaseResponse<String> delete(@PathVariable Long id) {
-        storyService.delete(id);
+        storyService.deleteStory(id);
         return new BaseResponse<>("해당 스토리가 삭제되었습니다.");
+    }
+
+    @DeleteMapping("/images")
+    public BaseResponse<String> deleteImages(@RequestParam List<String> file) {
+        storyService.deleteImages(file);
+        return new BaseResponse<>("File deleted : " + file);
     }
 }
