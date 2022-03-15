@@ -6,6 +6,8 @@ import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.SimpleUser;
+import com.todayhouse.domain.user.dto.request.SellerRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,40 +31,42 @@ class UserRepositoryTest extends DataJpaBase {
     @Autowired
     UserRepository userRepository;
 
-    User user = User.builder().email("test@test.com").nickname("test")
-            .authProvider(AuthProvider.LOCAL).password("abc1234")
-            .profileImage("img.jpg").roles(Collections.singletonList(Role.GUEST)).agreement(Agreement.agreeAll())
-            .build();
+    User user;
+
+    @BeforeEach
+    void setUp() {
+        user = User.builder().email("test@test.com").nickname("test")
+                .authProvider(AuthProvider.LOCAL).password("abc1234")
+                .profileImage("img.jpg").roles(Collections.singletonList(Role.GUEST)).agreement(Agreement.agreeAll())
+                .build();
+        em.persist(user);
+        em.flush();
+        em.clear();
+    }
+
 
     @Test
     @DisplayName("user 저장 후 email로 user 검색")
     void findByEmail() {
-        userRepository.save(user);
-
-        assertThat(userRepository.findByEmail(user.getEmail())).isEqualTo(Optional.ofNullable(user));
+        User user = userRepository.findByEmail(this.user.getEmail()).orElse(null);
+        assertThat(user.getEmail()).isEqualTo(user.getEmail());
     }
 
     @Test
     @DisplayName("없는 email 검색")
     void findByInvalidEmail() {
-        em.persist(user);
-
         assertThat(userRepository.findByEmail("invalid")).isEqualTo(Optional.empty());
     }
 
     @Test
     @DisplayName("email이 있는지 검색")
     void existsByEmail() {
-        em.persist(user);
-
         assertThat(userRepository.existsByEmailAndNicknameIsNotNull(user.getEmail())).isTrue();
     }
 
     @Test
     @DisplayName("nickname이 있는지 검색")
     void existsByNickname() {
-        em.persist(user);
-
         assertThat(userRepository.existsByNickname(user.getNickname())).isTrue();
     }
 
@@ -99,5 +103,18 @@ class UserRepositoryTest extends DataJpaBase {
                 hasProperty("nickname", is("user1")),
                 hasProperty("nickname", is("user2"))
         ));
+    }
+
+    @Test
+    @DisplayName("user와 seller join")
+    void findByIdWithSeller() {
+        SellerRequest request = SellerRequest.builder().brand("test").build();
+        user.createSeller(request);
+        userRepository.save(user);
+        em.flush();
+        em.clear();
+
+        User user = userRepository.findByIdWithSeller(this.user.getId()).orElse(null);
+        assertThat(user.getSeller().getBrand()).isEqualTo("test");
     }
 }

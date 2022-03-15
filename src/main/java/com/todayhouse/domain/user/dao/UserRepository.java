@@ -27,4 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "from User u join Follow f on u.id = f.from.id " +
             "where f.to.id = :id")
     Set<SimpleUser> findFollowersByToId(@Param("id") Long id);
+
+    @Query("select u from User u left join fetch u.seller where u.seller.id = :id")
+    Optional<User> findByIdWithSeller(@Param("id") Long id);
 }
