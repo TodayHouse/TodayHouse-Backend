@@ -7,7 +7,9 @@ import java.util.List;
 
 public interface FileService {
 
-    List<String> upload(List<MultipartFile> multipartFile);
+    List<String> uploadImages(List<MultipartFile> multipartFile);
+
+    String uploadImage(MultipartFile multipartFile);
 
     byte[] getImage(String fileName);
 

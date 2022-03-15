@@ -64,4 +64,8 @@ public class Story extends BaseTimeEntity {
         this.content = content;
         this.category = category;
     }
+
+    public void saveImage(String fileName){
+        this.images.add(new StoryImage(fileName, this));
+    }
 }

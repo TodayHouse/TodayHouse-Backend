@@ -89,7 +89,7 @@ class ProductServiceImplTest {
         when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
         when(productRepository.save(any(Product.class))).thenReturn(product);
-        when(fileService.upload(list)).thenReturn(List.of("data"));
+        when(fileService.uploadImages(list)).thenReturn(List.of("data"));
         doNothing().when(imageService).save(anyList(), any(Product.class));
 
         Long id = productService.saveProductRequest(list, request);

@@ -119,7 +119,7 @@ class ProductControllerTest extends IntegrationBase {
         MockMultipartFile json = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8));
         MockMultipartFile image = new MockMultipartFile("file", "image.jpa", "image/jpeg", "<<jpeg data>>".getBytes(StandardCharsets.UTF_8));
 
-        when(fileService.upload(anyList())).thenReturn(List.of("filename-1.jpeg"));
+        when(fileService.uploadImages(anyList())).thenReturn(List.of("filename-1.jpeg"));
 
         MvcResult mvcResult = mockMvc.perform(multipart(url)
                         .file(image)
@@ -383,7 +383,7 @@ class ProductControllerTest extends IntegrationBase {
 
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
 
-        when(fileService.upload(anyList())).thenReturn(List.of("first.jpeg","second.jpeg"));
+        when(fileService.uploadIamges(anyList())).thenReturn(List.of("first.jpeg","second.jpeg"));
         doNothing().when(fileService).delete(anyList());
 
         mockMvc.perform(multipart("http://localhost:8080/products/images")

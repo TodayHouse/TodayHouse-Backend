@@ -27,7 +27,7 @@ public class FileServiceImpl implements FileService {
     private final AmazonS3 amazonS3;
 
     @Override
-    public List<String> upload(List<MultipartFile> multipartFiles) {
+    public List<String> uploadImages(List<MultipartFile> multipartFiles) {
         List<String> fileNameList = new ArrayList<>();
 
         multipartFiles.forEach(file -> {
@@ -44,6 +44,21 @@ public class FileServiceImpl implements FileService {
             fileNameList.add(fileName);
         });
         return fileNameList;
+    }
+
+    @Override
+    public String uploadImage(MultipartFile multipartFile){
+        String fileName = createFileName(multipartFile.getOriginalFilename());
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(multipartFile.getSize());
+        objectMetadata.setContentType(multipartFile.getContentType());
+
+        try {
+            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, multipartFile.getInputStream(), objectMetadata).withCannedAcl(CannedAccessControlList.PublicRead));
+        } catch (IOException e) {
+            throw new BaseException(IMAGE_FILE_IO_EXCEPTION);
+        }
+        return fileName;
     }
 
     private String createFileName(String fileName) {

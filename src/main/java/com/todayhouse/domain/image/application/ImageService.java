@@ -8,9 +8,9 @@ import java.util.List;
 public interface ImageService {
     void save(List<String> fileName, Story story);
 
-    void save(List<String> fileName, Product product);
+    Long saveOne(String fileName, Story story);
 
-    byte[] getImage(String fileName);
+    void save(List<String> fileName, Product product);
 
     void deleteStoryImages(List<String> fileNames);
 

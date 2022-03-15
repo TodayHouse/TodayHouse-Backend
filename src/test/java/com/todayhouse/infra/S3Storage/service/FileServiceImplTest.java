@@ -35,7 +35,7 @@ class FileServiceImplTest {
         list.add(multipartFile);
         when(amazonS3.putObject(any())).thenReturn(any());
 
-        List<String> fileNames = fileService.upload(list);
+        List<String> fileNames = fileService.uploadImages(list);
 
         String result = fileNames.get(0);
         UUID.randomUUID().toString().concat(result.substring(result.lastIndexOf(".")));

@@ -24,6 +24,10 @@
     store-type: jdbc
     jdbc:
       initialize-schema: always
+  data:
+    web:
+      pageable:
+        default-page-size: 30
 
 server:
   servlet:

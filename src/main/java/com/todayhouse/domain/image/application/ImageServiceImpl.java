@@ -38,18 +38,17 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
+    public Long saveOne(String fileName, Story story){
+        return storyImageRepository.save(new StoryImage(fileName, story)).getId();
+    }
+
+    @Override
     public void save(List<String> fileNames, Product product) {
         productImageRepository.saveAll(
                 Optional.ofNullable(fileNames).orElseGet(Collections::emptyList)
                         .stream().filter(Objects::nonNull)
                         .map(file -> new ProductImage(file, product))
                         .collect(Collectors.toList()));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public byte[] getImage(String fileName) {
-        return fileService.getImage(fileName);
     }
 
     @Override
