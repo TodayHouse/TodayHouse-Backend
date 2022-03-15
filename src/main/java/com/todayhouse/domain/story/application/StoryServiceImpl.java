@@ -9,12 +9,13 @@ import com.todayhouse.domain.story.dto.response.StoryGetDetailResponse;
 import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
 import com.todayhouse.domain.story.exception.StoryNotFoundException;
 import com.todayhouse.domain.user.application.CustomUserDetailService;
+import com.todayhouse.domain.user.application.UserService;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.exception.UserNotFoundException;
 import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
-import nonapi.io.github.classgraph.fileslice.Slice;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +34,7 @@ public class StoryServiceImpl implements StoryService {
     private final StoryRepository storyRepository;
     private final FileService fileService;
     private final ImageService imageService;
+    private final UserService userService;
     private final CustomUserDetailService customUserDetailService;
 
     @Override
@@ -49,17 +51,16 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public Long saveImage(MultipartFile multipartFile, Long id){
+        Story story = storyRepository.findById(id).orElseThrow(StoryNotFoundException::new);
         String fileName = fileService.uploadImage(multipartFile);
-        Optional<Story> story = storyRepository.findById(id);
-        story.get().saveImage(fileName);
-        return imageService.saveOne(fileName, story.get());
+        imageService.saveOne(fileName, story);
+        return id;
     }
 
     @Override
     public Slice<StoryGetListResponse> findAllDesc(Pageable pageable) {
-        return storyRepository.findAllByOrderByIdDesc(pageable).stream()
-                .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)))
-                .collect(Collectors.toList());
+        return storyRepository.findAllByOrderByIdDesc(pageable)
+                .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
     }
 
     @Override
@@ -72,11 +73,16 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public List<StoryGetListResponse> findByUser(){
+    public Slice<StoryGetListResponse> findByUser(Pageable pageable){
         User user = (User) customUserDetailService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-        return storyRepository.findAllByUser(user).stream()
-                .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)))
-                .collect(Collectors.toList());
+        return storyRepository.findAllByUser(user, pageable)
+                .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
+    }
+
+    public Slice<StoryGetListResponse> findByUserNickname(String nickname, Pageable pageable){
+        User user = userService.findByNickname(nickname).orElseThrow(UserNotFoundException::new);
+        return storyRepository.findAllByUser(user, pageable)
+                .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
     }
 
     @Override

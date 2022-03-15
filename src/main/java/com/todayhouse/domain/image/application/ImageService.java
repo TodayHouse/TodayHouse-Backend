@@ -8,7 +8,7 @@ import java.util.List;
 public interface ImageService {
     void save(List<String> fileName, Story story);
 
-    Long saveOne(String fileName, Story story);
+    void saveOne(String fileName, Story story);
 
     void save(List<String> fileName, Product product);
 

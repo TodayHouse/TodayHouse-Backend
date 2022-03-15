@@ -4,9 +4,8 @@ import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryUpdateRequest;
 import com.todayhouse.domain.story.dto.response.StoryGetDetailResponse;
 import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
-import nonapi.io.github.classgraph.fileslice.Slice;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -21,7 +20,9 @@ public interface StoryService {
 
     StoryGetDetailResponse findById(Long id);
 
-    List<StoryGetListResponse> findByUser();
+    Slice<StoryGetListResponse> findByUser(Pageable pageable);
+
+    Slice<StoryGetListResponse> findByUserNickname(String nickname, Pageable pageable);
 
     List<String> getStoryImageFileNamesAll();
 

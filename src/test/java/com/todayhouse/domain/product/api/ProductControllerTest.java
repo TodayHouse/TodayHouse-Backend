@@ -383,7 +383,7 @@ class ProductControllerTest extends IntegrationBase {
 
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
 
-        when(fileService.uploadIamges(anyList())).thenReturn(List.of("first.jpeg","second.jpeg"));
+        when(fileService.uploadImages(anyList())).thenReturn(List.of("first.jpeg","second.jpeg"));
         doNothing().when(fileService).delete(anyList());
 
         mockMvc.perform(multipart("http://localhost:8080/products/images")

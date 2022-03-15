@@ -38,8 +38,8 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public Long saveOne(String fileName, Story story){
-        return storyImageRepository.save(new StoryImage(fileName, story)).getId();
+    public void saveOne(String fileName, Story story){
+        storyImageRepository.save(new StoryImage(fileName, story));
     }
 
     @Override

@@ -65,15 +65,6 @@ class ImageServiceImplTest {
     }
 
     @Test
-    @DisplayName("image 얻기")
-    void getImage() throws IOException {
-        byte[] bytes = new byte[]{(byte) 1, (byte) 2};
-        when(fileService.getImage(anyString())).thenReturn(bytes);
-
-        assertThat(imageService.getImage("filename")).isEqualTo(bytes);
-    }
-
-    @Test
     @DisplayName("Story filename 찾기")
     void findThumbnailUrl() {
         Story story = Mockito.mock(Story.class);

@@ -1,6 +1,5 @@
 package com.todayhouse.domain.image.domain;
 
-import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.global.common.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
