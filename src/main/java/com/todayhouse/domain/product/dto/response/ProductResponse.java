@@ -36,7 +36,7 @@ public class ProductResponse {
     // null safe로 parent, child, selection option 모두 response type으로 변경
     public ProductResponse(Product product) {
         this.id = product.getId();
-        this.sellerId = product.getId();
+        this.sellerId = product.getSeller().getId();
         this.brand = product.getBrand();
         this.title = product.getTitle();
         this.option1 = product.getParentOption();
