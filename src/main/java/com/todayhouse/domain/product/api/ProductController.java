@@ -33,8 +33,8 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public BaseResponse<Long> createProduct(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
-                                            @RequestPart(value = "request") @Valid ProductSaveRequest request) {
+    public BaseResponse<Long> saveProduct(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
+                                          @RequestPart(value = "request") @Valid ProductSaveRequest request) {
         Long productId = productService.saveProductRequest(multipartFiles, request);
         return new BaseResponse(Collections.singletonMap("productId", productId));
     }
