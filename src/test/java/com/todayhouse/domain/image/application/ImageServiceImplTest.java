@@ -1,5 +1,6 @@
 package com.todayhouse.domain.image.application;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.dao.StoryImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
@@ -8,6 +9,7 @@ import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.infra.S3Storage.service.FileService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,8 +17,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,6 +46,14 @@ class ImageServiceImplTest {
     @Mock
     ProductImageRepository productImageRepository;
 
+    @Mock
+    AmazonS3 amazonS3;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(imageService, "bucketName", "bucket");
+    }
+
     @Test
     @DisplayName("story image file 이름 저장")
     void save() {
@@ -51,6 +63,26 @@ class ImageServiceImplTest {
                 .collect(Collectors.toList());
         when(storyImageRepository.saveAll(anyList())).thenReturn(anyList());
         imageService.save(files, story);
+    }
+
+    @Test
+    @DisplayName("Story file 이름 하나 저장")
+    void saveStoryOne() {
+        String fileName = "file1.jpg";
+        Story story = Mockito.mock(Story.class);
+        StoryImage storyImage = Mockito.mock(StoryImage.class);
+        when(storyImageRepository.save(any(StoryImage.class))).thenReturn(storyImage);
+        imageService.saveOne(fileName, story);
+    }
+
+    @Test
+    @DisplayName("product file 이름 저장")
+    void saveProductOne() {
+        String fileName = "file1.jpg";
+        Product product = Mockito.mock(Product.class);
+        ProductImage productImage = Mockito.mock(ProductImage.class);
+        when(productImageRepository.save(any(ProductImage.class))).thenReturn(productImage);
+        imageService.saveOne(fileName, product);
     }
 
     @Test
@@ -66,22 +98,24 @@ class ImageServiceImplTest {
 
     @Test
     @DisplayName("Story filename 찾기")
-    void findThumbnailUrl() {
+    void findThumbnailUrl() throws MalformedURLException {
         Story story = Mockito.mock(Story.class);
         StoryImage test = StoryImage.builder().fileName("test").build();
         when(storyImageRepository.findFirstByStoryOrderByCreatedAtDesc(any(Story.class))).thenReturn(Optional.ofNullable(test));
+        when(amazonS3.getUrl(anyString(), eq("test"))).thenReturn(new URL("https://bucket.s3.region.amazonaws.com/test"));
 
-        assertThat(imageService.findThumbnailUrl(story)).isEqualTo(test.getFileName());
+        assertThat(imageService.findThumbnailUrl(story)).isEqualTo("https://bucket.s3.region.amazonaws.com/test");
     }
 
     @Test
     @DisplayName("Product filename 찾기")
-    void testFindThumbnailUrl() {
+    void testFindThumbnailUrl() throws MalformedURLException {
         Product product = Mockito.mock(Product.class);
         ProductImage test = ProductImage.builder().fileName("test").product(product).build();
         when(productImageRepository.findFirstByProductOrderByCreatedAtAsc(any(Product.class))).thenReturn(Optional.ofNullable(test));
+        when(amazonS3.getUrl(anyString(), eq("test"))).thenReturn(new URL("https://bucket.s3.region.amazonaws.com/test"));
 
-        assertThat(imageService.findThumbnailUrl(product)).isEqualTo(test.getFileName());
+        assertThat(imageService.findThumbnailUrl(product)).isEqualTo("https://bucket.s3.region.amazonaws.com/test");
     }
 
     @Test
@@ -160,5 +194,4 @@ class ImageServiceImplTest {
 
         assertThat(product.getImage()).isEqualTo("newImg.jpg");
     }
-
 }
