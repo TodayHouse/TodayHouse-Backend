@@ -64,9 +64,9 @@ class SellerServiceImplTest {
     }
 
     @Test
-    void userId로_seller_찾기() {
+    void sellerId로_seller_찾기() {
         Seller seller = Seller.builder().build();
-        when(userRepository.findById(1L))
+        when(userRepository.findBySellerIdWithSeller(1L))
                 .thenReturn(Optional.ofNullable(User.builder().id(1L).seller(seller).build()));
 
         assertThat(sellerService.findSeller(1L)).isEqualTo(seller);
