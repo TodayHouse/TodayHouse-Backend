@@ -2,14 +2,15 @@ package com.todayhouse.domain.category.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.todayhouse.domain.category.domain.Category;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class CategoryResponse {
     private Long id;
     private String name;

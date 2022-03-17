@@ -2,13 +2,11 @@ package com.todayhouse.domain.user.dto.response;
 
 import com.todayhouse.domain.user.domain.Seller;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class SellerResponse {
     private Long id;
     private String email;
