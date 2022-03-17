@@ -14,6 +14,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,5 +79,17 @@ class FileServiceImplTest {
 
         fileService.deleteOne(file);
         verify(amazonS3).deleteObject("bucket", file);
+    }
+
+    @Test
+    @DisplayName("파일 이름 url로 변경")
+    void changeToUrl() throws MalformedURLException {
+        String file = "aa.jpg";
+        String url = "https://bucket-aa.jpg";
+        ReflectionTestUtils.setField(fileService, "bucketName", "bucket");
+        when(amazonS3.getUrl("bucket", file)).thenReturn(new URL(url));
+
+        String result = fileService.changeFileNameToUrl(file);
+        assertThat(result).isEqualTo(url);
     }
 }

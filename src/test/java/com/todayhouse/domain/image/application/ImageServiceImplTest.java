@@ -46,14 +46,6 @@ class ImageServiceImplTest {
     @Mock
     ProductImageRepository productImageRepository;
 
-    @Mock
-    AmazonS3 amazonS3;
-
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(imageService, "bucketName", "bucket");
-    }
-
     @Test
     @DisplayName("story image file 이름 저장")
     void save() {
@@ -100,22 +92,24 @@ class ImageServiceImplTest {
     @DisplayName("Story filename 찾기")
     void findThumbnailUrl() throws MalformedURLException {
         Story story = Mockito.mock(Story.class);
+        String url = "https://bucket/test";
         StoryImage test = StoryImage.builder().fileName("test").build();
         when(storyImageRepository.findFirstByStoryOrderByCreatedAtDesc(any(Story.class))).thenReturn(Optional.ofNullable(test));
-        when(amazonS3.getUrl(anyString(), eq("test"))).thenReturn(new URL("https://bucket.s3.region.amazonaws.com/test"));
+        when(fileService.changeFileNameToUrl("test")).thenReturn(url);
 
-        assertThat(imageService.findThumbnailUrl(story)).isEqualTo("https://bucket.s3.region.amazonaws.com/test");
+        assertThat(imageService.findThumbnailUrl(story)).isEqualTo(url);
     }
 
     @Test
     @DisplayName("Product filename 찾기")
-    void testFindThumbnailUrl() throws MalformedURLException {
+    void testFindThumbnailUrl() {
         Product product = Mockito.mock(Product.class);
+        String url = "https://bucket/test";
         ProductImage test = ProductImage.builder().fileName("test").product(product).build();
         when(productImageRepository.findFirstByProductOrderByCreatedAtAsc(any(Product.class))).thenReturn(Optional.ofNullable(test));
-        when(amazonS3.getUrl(anyString(), eq("test"))).thenReturn(new URL("https://bucket.s3.region.amazonaws.com/test"));
+        when(fileService.changeFileNameToUrl("test")).thenReturn(url);
 
-        assertThat(imageService.findThumbnailUrl(product)).isEqualTo("https://bucket.s3.region.amazonaws.com/test");
+        assertThat(imageService.findThumbnailUrl(product)).isEqualTo(url);
     }
 
     @Test
@@ -172,7 +166,6 @@ class ImageServiceImplTest {
     void deleteStoryImages() {
         List<String> list = List.of("a", "b", "c");
         doNothing().when(storyImageRepository).deleteByFileName(anyString());
-        doNothing().when(fileService).delete(anyList());
 
         imageService.deleteStoryImages(list);
     }
@@ -188,7 +181,6 @@ class ImageServiceImplTest {
         doNothing().when(productImageRepository).deleteByFileName(anyString());
         when(productImageRepository.findFirstByProductOrderByCreatedAtAsc(any(Product.class)))
                 .thenReturn(Optional.ofNullable(ProductImage.builder().product(product).fileName("newImg.jpg").build()));
-        doNothing().when(fileService).delete(anyList());
 
         imageService.deleteProductImages(list);
 

@@ -88,4 +88,9 @@ public class FileServiceImpl implements FileService {
     public void deleteOne(String fileName) {
         amazonS3.deleteObject(bucketName, fileName);
     }
+
+    @Override
+    public String changeFileNameToUrl(String fileName){
+        return amazonS3.getUrl(bucketName, fileName).toString();
+    }
 }
