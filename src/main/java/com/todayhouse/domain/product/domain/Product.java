@@ -1,7 +1,6 @@
 package com.todayhouse.domain.product.domain;
 
 import com.todayhouse.domain.category.domain.Category;
-import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.exception.SellerNotSettingException;
 import com.todayhouse.domain.user.domain.Seller;
@@ -13,9 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -74,10 +71,7 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductImage> images = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ParentOption> options = new LinkedHashSet<>();
+    private Set<ParentOption> parents = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SelectionOption> selectionOptions = new LinkedHashSet<>();

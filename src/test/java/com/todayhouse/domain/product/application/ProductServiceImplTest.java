@@ -14,6 +14,8 @@ import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.exception.InvalidRequestException;
+import com.todayhouse.domain.user.exception.SellerNotFoundException;
 import com.todayhouse.infra.S3Storage.service.FileService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
@@ -29,9 +30,11 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -96,6 +99,47 @@ class ProductServiceImplTest {
         assertThat(id).isEqualTo(product.getId());
     }
 
+    @Test
+    @DisplayName("product 저장 시 seller null 오류")
+    void saveProductSellerNullException() {
+        String email = "test@test.com";
+        SecurityContextSetting(email);
+        User user = User.builder().email(email).build();
+        MultipartFile multipartFile = new MockMultipartFile("data", "filename.txt", "text/plain", "bytes".getBytes());
+        List<MultipartFile> list = new ArrayList<>();
+        list.add(multipartFile);
+
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).build();
+
+        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
+
+        assertThrows(SellerNotFoundException.class, () -> productService.saveProductRequest(list, request));
+    }
+
+    @Test
+    @DisplayName("이미지 없이 product 저장")
+    void saveProductWithoutImage() {
+        String email = "test@test.com";
+        SecurityContextSetting(email);
+        Seller seller = Seller.builder().build();
+        Product product = Product.builder().seller(seller).build();
+        User user = User.builder().email(email).seller(seller).build();
+
+        ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").build();
+        Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
+        parent.add(p1);
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).parentOptions(parent).build();
+
+        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+        doNothing().when(imageService).save(any(), any(Product.class));
+
+        Long id = productService.saveProductRequest(new ArrayList<>(), request);
+        assertThat(id).isEqualTo(product.getId());
+    }
+
 //    @Test
 //    void findAll() {
 //        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
@@ -113,7 +157,7 @@ class ProductServiceImplTest {
     void findOne() {
         Seller seller = Seller.builder().build();
         Product product = Product.builder().seller(seller).image("aa.jpg").build();
-        when(productRepository.findByIdWithOptionsAndSellerAndImages(1L)).thenReturn(Optional.ofNullable(product));
+        when(productRepository.findByIdWithOptionsAndSeller(1L)).thenReturn(Optional.ofNullable(product));
 
         Product result = productService.findByIdWithOptionsAndSellerAndImages(1L);
         assertThat(result).isEqualTo(product);
@@ -138,13 +182,35 @@ class ProductServiceImplTest {
 
         getValidProduct(1L);
         doNothing().when(productRepository).deleteById(1L);
-        when(productImageRepository.findByProductId(1L)).thenReturn(List.of(img1,img2));
+        when(productImageRepository.findByProductId(1L)).thenReturn(List.of(img1, img2));
         doNothing().when(fileService).delete(anyList());
         productService.deleteProduct(1L);
 
         verify(productRepository).deleteById(1L);
         verify(productImageRepository).findByProductId(1L);
         verify(fileService).delete(anyList());
+    }
+
+    @Test
+    @DisplayName("product를 seller가 아닌 사람이 삭제")
+    void deleteProductNotSellerExecption() {
+        String email = "email@test.com";
+        SecurityContextSetting(email);
+        Seller seller1 = Seller.builder().build();
+        Seller seller2 = Seller.builder().build();
+        User user = User.builder().email(email).seller(seller1).build();
+        Product product = Product.builder().seller(seller2).build();
+        when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
+        when(productRepository.findByIdWithSeller(1L)).thenReturn(Optional.ofNullable(product));
+
+        assertThrows(InvalidRequestException.class, () -> productService.deleteProduct(1L));
+    }
+
+    @Test
+    @DisplayName("파일 저장")
+    void saveFiles() {
+        MockMultipartFile file = new MockMultipartFile("file", "image.jpa", "image/jpeg", "<<jpeg data>>".getBytes(StandardCharsets.UTF_8));
+
     }
 
     private void SecurityContextSetting(String email) {

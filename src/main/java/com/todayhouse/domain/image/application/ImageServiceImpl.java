@@ -100,8 +100,8 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> findProductImageFileNamesAll() {
-        return productImageRepository.findAll().stream()
+    public List<String> findProductImageFileNamesByProductId(Long id) {
+        return productImageRepository.findByProductId(id).stream()
                 .map(image -> image.getFileName())
                 .collect(Collectors.toList());
     }

@@ -1,7 +1,6 @@
 package com.todayhouse.domain.product.api;
 
 import com.todayhouse.domain.image.application.ImageService;
-import com.todayhouse.domain.image.dto.ImageResponse;
 import com.todayhouse.domain.product.application.ProductService;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
@@ -40,8 +39,8 @@ public class ProductController {
     }
 
     @PostMapping("/images")
-    public BaseResponse<Long> addImages(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
-                                        @RequestPart(value = "request") @Valid SaveProductImagesRequest request) {
+    public BaseResponse<Long> saveImages(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
+                                         @RequestPart(value = "request") @Valid SaveProductImagesRequest request) {
         Long productId = productService.saveProductImages(multipartFiles, request.getProductId());
         return new BaseResponse(Collections.singletonMap("productId", productId));
     }
@@ -58,11 +57,12 @@ public class ProductController {
     @GetMapping("/{id}")
     public BaseResponse findProductWithImages(@PathVariable Long id) {
         Product product = productService.findByIdWithOptionsAndSellerAndImages(id);
-        List<ImageResponse> images = product.getImages().stream().filter(Objects::nonNull)
-                .map(i -> new ImageResponse(i.getFileName(), fileService.getImage(i.getFileName())))
+        List<String> fileNames = imageService.findProductImageFileNamesByProductId(id);
+        List<String> imageUrls = fileNames.stream().filter(Objects::nonNull)
+                .map(i -> fileService.changeFileNameToUrl(i))
                 .collect(Collectors.toList());
         ProductResponse response = new ProductResponse(product);
-        response.setImages(images);
+        response.setImages(imageUrls);
         return new BaseResponse(response);
     }
 

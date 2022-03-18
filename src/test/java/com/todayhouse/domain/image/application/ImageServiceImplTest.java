@@ -1,6 +1,5 @@
 package com.todayhouse.domain.image.application;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.dao.StoryImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
@@ -9,7 +8,6 @@ import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.infra.S3Storage.service.FileService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,10 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -146,15 +142,15 @@ class ImageServiceImplTest {
     }
 
     @Test
-    @DisplayName("모든 product image 찾기")
+    @DisplayName("product id로 image 찾기")
     void findProductImageAll() {
         Product product = Mockito.mock(Product.class);
         ProductImage a = ProductImage.builder().fileName("a").product(product).build();
         ProductImage b = ProductImage.builder().fileName("b").product(product).build();
         List<ProductImage> list = List.of(a, b);
-        when(productImageRepository.findAll()).thenReturn(list);
+        when(productImageRepository.findByProductId(1L)).thenReturn(list);
 
-        List<String> result = imageService.findProductImageFileNamesAll();
+        List<String> result = imageService.findProductImageFileNamesByProductId(1L);
 
         assertThat(result.size()).isEqualTo(2);
         assertTrue(result.contains("a"));

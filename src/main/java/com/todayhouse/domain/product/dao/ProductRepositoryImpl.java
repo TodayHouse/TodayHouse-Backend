@@ -58,13 +58,13 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
 
     // product를 seller, 모든 option과 left join
     @Override
-    public Optional<Product> findByIdWithOptionsAndSellerAndImages(Long id) {
+    public Optional<Product> findByIdWithOptionsAndSeller(Long id) {
         QProduct qProduct = QProduct.product;
 
         //seller, selectionOptions, parentOption-childOption 과 fetch join
         EntityGraph<Product> graph = em.createEntityGraph(Product.class);
-        graph.addAttributeNodes("seller", "selectionOptions", "images");
-        Subgraph<ParentOption> options = graph.addSubgraph("options");
+        graph.addAttributeNodes("seller", "selectionOptions");
+        Subgraph<ParentOption> options = graph.addSubgraph("parents");
         options.addAttributeNodes("children");
 
         JPAQuery<Product> query = jpaQueryFactory.selectFrom(qProduct).where(qProduct.id.eq(id));

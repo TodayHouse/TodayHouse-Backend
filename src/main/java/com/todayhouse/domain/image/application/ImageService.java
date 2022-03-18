@@ -24,5 +24,5 @@ public interface ImageService {
 
     List<String> findStoryImageFileNamesAll();
 
-    List<String> findProductImageFileNamesAll();
+    List<String> findProductImageFileNamesByProductId(Long productId);
 }

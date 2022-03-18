@@ -34,6 +34,8 @@ class ProductImageRepositoryTest extends DataJpaBase {
         img2 = ProductImage.builder().fileName("img2.jpg").product(product).build();
         em.persist(seller);
         em.persist(product);
+        em.persist(img1);
+        em.persist(img2);
         em.flush();
         em.clear();
     }
@@ -67,7 +69,19 @@ class ProductImageRepositoryTest extends DataJpaBase {
     void findByProductId() {
         List<ProductImage> images = productImageRepository.findByProductId(product.getId());
 
+        assertThat(images.size()).isEqualTo(2);
         assertThat(images.stream().anyMatch(i->i.getFileName().equals("img1.jpg")));
         assertThat(images.stream().anyMatch(i->i.getFileName().equals("img2.jpg")));
     }
+
+    @Test
+    @DisplayName("product images 찾기")
+    void findByProductIdWithOptions() {
+        List<ProductImage> images = productImageRepository.findByProductId(product.getId());
+
+        assertThat(images.stream().anyMatch(i->i.getFileName().equals("img1.jpg")));
+        assertThat(images.stream().anyMatch(i->i.getFileName().equals("img2.jpg")));
+    }
+
+
 }

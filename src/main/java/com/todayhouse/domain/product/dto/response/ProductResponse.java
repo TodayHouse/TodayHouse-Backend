@@ -1,10 +1,8 @@
 package com.todayhouse.domain.product.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.todayhouse.domain.image.dto.ImageResponse;
 import com.todayhouse.domain.product.domain.Product;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +12,6 @@ import java.util.stream.Collectors;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class ProductResponse {
     private Long id;
     private Long sellerId;
@@ -29,7 +26,7 @@ public class ProductResponse {
     private int deliveryFee;
     private int discountRate;
     private boolean specialPrice;
-    private List<ImageResponse> images;
+    private List<String> imageUrls;
     private Set<ParentOptionResponse> parentOptions;
     private Set<SelectionOptionResponse> selectionOptions;
 
@@ -48,7 +45,7 @@ public class ProductResponse {
         this.discountRate = product.getDiscountRate();
         this.specialPrice = product.isSpecialPrice();
         this.productDetail = product.getProductDetail();
-        this.parentOptions = Optional.ofNullable(product.getOptions())
+        this.parentOptions = Optional.ofNullable(product.getParents())
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
                 .map(parentOption -> new ParentOptionResponse(parentOption, true)).collect(Collectors.toSet());
         this.selectionOptions = Optional.ofNullable(product.getSelectionOptions())
@@ -56,7 +53,7 @@ public class ProductResponse {
                 .map(selectionOption -> new SelectionOptionResponse(selectionOption)).collect(Collectors.toSet());
     }
 
-    public void setImages(List<ImageResponse> images) {
-        this.images = images;
+    public void setImages(List<String> images) {
+        this.imageUrls = images;
     }
 }

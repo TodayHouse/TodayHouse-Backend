@@ -5,7 +5,7 @@ import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
-import com.todayhouse.domain.image.dto.ImageResponse;
+import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
@@ -66,7 +66,7 @@ public class ProductServiceImpl implements ProductService {
         return product.getId();
     }
 
-    // seller와 join한 모든 product, 대표 이미지
+    // 모든 product를 seller와 join, 대표 이미지 url도 설정
     @Override
     @Transactional(readOnly = true)
     public Page<ProductResponse> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable) {
@@ -74,7 +74,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(p -> {
                     ProductResponse response = new ProductResponse(p);
                     if (StringUtils.hasText(p.getImage()))
-                        response.setImages(List.of(createImageResponse(p.getImage())));
+                        response.setImages(List.of(fileService.changeFileNameToUrl(p.getImage())));
                     return response;
                 });
         return page;
@@ -84,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public Product findByIdWithOptionsAndSellerAndImages(Long id) {
-        return productRepository.findByIdWithOptionsAndSellerAndImages(id).orElseThrow(ProductNotFoundException::new);
+        return productRepository.findByIdWithOptionsAndSeller(id).orElseThrow(ProductNotFoundException::new);
     }
 
     @Override
@@ -99,9 +99,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(Long id) {
         getValidProduct(id);
-        List<String> fileNames = productImageRepository.findByProductId(id)
-                .stream().map(i -> i.getFileName()).collect(Collectors.toList());
-        fileService.delete(fileNames);
+        List<ProductImage> images = productImageRepository.findByProductId(id);
+        fileService.delete(images.stream().map(i -> i.getFileName()).collect(Collectors.toList()));
+        productImageRepository.deleteAllById(images.stream().map(i -> i.getId()).collect(Collectors.toList()));
         productRepository.deleteById(id);
     }
 
@@ -132,10 +132,5 @@ public class ProductServiceImpl implements ProductService {
             return fileService.uploadImages(multipartFiles);
         }
         return null;
-    }
-
-    private ImageResponse createImageResponse(String fileName) {
-        byte[] image = fileService.getImage(fileName);
-        return new ImageResponse(fileName, image);
     }
 }
