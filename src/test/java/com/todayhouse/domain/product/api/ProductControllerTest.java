@@ -105,13 +105,13 @@ class ProductControllerTest extends IntegrationBase {
     void saveProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
-        Set<ChildOptionSaveRequest> child = new LinkedHashSet<>();
-        ChildOptionSaveRequest c1 = ChildOptionSaveRequest.builder().content("c1").build();
-        ChildOptionSaveRequest c2 = ChildOptionSaveRequest.builder().content("c2").build();
+        Set<ProductChildOptionSaveRequest> child = new LinkedHashSet<>();
+        ProductChildOptionSaveRequest c1 = ProductChildOptionSaveRequest.builder().content("c1").build();
+        ProductChildOptionSaveRequest c2 = ProductChildOptionSaveRequest.builder().content("c2").build();
         child.add(c1);
         child.add(c2);
-        ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
-        Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
+        ProductParentOptionSaveRequest p1 = ProductParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
+        Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
                 .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryId(1L)
@@ -150,13 +150,13 @@ class ProductControllerTest extends IntegrationBase {
     @DisplayName("jwt가 없으면 product 저장 불가")
     void saveNotLogin() throws Exception {
         String url = "http://localhost:8080/products";
-        Set<ChildOptionSaveRequest> child = new LinkedHashSet<>();
-        ChildOptionSaveRequest c1 = ChildOptionSaveRequest.builder().content("c1").build();
-        ChildOptionSaveRequest c2 = ChildOptionSaveRequest.builder().content("c2").build();
+        Set<ProductChildOptionSaveRequest> child = new LinkedHashSet<>();
+        ProductChildOptionSaveRequest c1 = ProductChildOptionSaveRequest.builder().content("c1").build();
+        ProductChildOptionSaveRequest c2 = ProductChildOptionSaveRequest.builder().content("c2").build();
         child.add(c1);
         child.add(c2);
-        ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
-        Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
+        ProductParentOptionSaveRequest p1 = ProductParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
+        Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
                 .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryId(1L)
@@ -388,7 +388,7 @@ class ProductControllerTest extends IntegrationBase {
         MockMultipartFile first = new MockMultipartFile("file", "first.jpeg", "image/jpeg", "<<jpeg data1>>".getBytes(StandardCharsets.UTF_8));
         MockMultipartFile second = new MockMultipartFile("file", "second.jpeg", "image/jpeg", "<<jpeg data2>>".getBytes(StandardCharsets.UTF_8));
 
-        SaveProductImagesRequest request = SaveProductImagesRequest.builder().productId(product1.getId()).build();
+        ProductImageSaveRequest request = ProductImageSaveRequest.builder().productId(product1.getId()).build();
         MockMultipartFile json = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8));
 
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));

@@ -3,10 +3,10 @@ package com.todayhouse.domain.product.api;
 import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.product.application.ProductService;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.product.dto.request.ProductImageSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
-import com.todayhouse.domain.product.dto.request.SaveProductImagesRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.global.common.BaseResponse;
@@ -40,7 +40,7 @@ public class ProductController {
 
     @PostMapping("/images")
     public BaseResponse<Long> saveImages(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
-                                         @RequestPart(value = "request") @Valid SaveProductImagesRequest request) {
+                                         @RequestPart(value = "request") @Valid ProductImageSaveRequest request) {
         Long productId = productService.saveProductImages(multipartFiles, request.getProductId());
         return new BaseResponse(Collections.singletonMap("productId", productId));
     }

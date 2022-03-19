@@ -7,8 +7,8 @@ import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
-import com.todayhouse.domain.product.dto.request.ChildOptionSaveRequest;
-import com.todayhouse.domain.product.dto.request.ParentOptionSaveRequest;
+import com.todayhouse.domain.product.dto.request.ProductChildOptionSaveRequest;
+import com.todayhouse.domain.product.dto.request.ProductParentOptionSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
@@ -79,13 +79,13 @@ class ProductServiceImplTest {
         List<MultipartFile> list = new ArrayList<>();
         list.add(multipartFile);
 
-        Set<ChildOptionSaveRequest> child = new LinkedHashSet<>();
-        ChildOptionSaveRequest c1 = ChildOptionSaveRequest.builder().content("c1").build();
-        ChildOptionSaveRequest c2 = ChildOptionSaveRequest.builder().content("c2").build();
+        Set<ProductChildOptionSaveRequest> child = new LinkedHashSet<>();
+        ProductChildOptionSaveRequest c1 = ProductChildOptionSaveRequest.builder().content("c1").build();
+        ProductChildOptionSaveRequest c2 = ProductChildOptionSaveRequest.builder().content("c2").build();
         child.add(c1);
         child.add(c2);
-        ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
-        Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
+        ProductParentOptionSaveRequest p1 = ProductParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
+        Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).parentOptions(parent).build();
 
@@ -126,8 +126,8 @@ class ProductServiceImplTest {
         Product product = Product.builder().seller(seller).build();
         User user = User.builder().email(email).seller(seller).build();
 
-        ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").build();
-        Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
+        ProductParentOptionSaveRequest p1 = ProductParentOptionSaveRequest.builder().content("p1").build();
+        Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).parentOptions(parent).build();
 

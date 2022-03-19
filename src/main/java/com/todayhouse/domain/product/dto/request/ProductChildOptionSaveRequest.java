@@ -11,10 +11,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ChildOptionSaveRequest {
-    @NotNull(message = "parentOptionId를 입력해주세요.")
-    private Long parentOptionId;
-
+public class ProductChildOptionSaveRequest {
     @NotNull(message = "price를 입력해주세요")
     private int price;
 
