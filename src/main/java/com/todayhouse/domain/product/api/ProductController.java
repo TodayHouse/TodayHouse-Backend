@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -56,11 +55,9 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public BaseResponse findProductWithImages(@PathVariable Long id) {
-        Product product = productService.findByIdWithOptionsAndSellerAndImages(id);
-        List<String> fileNames = imageService.findProductImageFileNamesByProductId(id);
-        List<String> imageUrls = fileNames.stream().filter(Objects::nonNull)
-                .map(i -> fileService.changeFileNameToUrl(i))
-                .collect(Collectors.toList());
+        Product product = productService.findByIdWithOptionsAndSeller(id);
+        List<String> imageUrls = imageService.findProductImageFileNamesByProductId(id).stream().
+                map(fileName->fileService.changeFileNameToUrl(fileName)).collect(Collectors.toList());
         ProductResponse response = new ProductResponse(product);
         response.setImages(imageUrls);
         return new BaseResponse(response);

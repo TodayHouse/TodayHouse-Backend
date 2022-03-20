@@ -35,7 +35,7 @@ public class ProductResponse {
     public ProductResponse(Product product) {
         this.id = product.getId();
         this.sellerId = product.getSeller().getId();
-        this.categoryId = product.getCategory().getId();
+        this.categoryId = product.getCategory() == null ? null: product.getCategory().getId();
         this.brand = product.getBrand();
         this.title = product.getTitle();
         this.option1 = product.getParentOption();

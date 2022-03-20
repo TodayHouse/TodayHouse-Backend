@@ -159,7 +159,7 @@ class ProductServiceImplTest {
         Product product = Product.builder().seller(seller).image("aa.jpg").build();
         when(productRepository.findByIdWithOptionsAndSeller(1L)).thenReturn(Optional.ofNullable(product));
 
-        Product result = productService.findByIdWithOptionsAndSellerAndImages(1L);
+        Product result = productService.findByIdWithOptionsAndSeller(1L);
         assertThat(result).isEqualTo(product);
     }
 

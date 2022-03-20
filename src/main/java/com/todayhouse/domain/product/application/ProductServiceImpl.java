@@ -83,7 +83,7 @@ public class ProductServiceImpl implements ProductService {
     // product 와 productImage, 모든 options, seller left join
     @Override
     @Transactional(readOnly = true)
-    public Product findByIdWithOptionsAndSellerAndImages(Long id) {
+    public Product findByIdWithOptionsAndSeller(Long id) {
         return productRepository.findByIdWithOptionsAndSeller(id).orElseThrow(ProductNotFoundException::new);
     }
 
