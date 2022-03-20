@@ -1,6 +1,8 @@
 package com.todayhouse.domain.product.dao;
 
 import com.todayhouse.DataJpaBase;
+import com.todayhouse.domain.category.dao.CategoryRepository;
+import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.domain.ChildOption;
@@ -38,18 +40,20 @@ class ProductRepositoryTest extends DataJpaBase {
     TestEntityManager em;
 
     Product product1, product2, product3;
+    Category c1;
 
     @BeforeEach
     void preSet() {
         productRepository.deleteAll();
-
         Seller seller = Seller.builder().email("seller@email.com").brand("house").build();
         em.persist(seller);
         product1 = Product.builder().price(1000).title("p1").seller(seller).build();
         ParentOption op1 = ParentOption.builder().product(product1).content("op1").price(1000).stock(10).build();
         ParentOption op2 = ParentOption.builder().product(product1).content("op2").price(1000).stock(10).build();
 
-        product2 = Product.builder().price(2000).title("p2").seller(seller).build();
+        c1 = Category.builder().name("c1").build();
+        em.persist(c1);
+        product2 = Product.builder().category(c1).price(2000).title("p2").seller(seller).build();
         ParentOption op3 = ParentOption.builder().product(product2).content("op3").build();
         ParentOption op4 = ParentOption.builder().product(product2).content("op4").build();
         ChildOption ch1 = ChildOption.builder().parent(op3).content("ch1").stock(10).price(1000).build();
@@ -101,6 +105,7 @@ class ProductRepositoryTest extends DataJpaBase {
     void product_하나_찾기() {
         Product product = productRepository.findByIdWithOptionsAndSeller(product2.getId()).orElse(null);
 
+        assertThat(product.getCategory().getId()).isEqualTo(c1.getId());
         assertThat(product.getSeller().getBrand()).isEqualTo(product.getBrand());
         assertThat(product.getTitle()).isEqualTo("p2");
         assertThat(product.getParents().size()).isEqualTo(2);
