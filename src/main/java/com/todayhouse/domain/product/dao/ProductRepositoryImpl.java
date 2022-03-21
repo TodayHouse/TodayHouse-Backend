@@ -17,13 +17,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Subgraph;
+import javax.persistence.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ProductRepositoryImpl extends QuerydslRepositorySupport
         implements CustomProductRepository {
@@ -45,7 +43,6 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
         QSeller qSeller = QSeller.seller;
 
         JPQLQuery<Product> query = from(qProduct).join(qProduct.seller, qSeller);
-
         makeProductSearchQuery(query, productSearch);
 
         query.fetchJoin();
@@ -84,9 +81,9 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
             query.where(qProduct.price.goe(productSearch.getPriceFrom()));
         if (productSearch.getPriceTo() != null)
             query.where(qProduct.price.loe(productSearch.getPriceTo()));
-        if (productSearch.isDeliveryFee())
+        if (productSearch.getDeliveryFee() != null && productSearch.getDeliveryFee().booleanValue())
             query.where(qProduct.deliveryFee.gt(0));
-        if (productSearch.isSpecialPrice())
+        if (productSearch.getSpecialPrice() != null && productSearch.getSpecialPrice().booleanValue())
             query.where(qProduct.specialPrice.isTrue());
 
         List<Long> ids = getCategoryIds(productSearch.getCategoryId());
@@ -99,21 +96,18 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
     private List<Long> getCategoryIds(Long categoryId) {
         if (categoryId == null) return null;
 
-        QCategory qCategory = QCategory.category;
+        String sql = "with recursive rec(category_id, name, depth, parent_id) as (" +
+                " select category_id, name, depth, parent_id from Category where category_id=" + categoryId +
+                " union all " +
+                " select ch.category_id, ch.name, ch.depth, ch.parent_id from rec as par, Category as ch where par.category_id = ch.parent_id" +
+                " ) " +
+                " select * from rec";
 
-        Category category = from(qCategory).where(qCategory.id.eq(categoryId)).fetchOne();
-        if (category == null) throw new CategoryNotFoundException();
-
-        List<Long> ids = new LinkedList<>();
-        getIds(category, ids);
-        return ids;
-    }
-
-    private void getIds(Category category, List<Long> ids) {
-        ids.add(category.getId());
-        for (Category c : category.getChildren()) {
-            getIds(c, ids);
+        List<Category> categories = em.createNativeQuery(sql, Category.class).getResultList();
+        for (Category c : categories) {
+            System.out.println(c.getId());
         }
+        return categories.stream()
+                .map(category -> category.getId()).collect(Collectors.toList());
     }
-
 }

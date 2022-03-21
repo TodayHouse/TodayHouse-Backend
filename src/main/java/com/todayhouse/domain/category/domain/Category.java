@@ -25,8 +25,7 @@ public class Category {
     @JoinColumn(name = "parent_id")
     private Category parent;
 
-    @BatchSize(size = 5)
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Category> children = new ArrayList<>();
 
     private int depth;
