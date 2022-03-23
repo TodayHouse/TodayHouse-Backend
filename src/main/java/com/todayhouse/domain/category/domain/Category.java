@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -33,14 +32,14 @@ public class Category {
     @Builder
     public Category(String name, Category parent) {
         this.name = name;
-        setParent(parent);
+        updateParent(parent);
     }
 
     public void updateName(String name) {
         this.name = name;
     }
 
-    public void setParent(Category parent) {
+    public void updateParent(Category parent) {
         if (this.parent != null) return;
 
         this.parent = parent;

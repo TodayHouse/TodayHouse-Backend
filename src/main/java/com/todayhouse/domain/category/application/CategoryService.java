@@ -12,11 +12,9 @@ public interface CategoryService {
 
     Category updateCategory(CategoryUpdateRequest request);
 
-    CategoryResponse findAllByName(String name);
+    CategoryResponse findOneWithChildrenAllById(Long id);
 
-    CategoryResponse findAllById(Long id);
-
-    List<CategoryResponse> findAll();
+    List<Category> findAllWithChildrenAll();
 
     void deleteCategory(Long id);
 }

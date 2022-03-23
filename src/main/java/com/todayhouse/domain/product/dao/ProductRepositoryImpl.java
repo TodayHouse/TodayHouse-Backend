@@ -15,7 +15,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
-import javax.persistence.*;
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Subgraph;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -85,10 +88,11 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
         if (productSearch.getSpecialPrice() != null && productSearch.getSpecialPrice().booleanValue())
             query.where(qProduct.specialPrice.isTrue());
 
-        List<Long> ids = categoryRepository.findOneWithAllChildrenById(productSearch.getCategoryId()).stream()
-                .map(category -> category.getId()).collect(Collectors.toList());
-
-        if (ids != null)
-            query.where(qProduct.category.id.in(ids));
+        if (productSearch.getCategoryId() != null) {
+            List<Long> ids = categoryRepository.findOneWithAllChildrenById(productSearch.getCategoryId()).stream()
+                    .map(category -> category.getId()).collect(Collectors.toList());
+            if (!ids.isEmpty())
+                query.where(qProduct.category.id.in(ids));
+        }
     }
 }

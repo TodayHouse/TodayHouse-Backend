@@ -1,7 +1,6 @@
 package com.todayhouse.domain.product.dao;
 
 import com.todayhouse.DataJpaBase;
-import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
@@ -17,12 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,14 +39,14 @@ class ProductRepositoryTest extends DataJpaBase {
     TestEntityManager em;
 
     Product product1, product2, product3;
-    Category c1;
+    Category c1, c2, c3;
 
     @BeforeEach
     void preSet() {
         productRepository.deleteAll();
         c1 = Category.builder().name("c1").build();
-        Category c2 = Category.builder().parent(c1).name("c2").build();
-        Category c3 = Category.builder().parent(c2).name("c3").build();
+        c2 = Category.builder().parent(c1).name("c2").build();
+        c3 = Category.builder().parent(c2).name("c3").build();
         em.persist(c1);
 
         Seller seller = Seller.builder().email("seller@email.com").brand("house").build();
@@ -110,7 +107,7 @@ class ProductRepositoryTest extends DataJpaBase {
     void product_하나_찾기() {
         Product product = productRepository.findByIdWithOptionsAndSeller(product2.getId()).orElse(null);
 
-        assertThat(product.getCategory().getId()).isEqualTo(c1.getId());
+        assertThat(product.getCategory().getId()).isEqualTo(c2.getId());
         assertThat(product.getSeller().getBrand()).isEqualTo(product.getBrand());
         assertThat(product.getTitle()).isEqualTo("p2");
         assertThat(product.getParents().size()).isEqualTo(2);
@@ -118,7 +115,7 @@ class ProductRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void product_조건으로_찾기(){
+    void product_조건으로_찾기() {
         ProductSearchRequest request = ProductSearchRequest.builder().categoryId(c1.getId()).priceFrom(2000).build();
         PageRequest of = PageRequest.of(0, 30, Sort.by("createdAt").descending());
         Page<Product> page = productRepository.findAllWithSeller(request, of);

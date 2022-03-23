@@ -4,6 +4,7 @@ import com.todayhouse.domain.category.application.CategoryService;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
+import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.dto.response.CategorySaveResponse;
 import com.todayhouse.domain.category.dto.response.CategoryUpdateResponse;
 import com.todayhouse.global.common.BaseResponse;
@@ -24,13 +25,14 @@ public class CategoryController {
 
     @GetMapping
     public BaseResponse findAll() {
-        return new BaseResponse(categoryService.findAll());
+        return new BaseResponse(categoryService.findAllWithChildrenAll());
     }
 
     // 해당 카테고리의 모든 하위 카테고리
     @GetMapping("/{id}")
-    public BaseResponse findSubAll(@PathVariable Long id) {
-        return new BaseResponse(categoryService.findAllById(id));
+    public BaseResponse findWithSubAll(@PathVariable Long id) {
+        CategoryResponse response = categoryService.findOneWithChildrenAllById(id);
+        return new BaseResponse(response);
     }
 
     @PatchMapping

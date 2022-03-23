@@ -47,9 +47,11 @@ public class ProductController {
     //?page=0&size=4&sort=price,DESC&sort=id,DESC 형식으로 작성
     //ProductSearchRequest은 선택사항
     @GetMapping
-    public BaseResponse findProductsPagination(@RequestBody(required = false) ProductSearchRequest productSearch,
+    public BaseResponse findProductsPagination(@ModelAttribute ProductSearchRequest productSearch,
                                                Pageable pageable) {
+        System.out.println(pageable);
         Page<ProductResponse> products = productService.findAllWithSeller(productSearch, pageable);
+
         return new BaseResponse(new ProductSearchResponse(products));
     }
 
@@ -57,7 +59,7 @@ public class ProductController {
     public BaseResponse findProductWithImages(@PathVariable Long id) {
         Product product = productService.findByIdWithOptionsAndSeller(id);
         List<String> imageUrls = imageService.findProductImageFileNamesByProductId(id).stream().
-                map(fileName->fileService.changeFileNameToUrl(fileName)).collect(Collectors.toList());
+                map(fileName -> fileService.changeFileNameToUrl(fileName)).collect(Collectors.toList());
         ProductResponse response = new ProductResponse(product);
         response.setImages(imageUrls);
         return new BaseResponse(response);

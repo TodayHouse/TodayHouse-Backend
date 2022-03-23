@@ -12,8 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -47,22 +48,27 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryResponse> findAll() {
-        List<Category> categories = categoryRepository.findByDepth(0);
-        return categories.stream().map(c -> new CategoryResponse(c)).collect(Collectors.toList());
+    public List<Category> findAllWithChildrenAll() {
+        return categoryRepository.findByDepth(0);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryResponse findAllByName(String name) {
-        Category category = categoryRepository.findByName(name).orElseThrow(CategoryNotFoundException::new);
-        return new CategoryResponse(category);
+    public CategoryResponse findOneWithChildrenAllById(Long id) {
+        Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFoundException::new);
+        return createCategoryResponse(category);
     }
 
-    @Override
-    public CategoryResponse findAllById(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFoundException::new);
-        return new CategoryResponse(category);
+    private CategoryResponse createCategoryResponse(Category category) {
+        List<Category> categories = categoryRepository.findOneWithAllChildrenById(category.getId());
+        Map<Long, CategoryResponse> map = new HashMap<>();
+        categories.stream().forEach(c -> {
+            CategoryResponse response = new CategoryResponse(c);
+            map.put(c.getId(), response);
+            if (c.getId() != category.getId())
+                map.get(c.getParent().getId()).getSubCategories().add(response);
+        });
+        return map.get(category.getId());
     }
 
     @PostConstruct

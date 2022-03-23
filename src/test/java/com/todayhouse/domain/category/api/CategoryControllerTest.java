@@ -6,6 +6,7 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
+import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.dto.response.CategorySaveResponse;
 import com.todayhouse.domain.category.dto.response.CategoryUpdateResponse;
 import com.todayhouse.global.common.BaseResponse;
@@ -19,7 +20,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -80,10 +84,18 @@ class CategoryControllerTest extends IntegrationBase {
     @Test
     @DisplayName("특정 하위 카테고리 찾기")
     void findAllSub() throws Exception {
-        String url = "http://localhost:8080/categories/" + c1.getId();
-        mockMvc.perform(get(url))
+        String url = "http://localhost:8080/categories/" + p1.getId();
+        MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andDo(print());
+                .andDo(print())
+                .andReturn();
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        CategoryResponse parent = objectMapper.convertValue(response.getResult(), CategoryResponse.class);
+        List<CategoryResponse> children = parent.getSubCategories();
+        assertThat(parent.getName()).isEqualTo(p1.getName());
+        assertThat(children.size()).isEqualTo(2);
+        assertTrue(children.stream().anyMatch(c -> c.getSubCategories().size() == 1 &&
+                c.getSubCategories().get(0).getName().equals("cc1")));
     }
 
     @Test
