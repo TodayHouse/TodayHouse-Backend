@@ -4,9 +4,7 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.todayhouse.domain.category.domain.Category;
-import com.todayhouse.domain.category.domain.QCategory;
-import com.todayhouse.domain.category.exception.CategoryNotFoundException;
+import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.domain.QProduct;
@@ -18,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import javax.persistence.*;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,13 +24,15 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
         implements CustomProductRepository {
 
     @PersistenceContext
-    EntityManager em;
+    private EntityManager em;
 
     private final JPAQueryFactory jpaQueryFactory;
+    private final CategoryRepository categoryRepository;
 
-    public ProductRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
+    public ProductRepositoryImpl(JPAQueryFactory jpaQueryFactory, CategoryRepository categoryRepository) {
         super(Product.class);
         this.jpaQueryFactory = jpaQueryFactory;
+        this.categoryRepository = categoryRepository;
     }
 
     //product 페이징
@@ -86,28 +85,10 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
         if (productSearch.getSpecialPrice() != null && productSearch.getSpecialPrice().booleanValue())
             query.where(qProduct.specialPrice.isTrue());
 
-        List<Long> ids = getCategoryIds(productSearch.getCategoryId());
+        List<Long> ids = categoryRepository.findOneWithAllChildrenById(productSearch.getCategoryId()).stream()
+                .map(category -> category.getId()).collect(Collectors.toList());
 
         if (ids != null)
             query.where(qProduct.category.id.in(ids));
-    }
-
-    // 해당 카테고리 id와 모든 하위 카테고리 id를 list에 추가
-    private List<Long> getCategoryIds(Long categoryId) {
-        if (categoryId == null) return null;
-
-        String sql = "with recursive rec(category_id, name, depth, parent_id) as (" +
-                " select category_id, name, depth, parent_id from Category where category_id=" + categoryId +
-                " union all " +
-                " select ch.category_id, ch.name, ch.depth, ch.parent_id from rec as par, Category as ch where par.category_id = ch.parent_id" +
-                " ) " +
-                " select * from rec";
-
-        List<Category> categories = em.createNativeQuery(sql, Category.class).getResultList();
-        for (Category c : categories) {
-            System.out.println(c.getId());
-        }
-        return categories.stream()
-                .map(category -> category.getId()).collect(Collectors.toList());
     }
 }

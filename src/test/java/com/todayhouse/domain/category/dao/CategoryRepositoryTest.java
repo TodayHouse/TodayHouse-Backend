@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -127,5 +128,24 @@ class CategoryRepositoryTest extends DataJpaBase {
 
         List<Category> categories = categoryRepository.findByDepth(1);
         assertEquals("ch", categories.get(0).getName());
+    }
+
+    @Test
+    void subCategory_포함하여_찾기(){
+        Category par = Category.builder().name("par").build();
+        Category ch1 = Category.builder().name("ch1").parent(par).build();
+        Category ch2 = Category.builder().name("ch2").parent(par).build();
+        Category ch1ch1 = Category.builder().name("ch1ch1").parent(ch1).build();
+
+        em.persist(par);
+        em.flush();
+        em.clear();
+
+        List<Category> categories = categoryRepository.findOneWithAllChildrenById(par.getId());
+        assertThat(categories.size()).isEqualTo(4);
+        assertThat(categories.get(0).getId()).isEqualTo(par.getId());
+        assertThat(categories.get(1).getId()).isEqualTo(ch1.getId());
+        assertThat(categories.get(2).getId()).isEqualTo(ch2.getId());
+        assertThat(categories.get(3).getId()).isEqualTo(ch1ch1.getId());
     }
 }
