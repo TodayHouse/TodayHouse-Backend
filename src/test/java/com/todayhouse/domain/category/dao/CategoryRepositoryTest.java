@@ -11,8 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)//@BeforeAll 사용
 class CategoryRepositoryTest extends DataJpaBase {
@@ -148,4 +147,29 @@ class CategoryRepositoryTest extends DataJpaBase {
         assertThat(categories.get(2).getId()).isEqualTo(ch2.getId());
         assertThat(categories.get(3).getId()).isEqualTo(ch1ch1.getId());
     }
+
+    @Test
+    void 모든_카테고리_깊이_부모_ID_오름차순_찾기(){
+        Category par1 = Category.builder().name("par1").build();
+        Category ch1 = Category.builder().name("ch1").parent(par1).build();
+        Category ch2 = Category.builder().name("ch2").parent(par1).build();
+        Category ch1ch1 = Category.builder().name("ch1ch1").parent(ch1).build();
+
+        Category par2 = Category.builder().name("par2").build();
+        Category ch3 = Category.builder().name("ch3").parent(par2).build();
+        Category ch3ch2 = Category.builder().name("ch3ch2").parent(ch3).build();
+
+        em.persist(par1);
+        em.persist(par2);
+        em.flush();
+        em.clear();
+
+        List<Category> expect = List.of(par1, par2, ch1, ch2, ch3, ch1ch1, ch3ch2);
+        List<Category> result = categoryRepository.findAllByOrderByDepthAscParentAscIdAsc();
+        for(int i=0;i<expect.size();i++){
+            assertThat(result.get(i).getName()).isEqualTo(expect.get(i).getName());
+        }
+    }
+
+
 }

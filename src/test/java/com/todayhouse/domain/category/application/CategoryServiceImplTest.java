@@ -82,17 +82,24 @@ class CategoryServiceImplTest {
         Category c1 = Category.builder().name("c1").build();
         Category c2 = Category.builder().name("c2").build();
         Category c3 = Category.builder().name("c3").parent(c2).build();
-        List<Category> list = new ArrayList<>();
-        list.add(c1);
-        list.add(c2);
-        list.add(c3);
+        Category c4 = Category.builder().name("c4").parent(c3).build();
+        ReflectionTestUtils.setField(c1, "id", 1L);
+        ReflectionTestUtils.setField(c2, "id", 2L);
+        ReflectionTestUtils.setField(c3, "id", 3L);
+        ReflectionTestUtils.setField(c4, "id", 4L);
 
-        when(categoryRepository.findByDepth(0)).thenReturn(list);
+        List<Category> list = List.of(c1, c2, c3, c4);
 
-        List<Category> find = categoryService.findAllWithChildrenAll();
-        assertTrue(find.stream().anyMatch(c -> c.getName().equals("c1")));
-        assertTrue(find.stream().anyMatch(c -> c.getName().equals("c2") &&
-                c.getChildren().get(0).getName().equals("c3")));
+        when(categoryRepository.findAllByOrderByDepthAscParentAscIdAsc()).thenReturn(list);
+
+        List<CategoryResponse> find = categoryService.findAllWithChildrenAll();
+        CategoryResponse child = find.get(1).getSubCategories().get(0);
+        CategoryResponse grand = child.getSubCategories().get(0);
+
+        assertThat(find.get(0).getName()).isEqualTo("c1");
+        assertThat(find.get(1).getName()).isEqualTo("c2");
+        assertThat(child.getName()).isEqualTo("c3");
+        assertThat(grand.getName()).isEqualTo("c4");
     }
 
     @Test
@@ -109,6 +116,7 @@ class CategoryServiceImplTest {
         list.add(c3);
 
         when(categoryRepository.findById(2L)).thenReturn(Optional.ofNullable(c2));
+
         createCategoryResponse(list);
         CategoryResponse find = categoryService.findOneWithChildrenAllById(2L);
         assertThat(find.getName()).isEqualTo("c2");

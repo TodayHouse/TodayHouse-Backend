@@ -14,7 +14,7 @@ public interface CategoryService {
 
     CategoryResponse findOneWithChildrenAllById(Long id);
 
-    List<Category> findAllWithChildrenAll();
+    List<CategoryResponse> findAllWithChildrenAll();
 
     void deleteCategory(Long id);
 }

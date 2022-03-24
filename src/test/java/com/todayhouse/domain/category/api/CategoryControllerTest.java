@@ -1,5 +1,6 @@
 package com.todayhouse.domain.category.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.category.dao.CategoryRepository;
@@ -40,7 +41,7 @@ class CategoryControllerTest extends IntegrationBase {
     @Autowired
     ObjectMapper objectMapper;
 
-    Category p1, c1, c2, cc1;
+    Category p1, c1, c2, cc1, p2;
 
     @BeforeAll
     void setUp() {
@@ -49,8 +50,10 @@ class CategoryControllerTest extends IntegrationBase {
         c1 = Category.builder().name("c1").parent(p1).build();
         c2 = Category.builder().name("c2").parent(p1).build();
         cc1 = Category.builder().name("cc1").parent(c1).build();
+        p2 = Category.builder().name("p2").build();
 
         categoryRepository.save(p1);
+        categoryRepository.save(p2);
     }
 
     @Test
@@ -76,9 +79,32 @@ class CategoryControllerTest extends IntegrationBase {
     @DisplayName("모든 카테고리 찾기")
     void findAll() throws Exception {
         String url = "http://localhost:8080/categories";
-        mockMvc.perform(get(url))
+        MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andDo(print());
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        List<CategoryResponse> categories= objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        });
+        assertThat(categories.size()).isEqualTo(2);
+        categories.stream().forEach(c->{
+            if(c.getSubCategories().size()==0)
+                assertThat(c.getName()).isEqualTo("p2");
+            else{
+                assertThat(c.getName()).isEqualTo("p1");
+                assertThat(c.getSubCategories().size()).isEqualTo(2);
+                c.getSubCategories().stream().forEach(cc->{
+                    if(cc.getSubCategories().size()==0)
+                        assertThat(cc.getName()).isEqualTo("c2");
+                    else{
+                        assertThat(cc.getName()).isEqualTo("c1");
+                        assertThat(cc.getSubCategories().size()).isEqualTo(1);
+                        assertThat(cc.getSubCategories().get(0).getName()).isEqualTo("cc1");
+                    }
+                });
+            }
+        });
     }
 
     @Test
@@ -125,6 +151,6 @@ class CategoryControllerTest extends IntegrationBase {
                 .andExpect(status().isOk());
 
         int size = categoryRepository.findAll().size();
-        assertThat(size).isEqualTo(0);
+        assertThat(size).isEqualTo(1);
     }
 }

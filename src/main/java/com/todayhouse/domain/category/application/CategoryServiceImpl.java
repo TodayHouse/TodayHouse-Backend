@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +49,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Category> findAllWithChildrenAll() {
-        return categoryRepository.findByDepth(0);
+    public List<CategoryResponse> findAllWithChildrenAll() {
+        return createCategoryResponsesAll();
     }
 
     @Override
@@ -69,6 +70,21 @@ public class CategoryServiceImpl implements CategoryService {
                 map.get(c.getParent().getId()).getSubCategories().add(response);
         });
         return map.get(category.getId());
+    }
+
+    private List<CategoryResponse> createCategoryResponsesAll(){
+        List<Category> categories = categoryRepository.findAllByOrderByDepthAscParentAscIdAsc();
+        Map<Long, CategoryResponse> map = new HashMap<>();
+        List<CategoryResponse> responses = new ArrayList<>();
+        categories.stream().forEach(c -> {
+            CategoryResponse response = new CategoryResponse(c);
+            map.put(c.getId(), response);
+            if (c.getDepth() != 0)
+                map.get(c.getParent().getId()).getSubCategories().add(response);
+            else
+                responses.add(response);
+        });
+        return responses;
     }
 
     @PostConstruct
