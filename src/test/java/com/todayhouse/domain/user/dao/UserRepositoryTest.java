@@ -105,16 +105,20 @@ class UserRepositoryTest extends DataJpaBase {
         ));
     }
 
+    @Autowired
+    SellerRepository sellerRepository;
+
     @Test
-    @DisplayName("user와 seller join")
-    void findByIdWithSeller() {
+    @DisplayName("user와 seller를 join해서 찾기")
+    void findBySellerIdWithSeller() {
         SellerRequest request = SellerRequest.builder().brand("test").build();
         user.createSeller(request);
-        userRepository.save(user);
+        User save = userRepository.save(user);
+        Long sellerId = save.getSeller().getId();
         em.flush();
         em.clear();
 
-        User user = userRepository.findByIdWithSeller(this.user.getId()).orElse(null);
+        User user = userRepository.findBySellerIdWithSeller(sellerId).orElse(null);
         assertThat(user.getSeller().getBrand()).isEqualTo("test");
     }
 }

@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -54,6 +54,26 @@ class ImageServiceImplTest {
     }
 
     @Test
+    @DisplayName("Story file 이름 하나 저장")
+    void saveStoryOne() {
+        String fileName = "file1.jpg";
+        Story story = Mockito.mock(Story.class);
+        StoryImage storyImage = Mockito.mock(StoryImage.class);
+        when(storyImageRepository.save(any(StoryImage.class))).thenReturn(storyImage);
+        imageService.saveOne(fileName, story);
+    }
+
+    @Test
+    @DisplayName("product file 이름 저장")
+    void saveProductOne() {
+        String fileName = "file1.jpg";
+        Product product = Mockito.mock(Product.class);
+        ProductImage productImage = Mockito.mock(ProductImage.class);
+        when(productImageRepository.save(any(ProductImage.class))).thenReturn(productImage);
+        imageService.saveOne(fileName, product);
+    }
+
+    @Test
     @DisplayName("product image file 이름 저장")
     void testSave() {
         List<String> files = List.of("file1", "file2", "file3");
@@ -66,22 +86,26 @@ class ImageServiceImplTest {
 
     @Test
     @DisplayName("Story filename 찾기")
-    void findThumbnailUrl() {
+    void findThumbnailUrl() throws MalformedURLException {
         Story story = Mockito.mock(Story.class);
+        String url = "https://bucket/test";
         StoryImage test = StoryImage.builder().fileName("test").build();
         when(storyImageRepository.findFirstByStoryOrderByCreatedAtDesc(any(Story.class))).thenReturn(Optional.ofNullable(test));
+        when(fileService.changeFileNameToUrl("test")).thenReturn(url);
 
-        assertThat(imageService.findThumbnailUrl(story)).isEqualTo(test.getFileName());
+        assertThat(imageService.findThumbnailUrl(story)).isEqualTo(url);
     }
 
     @Test
     @DisplayName("Product filename 찾기")
     void testFindThumbnailUrl() {
         Product product = Mockito.mock(Product.class);
+        String url = "https://bucket/test";
         ProductImage test = ProductImage.builder().fileName("test").product(product).build();
         when(productImageRepository.findFirstByProductOrderByCreatedAtAsc(any(Product.class))).thenReturn(Optional.ofNullable(test));
+        when(fileService.changeFileNameToUrl("test")).thenReturn(url);
 
-        assertThat(imageService.findThumbnailUrl(product)).isEqualTo(test.getFileName());
+        assertThat(imageService.findThumbnailUrl(product)).isEqualTo(url);
     }
 
     @Test
@@ -118,15 +142,15 @@ class ImageServiceImplTest {
     }
 
     @Test
-    @DisplayName("모든 product image 찾기")
+    @DisplayName("product id로 image 찾기")
     void findProductImageAll() {
         Product product = Mockito.mock(Product.class);
         ProductImage a = ProductImage.builder().fileName("a").product(product).build();
         ProductImage b = ProductImage.builder().fileName("b").product(product).build();
         List<ProductImage> list = List.of(a, b);
-        when(productImageRepository.findAll()).thenReturn(list);
+        when(productImageRepository.findByProductId(1L)).thenReturn(list);
 
-        List<String> result = imageService.findProductImageFileNamesAll();
+        List<String> result = imageService.findProductImageFileNamesByProductId(1L);
 
         assertThat(result.size()).isEqualTo(2);
         assertTrue(result.contains("a"));
@@ -138,7 +162,6 @@ class ImageServiceImplTest {
     void deleteStoryImages() {
         List<String> list = List.of("a", "b", "c");
         doNothing().when(storyImageRepository).deleteByFileName(anyString());
-        doNothing().when(fileService).delete(anyList());
 
         imageService.deleteStoryImages(list);
     }
@@ -154,11 +177,9 @@ class ImageServiceImplTest {
         doNothing().when(productImageRepository).deleteByFileName(anyString());
         when(productImageRepository.findFirstByProductOrderByCreatedAtAsc(any(Product.class)))
                 .thenReturn(Optional.ofNullable(ProductImage.builder().product(product).fileName("newImg.jpg").build()));
-        doNothing().when(fileService).delete(anyList());
 
         imageService.deleteProductImages(list);
 
         assertThat(product.getImage()).isEqualTo("newImg.jpg");
     }
-
 }

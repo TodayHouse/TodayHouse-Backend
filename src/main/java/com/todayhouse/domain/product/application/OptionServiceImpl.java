@@ -22,7 +22,7 @@ import java.util.Set;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class OptionServiceImpl implements OptionService{
+public class OptionServiceImpl implements OptionService {
     private final ProductRepository productRepository;
     private final ParentOptionRepository parentOptionRepository;
     private final ChildOptionRepository childOptionRepository;
@@ -48,8 +48,6 @@ public class OptionServiceImpl implements OptionService{
         SelectionOption selectionOption = selectionOptionSaveRequest.toEntity(product);
         return selectionOptionRepository.save(selectionOption);
     }
-
-
 
     @Override
     @Transactional(readOnly = true)

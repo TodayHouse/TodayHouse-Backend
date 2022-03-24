@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class SaveProductImagesRequest {
+public class ProductImageSaveRequest {
     @NotNull(message = "product id를 입력해주세요.")
     private Long productId;
 }

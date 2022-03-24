@@ -18,7 +18,7 @@ public interface ProductService {
 
     Page<ProductResponse> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable);
 
-    Product findByIdWithOptionsAndSellerAndImages(Long id);
+    Product findByIdWithOptionsAndSeller(Long id);
 
     Product updateProduct(ProductUpdateRequest request);
 

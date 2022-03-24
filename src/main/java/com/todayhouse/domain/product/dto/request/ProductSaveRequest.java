@@ -44,9 +44,9 @@ public class ProductSaveRequest {
 
     private String selectionOption;
 
-    private Set<ParentOptionSaveRequest> parentOptions;
+    private Set<ProductParentOptionSaveRequest> parentOptions;
 
-    private Set<SelectionOptionSaveRequest> selectionOptions;
+    private Set<ProductSelectionOptionSaveRequest> selectionOptions;
 
     // ChildOption 까지 entity로 변환
     public Product toEntityWithParentAndSelection(Seller seller, Category category, String image) {

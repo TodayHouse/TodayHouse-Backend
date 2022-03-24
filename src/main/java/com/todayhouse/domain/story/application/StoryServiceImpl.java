@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +49,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public Long saveImage(MultipartFile multipartFile, Long id){
+    public Long saveImage(MultipartFile multipartFile, Long id) {
         Story story = storyRepository.findById(id).orElseThrow(StoryNotFoundException::new);
         String fileName = fileService.uploadImage(multipartFile);
         imageService.saveOne(fileName, story);
@@ -73,20 +72,20 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public Slice<StoryGetListResponse> findByUser(Pageable pageable){
+    public Slice<StoryGetListResponse> findByUser(Pageable pageable) {
         User user = (User) customUserDetailService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         return storyRepository.findAllByUser(user, pageable)
                 .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
     }
 
-    public Slice<StoryGetListResponse> findByUserNickname(String nickname, Pageable pageable){
+    public Slice<StoryGetListResponse> findByUserNickname(String nickname, Pageable pageable) {
         User user = userService.findByNickname(nickname).orElseThrow(UserNotFoundException::new);
         return storyRepository.findAllByUser(user, pageable)
                 .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
     }
 
     @Override
-    public List<String> getStoryImageFileNamesAll(){
+    public List<String> getStoryImageFileNamesAll() {
         return imageService.findStoryImageFileNamesAll();
     }
 
@@ -110,12 +109,15 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public void deleteStory(Long id) {
         Story story = this.getStory(id);
-        imageService.deleteStoryImages(story.getImages().stream().map(image -> image.getFileName()).collect(Collectors.toList()));
+        List<String> fileNames = story.getImages().stream().map(image -> image.getFileName()).collect(Collectors.toList());
+        imageService.deleteStoryImages(fileNames);
+        fileService.delete(fileNames);
         storyRepository.delete(story);
     }
 
     @Override
-    public void deleteImages(List<String> file){
+    public void deleteImages(List<String> file) {
         imageService.deleteStoryImages(file);
+        fileService.delete(file);
     }
 }

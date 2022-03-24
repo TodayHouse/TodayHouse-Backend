@@ -3,7 +3,6 @@ package com.todayhouse.domain.product.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.todayhouse.domain.product.domain.ParentOption;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class ParentOptionResponse {
     private Long id;
     private int price;

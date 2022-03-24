@@ -1,11 +1,12 @@
 package com.todayhouse.domain.product.dto.response;
 
 import com.todayhouse.domain.product.domain.ChildOption;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class ChildOptionResponse {
     private Long id;
     private int price;

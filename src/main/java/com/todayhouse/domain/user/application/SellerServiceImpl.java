@@ -35,7 +35,7 @@ public class SellerServiceImpl implements SellerService {
     @Override
     @Transactional(readOnly = true)
     public Seller findSeller(Long sellerId) {
-        User user = userRepository.findByIdWithSeller(sellerId).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findBySellerIdWithSeller(sellerId).orElseThrow(UserNotFoundException::new);
         Seller seller = user.getSeller();
         if (seller == null)
             throw new SellerNotFoundException();

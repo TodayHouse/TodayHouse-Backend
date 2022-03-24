@@ -12,6 +12,8 @@ public interface ImageService {
 
     void save(List<String> fileName, Product product);
 
+    void saveOne(String fileName, Product product);
+
     void deleteStoryImages(List<String> fileNames);
 
     void deleteProductImages(List<String> fileNames);
@@ -22,5 +24,5 @@ public interface ImageService {
 
     List<String> findStoryImageFileNamesAll();
 
-    List<String> findProductImageFileNamesAll();
+    List<String> findProductImageFileNamesByProductId(Long productId);
 }

@@ -31,29 +31,24 @@ public class FileServiceImpl implements FileService {
         List<String> fileNameList = new ArrayList<>();
 
         multipartFiles.forEach(file -> {
-            String fileName = createFileName(file.getOriginalFilename());
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentLength(file.getSize());
-            objectMetadata.setContentType(file.getContentType());
-
-            try (InputStream inputStream = file.getInputStream()) {
-                amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, objectMetadata).withCannedAcl(CannedAccessControlList.PublicRead));
-            } catch (IOException e) {
-                throw new BaseException(IMAGE_FILE_IO_EXCEPTION);
-            }
+            String fileName = upload(file);
             fileNameList.add(fileName);
         });
         return fileNameList;
     }
 
     @Override
-    public String uploadImage(MultipartFile multipartFile){
-        String fileName = createFileName(multipartFile.getOriginalFilename());
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(multipartFile.getSize());
-        objectMetadata.setContentType(multipartFile.getContentType());
+    public String uploadImage(MultipartFile multipartFile) {
+        return upload(multipartFile);
+    }
 
-        try (InputStream inputStream = multipartFile.getInputStream()) {
+    private String upload(MultipartFile file) {
+        String fileName = createFileName(file.getOriginalFilename());
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(file.getSize());
+        objectMetadata.setContentType(file.getContentType());
+
+        try (InputStream inputStream = file.getInputStream()) {
             amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, objectMetadata).withCannedAcl(CannedAccessControlList.PublicRead));
         } catch (IOException e) {
             throw new BaseException(IMAGE_FILE_IO_EXCEPTION);
@@ -92,5 +87,10 @@ public class FileServiceImpl implements FileService {
     @Override
     public void deleteOne(String fileName) {
         amazonS3.deleteObject(bucketName, fileName);
+    }
+
+    @Override
+    public String changeFileNameToUrl(String fileName){
+        return amazonS3.getUrl(bucketName, fileName).toString();
     }
 }

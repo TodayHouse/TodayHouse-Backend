@@ -31,5 +31,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Set<SimpleUser> findFollowersByToId(@Param("id") Long id);
 
     @Query("select u from User u left join fetch u.seller where u.seller.id = :id")
-    Optional<User> findByIdWithSeller(@Param("id") Long id);
+    Optional<User> findBySellerIdWithSeller(@Param("id") Long id);
 }

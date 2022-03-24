@@ -1,6 +1,10 @@
 package com.todayhouse.domain.product.dao;
 
 import com.todayhouse.DataJpaBase;
+import com.todayhouse.domain.category.dao.CategoryRepository;
+import com.todayhouse.domain.category.domain.Category;
+import com.todayhouse.domain.image.dao.ProductImageRepository;
+import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.domain.ChildOption;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
@@ -24,33 +28,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ProductRepositoryTest extends DataJpaBase {
 
     @Autowired
+    SellerRepository sellerRepository;
+
+    @Autowired
     ProductRepository productRepository;
 
     @Autowired
-    SellerRepository sellerRepository;
+    ProductImageRepository productImageRepository;
 
     @Autowired
     TestEntityManager em;
 
     Product product1, product2, product3;
+    Category c1;
 
     @BeforeEach
     void preSet() {
         productRepository.deleteAll();
-
         Seller seller = Seller.builder().email("seller@email.com").brand("house").build();
         em.persist(seller);
         product1 = Product.builder().price(1000).title("p1").seller(seller).build();
         ParentOption op1 = ParentOption.builder().product(product1).content("op1").price(1000).stock(10).build();
         ParentOption op2 = ParentOption.builder().product(product1).content("op2").price(1000).stock(10).build();
 
-        product2 = Product.builder().price(2000).title("p2").seller(seller).build();
+        c1 = Category.builder().name("c1").build();
+        em.persist(c1);
+        product2 = Product.builder().category(c1).price(2000).title("p2").seller(seller).build();
         ParentOption op3 = ParentOption.builder().product(product2).content("op3").build();
         ParentOption op4 = ParentOption.builder().product(product2).content("op4").build();
         ChildOption ch1 = ChildOption.builder().parent(op3).content("ch1").stock(10).price(1000).build();
         ChildOption ch2 = ChildOption.builder().parent(op3).content("ch2").stock(20).price(2000).build();
         ChildOption ch3 = ChildOption.builder().parent(op4).content("ch3").stock(30).price(3000).build();
         ChildOption ch4 = ChildOption.builder().parent(op4).content("ch4").stock(40).price(4000).build();
+        ProductImage file1 = ProductImage.builder().fileName("file1").product(product2).build();
+        ProductImage file2 = ProductImage.builder().fileName("file2").product(product2).build();
 
         product3 = Product.builder().price(3000).title("p3").seller(seller).build();
         ParentOption op5 = ParentOption.builder().product(product3).content("op5").price(5555).stock(0).build();
@@ -92,11 +103,12 @@ class ProductRepositoryTest extends DataJpaBase {
 
     @Test
     void product_하나_찾기() {
-        Product product = productRepository.findByIdWithOptionsAndSellerAndImages(product2.getId()).orElse(null);
+        Product product = productRepository.findByIdWithOptionsAndSeller(product2.getId()).orElse(null);
 
+        assertThat(product.getCategory().getId()).isEqualTo(c1.getId());
         assertThat(product.getSeller().getBrand()).isEqualTo(product.getBrand());
         assertThat(product.getTitle()).isEqualTo("p2");
-        assertThat(product.getOptions().size()).isEqualTo(2);
-        assertTrue(product.getOptions().stream().allMatch(op -> op.getChildren().size() == 2)); //childOption 모두 2개
+        assertThat(product.getParents().size()).isEqualTo(2);
+        assertTrue(product.getParents().stream().allMatch(op -> op.getChildren().size() == 2)); //childOption 모두 2개
     }
 }

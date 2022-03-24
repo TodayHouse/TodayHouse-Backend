@@ -29,10 +29,29 @@ jacocoTestReport {
         csv.enabled true
         xml.enabled false
     }
+
+    def Qdomains = []
+    for(qPattern in "**/QA" .. "**/QZ"){
+        Qdomains.add(qPattern+"*")
+    }
+
+    afterEvaluate {
+
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: [] + Qdomains)
+        }))
+    }
+
     finalizedBy 'jacocoTestCoverageVerification'
 }
 
 jacocoTestCoverageVerification {
+    def Qdomains = []
+    for (qPattern in "*.QA".."*.QZ") {  // qPattern = "*.QA","*.QB","*.QC", ... "*.QZ"
+        Qdomains.add(qPattern + "*")
+    }
+
     violationRules {
         rule {
             enabled = false
@@ -45,9 +64,8 @@ jacocoTestCoverageVerification {
                 minimum = 0.60
             }
 
-            excludes = []
+            excludes = [] + Qdomains
         }
-
     }
 }
 

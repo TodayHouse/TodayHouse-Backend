@@ -17,7 +17,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public BaseResponse SaveCategory(@RequestBody CategorySaveRequest request) {
+    public BaseResponse saveCategory(@RequestBody CategorySaveRequest request) {
         Category category = categoryService.addCategory(request);
         return new BaseResponse(new CategorySaveResponse(category));
     }

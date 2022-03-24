@@ -4,13 +4,11 @@ import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Gender;
 import com.todayhouse.domain.user.domain.User;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class UserFindResponse {
     private Long id;
     private String email;

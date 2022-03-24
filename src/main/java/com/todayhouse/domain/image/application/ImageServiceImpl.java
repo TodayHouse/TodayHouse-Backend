@@ -29,7 +29,6 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void save(List<String> fileNames, Story story) {
-
         storyImageRepository.saveAll(
                 Optional.ofNullable(fileNames).orElseGet(Collections::emptyList)
                         .stream().filter(Objects::nonNull)
@@ -38,7 +37,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void saveOne(String fileName, Story story){
+    public void saveOne(String fileName, Story story) {
         storyImageRepository.save(new StoryImage(fileName, story));
     }
 
@@ -52,10 +51,14 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
+    public void saveOne(String fileName, Product product) {
+        productImageRepository.save(new ProductImage(fileName, product));
+    }
+
+    @Override
     public void deleteStoryImages(List<String> fileNames) {
         for (String fileName : fileNames)
             storyImageRepository.deleteByFileName(fileName);
-        fileService.delete(fileNames);
     }
 
     @Override
@@ -69,7 +72,6 @@ public class ImageServiceImpl implements ImageService {
             productImageRepository.findFirstByProductOrderByCreatedAtAsc(product)
                     .ifPresent(i -> product.updateImage(i.getFileName()));
         }
-        fileService.delete(fileNames);
     }
 
     @Override
@@ -77,7 +79,7 @@ public class ImageServiceImpl implements ImageService {
     public String findThumbnailUrl(Story story) {
         StoryImage image = storyImageRepository.findFirstByStoryOrderByCreatedAtDesc(story).orElse(null);
         if (image == null) return null;
-        return image.getFileName();
+        return fileService.changeFileNameToUrl(image.getFileName());
     }
 
     @Override
@@ -85,7 +87,7 @@ public class ImageServiceImpl implements ImageService {
     public String findThumbnailUrl(Product product) {
         ProductImage image = productImageRepository.findFirstByProductOrderByCreatedAtAsc(product).orElse(null);
         if (image == null) return null;
-        return image.getFileName();
+        return fileService.changeFileNameToUrl(image.getFileName());
     }
 
     @Override
@@ -98,8 +100,8 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> findProductImageFileNamesAll() {
-        return productImageRepository.findAll().stream()
+    public List<String> findProductImageFileNamesByProductId(Long id) {
+        return productImageRepository.findByProductId(id).stream()
                 .map(image -> image.getFileName())
                 .collect(Collectors.toList());
     }

@@ -16,4 +16,6 @@ public interface FileService {
     void delete(List<String> fileName);
 
     void deleteOne(String fileName);
+
+    String changeFileNameToUrl(String fileName);
 }

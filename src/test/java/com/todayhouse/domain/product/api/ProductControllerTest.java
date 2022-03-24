@@ -101,17 +101,17 @@ class ProductControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("product 저장")
+    @DisplayName("product와 image 저장")
     void saveProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
-        Set<ChildOptionSaveRequest> child = new LinkedHashSet<>();
-        ChildOptionSaveRequest c1 = ChildOptionSaveRequest.builder().content("c1").build();
-        ChildOptionSaveRequest c2 = ChildOptionSaveRequest.builder().content("c2").build();
+        Set<ProductChildOptionSaveRequest> child = new LinkedHashSet<>();
+        ProductChildOptionSaveRequest c1 = ProductChildOptionSaveRequest.builder().content("c1").build();
+        ProductChildOptionSaveRequest c2 = ProductChildOptionSaveRequest.builder().content("c2").build();
         child.add(c1);
         child.add(c2);
-        ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
-        Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
+        ProductParentOptionSaveRequest p1 = ProductParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
+        Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
                 .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryId(1L)
@@ -133,13 +133,13 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         Long id = ((Number) objectMapper.convertValue(getResponseFromMvcResult(mvcResult).getResult(), Map.class).get("productId")).longValue();
-        Product product = productRepository.findByIdWithOptionsAndSellerAndImages(id).orElse(null);
+        Product product = productRepository.findByIdWithOptionsAndSeller(id).orElse(null);
         ProductImage productImage = productImageRepository.findFirstByProductOrderByCreatedAtAsc(product).orElse(null);
-        assertThat(product.getTitle()).isEqualTo("new");
-        Set<ParentOption> parents = product.getOptions();
+        Set<ParentOption> parents = product.getParents();
         List<ParentOption> list = new ArrayList<>(parents);
         Set<ChildOption> children = list.get(0).getChildren();
         assertThat(product.getTitle()).isEqualTo("new");
+        assertThat(product.getImage()).isEqualTo("filename-1.jpeg");
         assertThat(list.get(0).getContent()).isEqualTo("p1");
         assertThat(list.size()).isEqualTo(1);
         assertThat(children.size()).isEqualTo(2);
@@ -150,13 +150,13 @@ class ProductControllerTest extends IntegrationBase {
     @DisplayName("jwt가 없으면 product 저장 불가")
     void saveNotLogin() throws Exception {
         String url = "http://localhost:8080/products";
-        Set<ChildOptionSaveRequest> child = new LinkedHashSet<>();
-        ChildOptionSaveRequest c1 = ChildOptionSaveRequest.builder().content("c1").build();
-        ChildOptionSaveRequest c2 = ChildOptionSaveRequest.builder().content("c2").build();
+        Set<ProductChildOptionSaveRequest> child = new LinkedHashSet<>();
+        ProductChildOptionSaveRequest c1 = ProductChildOptionSaveRequest.builder().content("c1").build();
+        ProductChildOptionSaveRequest c2 = ProductChildOptionSaveRequest.builder().content("c2").build();
         child.add(c1);
         child.add(c2);
-        ParentOptionSaveRequest p1 = ParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
-        Set<ParentOptionSaveRequest> parent = new LinkedHashSet<>();
+        ProductParentOptionSaveRequest p1 = ProductParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
+        Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
                 .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryId(1L)
@@ -230,13 +230,17 @@ class ProductControllerTest extends IntegrationBase {
     @Test
     @DisplayName("product 찾았다")
     void findProduct() throws Exception {
+        String imageUrl = "saveUrl";
         ProductImage img1 = ProductImage.builder().product(product1).fileName("test1.jpg").build();
         ProductImage img2 = ProductImage.builder().product(product1).fileName("test2.jpg").build();
         productImageRepository.save(img1);
         productImageRepository.save(img2);
+        product1.updateImage(imageUrl);
+        productRepository.save(product1);
         em.flush();
         em.clear();
-        when(fileService.getImage(anyString())).thenReturn(new byte[10]);
+
+        when(fileService.changeFileNameToUrl(anyString())).thenReturn(imageUrl);
 
         String url = "http://localhost:8080/products/" + product1.getId();
         MvcResult mvcResult = mockMvc.perform(get(url))
@@ -245,8 +249,10 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
-        Product product = objectMapper.convertValue(baseResponse.getResult(), Product.class);
-        assertThat(product.getTitle()).isEqualTo("p1");
+        ProductResponse result = objectMapper.convertValue(baseResponse.getResult(), ProductResponse.class);
+        assertThat(result.getTitle()).isEqualTo("p1");
+        assertThat(result.getImageUrls().get(0)).isEqualTo(imageUrl);
+        assertThat(result.getImageUrls().size()).isEqualTo(2);
     }
 
     @Test
@@ -352,24 +358,28 @@ class ProductControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("product image 삭제")
+    @DisplayName("product image 삭제 후 대표이미지 변경")
     void deleteProductImage() throws Exception {
-        String fileName = "test.jpg";
-        ProductImage img = ProductImage.builder().product(product1).fileName(fileName).build();
-        productImageRepository.save(img);
+        String fileName1 = "test1.jpg";
+        String fileName2 = "test2.jpg";
+        ProductImage img1 = ProductImage.builder().product(product1).fileName(fileName1).build();
+        ProductImage img2 = ProductImage.builder().product(product1).fileName(fileName2).build();
+        productImageRepository.save(img1);
+        productImageRepository.save(img2);
         em.flush();
         em.clear();
 
-        String url = "http://localhost:8080/products/images/" + fileName;
+        String url = "http://localhost:8080/products/images/" + fileName1;
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
-        doNothing().when(fileService).deleteOne(fileName);
+        doNothing().when(fileService).deleteOne(fileName1);
 
         mockMvc.perform(delete(url)
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk());
 
-        List<ProductImage> images = productImageRepository.findAll();
-        assertThat(images.size()).isEqualTo(0);
+        Product product = productRepository.findById(product1.getId()).orElse(null);
+        List<ProductImage> images = productImageRepository.findByProductId(product1.getId());
+        assertThat(images.get(0).getFileName()).isEqualTo(product.getImage());
     }
 
     @Test
@@ -378,12 +388,12 @@ class ProductControllerTest extends IntegrationBase {
         MockMultipartFile first = new MockMultipartFile("file", "first.jpeg", "image/jpeg", "<<jpeg data1>>".getBytes(StandardCharsets.UTF_8));
         MockMultipartFile second = new MockMultipartFile("file", "second.jpeg", "image/jpeg", "<<jpeg data2>>".getBytes(StandardCharsets.UTF_8));
 
-        SaveProductImagesRequest request = SaveProductImagesRequest.builder().productId(product1.getId()).build();
+        ProductImageSaveRequest request = ProductImageSaveRequest.builder().productId(product1.getId()).build();
         MockMultipartFile json = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8));
 
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
 
-        when(fileService.uploadImages(anyList())).thenReturn(List.of("first.jpeg","second.jpeg"));
+        when(fileService.uploadImages(anyList())).thenReturn(List.of("first.jpeg", "second.jpeg"));
         doNothing().when(fileService).delete(anyList());
 
         mockMvc.perform(multipart("http://localhost:8080/products/images")

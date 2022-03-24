@@ -1,13 +1,12 @@
 package com.todayhouse.domain.product.api;
 
 import com.todayhouse.domain.image.application.ImageService;
-import com.todayhouse.domain.image.dto.ImageResponse;
 import com.todayhouse.domain.product.application.ProductService;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.product.dto.request.ProductImageSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
-import com.todayhouse.domain.product.dto.request.SaveProductImagesRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.global.common.BaseResponse;
@@ -21,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,15 +31,15 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public BaseResponse<Long> createProduct(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
-                                            @RequestPart(value = "request") @Valid ProductSaveRequest request) {
+    public BaseResponse<Long> saveProduct(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
+                                          @RequestPart(value = "request") @Valid ProductSaveRequest request) {
         Long productId = productService.saveProductRequest(multipartFiles, request);
         return new BaseResponse(Collections.singletonMap("productId", productId));
     }
 
     @PostMapping("/images")
-    public BaseResponse<Long> addImages(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
-                                        @RequestPart(value = "request") @Valid SaveProductImagesRequest request) {
+    public BaseResponse<Long> saveImages(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
+                                         @RequestPart(value = "request") @Valid ProductImageSaveRequest request) {
         Long productId = productService.saveProductImages(multipartFiles, request.getProductId());
         return new BaseResponse(Collections.singletonMap("productId", productId));
     }
@@ -57,12 +55,11 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public BaseResponse findProductWithImages(@PathVariable Long id) {
-        Product product = productService.findByIdWithOptionsAndSellerAndImages(id);
-        List<ImageResponse> images = product.getImages().stream().filter(Objects::nonNull)
-                .map(i -> new ImageResponse(i.getFileName(), fileService.getImage(i.getFileName())))
-                .collect(Collectors.toList());
+        Product product = productService.findByIdWithOptionsAndSeller(id);
+        List<String> imageUrls = imageService.findProductImageFileNamesByProductId(id).stream().
+                map(fileName->fileService.changeFileNameToUrl(fileName)).collect(Collectors.toList());
         ProductResponse response = new ProductResponse(product);
-        response.setImages(images);
+        response.setImages(imageUrls);
         return new BaseResponse(response);
     }
 

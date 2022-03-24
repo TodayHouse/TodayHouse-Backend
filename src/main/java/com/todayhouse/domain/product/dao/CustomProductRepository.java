@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface CustomProductRepository {
     Page<Product> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable);
 
-    Optional<Product> findByIdWithOptionsAndSellerAndImages(Long id);
+    Optional<Product> findByIdWithOptionsAndSeller(Long id);
 }
