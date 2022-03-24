@@ -66,7 +66,7 @@ public class ProductServiceImpl implements ProductService {
         return product.getId();
     }
 
-    // 모든 product를 seller와 join, 대표 이미지 url도 설정
+    // 필터링한 모든 product를 seller와 join, 대표 이미지 url도 설정
     @Override
     @Transactional(readOnly = true)
     public Page<ProductResponse> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable) {

@@ -38,7 +38,7 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
         this.categoryRepository = categoryRepository;
     }
 
-    //product 페이징
+    //product 페이징, 필터링
     @Override
     public Page<Product> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable) {
         QProduct qProduct = QProduct.product;

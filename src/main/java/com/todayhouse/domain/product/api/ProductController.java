@@ -49,9 +49,7 @@ public class ProductController {
     @GetMapping
     public BaseResponse findProductsPagination(@ModelAttribute ProductSearchRequest productSearch,
                                                Pageable pageable) {
-        System.out.println(pageable);
         Page<ProductResponse> products = productService.findAllWithSeller(productSearch, pageable);
-
         return new BaseResponse(new ProductSearchResponse(products));
     }
 

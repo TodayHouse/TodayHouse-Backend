@@ -95,11 +95,8 @@ class ProductRepositoryTest extends DataJpaBase {
     @Test
     void product_삭제() {
         productRepository.deleteById(product1.getId());
-        System.out.println(product1.getId());
         List<Product> list = productRepository.findAll();
-        for (Product p : list) {
-            System.out.println(p.toString());
-        }
+
         assertThat(list.size()).isEqualTo(2);
     }
 
