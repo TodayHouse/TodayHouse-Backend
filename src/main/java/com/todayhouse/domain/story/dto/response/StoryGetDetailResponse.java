@@ -26,7 +26,7 @@ public class StoryGetDetailResponse {
         this.content = story.getContent();
         this.writer = story.getUser().getNickname();
         this.liked = story.getLiked();
-        this.imageUrls = story.getImages().stream().map(image -> image.getFileName()).collect(Collectors.toList());
+        this.imageUrls = story.getImages().stream().map(image -> "https://today-house-bucket.s3.ap-northeast-2.amazonaws.com/" + image.getFileName()).collect(Collectors.toList());
         this.category = story.getCategory();
         this.createdAt = story.getCreatedAt();
         this.updatedAt = story.getUpdatedAt();

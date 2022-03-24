@@ -58,7 +58,7 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public Slice<StoryGetListResponse> findAllDesc(Pageable pageable) {
-        return storyRepository.findAllByOrderByIdDesc(pageable)
+        return storyRepository.findAllByOrderById(pageable)
                 .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
     }
 
