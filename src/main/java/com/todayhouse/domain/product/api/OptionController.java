@@ -70,31 +70,31 @@ public class OptionController {
         return new BaseResponse(response);
     }
 
-    @PatchMapping("/parent")
+    @PutMapping("/parent")
     public BaseResponse updateParentOption(@Valid @RequestBody ParentOptionUpdateRequest request) {
         ParentOption parentOption = optionService.updateParentOption(request);
         return new BaseResponse(new ParentOptionResponse(parentOption, false));
     }
 
-    @PatchMapping("/child")
+    @PutMapping("/child")
     public BaseResponse updateChildOption(@Valid @RequestBody ChildOptionUpdateRequest request) {
         ChildOption childOption = optionService.updateChildOption(request);
         return new BaseResponse(new ChildOptionResponse(childOption));
     }
 
-    @PatchMapping("/selection")
+    @PutMapping("/selection")
     public BaseResponse updateSelectionOption(@Valid @RequestBody SelectionOptionUpdateRequest request) {
         SelectionOption selectionOption = optionService.updateSelectionOption(request);
         return new BaseResponse(new SelectionOptionResponse(selectionOption));
     }
 
-    @DeleteMapping("/parents/{id}")
+    @DeleteMapping("/parent/{id}")
     public BaseResponse deleteParentOption(@PathVariable Long id) {
         optionService.deleteParentOptionById(id);
         return new BaseResponse("삭제되었습니다.");
     }
 
-    @DeleteMapping("/children/{id}")
+    @DeleteMapping("/child/{id}")
     public BaseResponse deleteChildOption(@PathVariable Long id) {
         optionService.deleteChildOptionById(id);
         return new BaseResponse("삭제되었습니다.");

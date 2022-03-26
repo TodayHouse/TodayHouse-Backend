@@ -5,6 +5,7 @@ import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
 import com.todayhouse.domain.category.dto.response.CategoryResponse;
+import com.todayhouse.domain.category.exception.CategoryExistException;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -43,6 +43,14 @@ class CategoryServiceImplTest {
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
         assertThat(categoryService.addCategory(request)).isEqualTo(category);
+    }
+
+    @Test
+    @DisplayName("새 카테고리 이름 중복 예외처리")
+    void addCategoryException() {
+        CategorySaveRequest request = CategorySaveRequest.builder().name("c1").build();
+        when(categoryRepository.existsByName(anyString())).thenReturn(true);
+        assertThrows(CategoryExistException.class, () -> categoryService.addCategory(request));
     }
 
     @Test

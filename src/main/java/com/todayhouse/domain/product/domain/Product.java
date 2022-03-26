@@ -118,22 +118,4 @@ public class Product {
     public void updateImage(String image) {
         this.image = image;
     }
-
-    @Override
-    public String toString() {
-        return "Product{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", image='" + image + '\'' +
-                ", price=" + price +
-                ", discountRate=" + discountRate +
-                ", deliveryFee=" + deliveryFee +
-                ", specialPrice=" + specialPrice +
-                ", productDetail='" + productDetail + '\'' +
-                ", sales=" + sales +
-                ", createdAt=" + createdAt +
-                ", modifiedAt=" + modifiedAt +
-                ", sellerId=" + seller.getId() +
-                '}';
-    }
 }
