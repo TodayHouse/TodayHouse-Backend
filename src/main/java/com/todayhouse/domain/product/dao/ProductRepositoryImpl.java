@@ -4,9 +4,7 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.todayhouse.domain.category.domain.Category;
-import com.todayhouse.domain.category.domain.QCategory;
-import com.todayhouse.domain.category.exception.CategoryNotFoundException;
+import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.domain.QProduct;
@@ -21,31 +19,32 @@ import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Subgraph;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ProductRepositoryImpl extends QuerydslRepositorySupport
         implements CustomProductRepository {
 
     @PersistenceContext
-    EntityManager em;
+    private EntityManager em;
 
     private final JPAQueryFactory jpaQueryFactory;
+    private final CategoryRepository categoryRepository;
 
-    public ProductRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
+    public ProductRepositoryImpl(JPAQueryFactory jpaQueryFactory, CategoryRepository categoryRepository) {
         super(Product.class);
         this.jpaQueryFactory = jpaQueryFactory;
+        this.categoryRepository = categoryRepository;
     }
 
-    //product 페이징
+    //product 페이징, 필터링
     @Override
     public Page<Product> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable) {
         QProduct qProduct = QProduct.product;
         QSeller qSeller = QSeller.seller;
 
         JPQLQuery<Product> query = from(qProduct).join(qProduct.seller, qSeller);
-
         makeProductSearchQuery(query, productSearch);
 
         query.fetchJoin();
@@ -84,36 +83,16 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
             query.where(qProduct.price.goe(productSearch.getPriceFrom()));
         if (productSearch.getPriceTo() != null)
             query.where(qProduct.price.loe(productSearch.getPriceTo()));
-        if (productSearch.isDeliveryFee())
+        if (productSearch.getDeliveryFee() != null && productSearch.getDeliveryFee().booleanValue())
             query.where(qProduct.deliveryFee.gt(0));
-        if (productSearch.isSpecialPrice())
+        if (productSearch.getSpecialPrice() != null && productSearch.getSpecialPrice().booleanValue())
             query.where(qProduct.specialPrice.isTrue());
 
-        List<Long> ids = getCategoryIds(productSearch.getCategoryId());
-
-        if (ids != null)
-            query.where(qProduct.category.id.in(ids));
-    }
-
-    // 해당 카테고리 id와 모든 하위 카테고리 id를 list에 추가
-    private List<Long> getCategoryIds(Long categoryId) {
-        if (categoryId == null) return null;
-
-        QCategory qCategory = QCategory.category;
-
-        Category category = from(qCategory).where(qCategory.id.eq(categoryId)).fetchOne();
-        if (category == null) throw new CategoryNotFoundException();
-
-        List<Long> ids = new LinkedList<>();
-        getIds(category, ids);
-        return ids;
-    }
-
-    private void getIds(Category category, List<Long> ids) {
-        ids.add(category.getId());
-        for (Category c : category.getChildren()) {
-            getIds(c, ids);
+        if (productSearch.getCategoryId() != null) {
+            List<Long> ids = categoryRepository.findOneWithAllChildrenById(productSearch.getCategoryId()).stream()
+                    .map(category -> category.getId()).collect(Collectors.toList());
+            if (!ids.isEmpty())
+                query.where(qProduct.category.id.in(ids));
         }
     }
-
 }

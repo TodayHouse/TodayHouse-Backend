@@ -68,9 +68,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyRole("USER", "ADMIN") // user, admin post 요청만 허용
                 .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**", "/options/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin delete 요청만 허용
-                .antMatchers(HttpMethod.PUT, "/products")
+                .antMatchers(HttpMethod.PUT, "/products", "/options/**")
                 .hasAnyRole("USER", "ADMIN")
-                .antMatchers(HttpMethod.PATCH, "/stories/**", "/options/**")
+                .antMatchers(HttpMethod.PATCH, "/stories/**")
                 .hasAnyRole("USER", "ADMIN")
                 .antMatchers("/users/password/new", "/users/signup", "/oauth2/**")
                 .hasAnyRole("GUEST") // guest 요청만 허용

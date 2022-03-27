@@ -1,7 +1,6 @@
 package com.todayhouse.domain.product.dao;
 
 import com.todayhouse.DataJpaBase;
-import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
@@ -40,20 +39,23 @@ class ProductRepositoryTest extends DataJpaBase {
     TestEntityManager em;
 
     Product product1, product2, product3;
-    Category c1;
+    Category c1, c2, c3;
 
     @BeforeEach
     void preSet() {
         productRepository.deleteAll();
+        c1 = Category.builder().name("c1").build();
+        c2 = Category.builder().parent(c1).name("c2").build();
+        c3 = Category.builder().parent(c2).name("c3").build();
+        em.persist(c1);
+
         Seller seller = Seller.builder().email("seller@email.com").brand("house").build();
         em.persist(seller);
-        product1 = Product.builder().price(1000).title("p1").seller(seller).build();
+        product1 = Product.builder().category(c1).price(1000).title("p1").seller(seller).build();
         ParentOption op1 = ParentOption.builder().product(product1).content("op1").price(1000).stock(10).build();
         ParentOption op2 = ParentOption.builder().product(product1).content("op2").price(1000).stock(10).build();
 
-        c1 = Category.builder().name("c1").build();
-        em.persist(c1);
-        product2 = Product.builder().category(c1).price(2000).title("p2").seller(seller).build();
+        product2 = Product.builder().category(c2).price(2000).title("p2").seller(seller).build();
         ParentOption op3 = ParentOption.builder().product(product2).content("op3").build();
         ParentOption op4 = ParentOption.builder().product(product2).content("op4").build();
         ChildOption ch1 = ChildOption.builder().parent(op3).content("ch1").stock(10).price(1000).build();
@@ -63,7 +65,7 @@ class ProductRepositoryTest extends DataJpaBase {
         ProductImage file1 = ProductImage.builder().fileName("file1").product(product2).build();
         ProductImage file2 = ProductImage.builder().fileName("file2").product(product2).build();
 
-        product3 = Product.builder().price(3000).title("p3").seller(seller).build();
+        product3 = Product.builder().category(c3).price(3000).title("p3").seller(seller).build();
         ParentOption op5 = ParentOption.builder().product(product3).content("op5").price(5555).stock(0).build();
 
         em.persist(product1);
@@ -93,11 +95,8 @@ class ProductRepositoryTest extends DataJpaBase {
     @Test
     void product_삭제() {
         productRepository.deleteById(product1.getId());
-        System.out.println(product1.getId());
         List<Product> list = productRepository.findAll();
-        for (Product p : list) {
-            System.out.println(p.toString());
-        }
+
         assertThat(list.size()).isEqualTo(2);
     }
 
@@ -105,10 +104,21 @@ class ProductRepositoryTest extends DataJpaBase {
     void product_하나_찾기() {
         Product product = productRepository.findByIdWithOptionsAndSeller(product2.getId()).orElse(null);
 
-        assertThat(product.getCategory().getId()).isEqualTo(c1.getId());
+        assertThat(product.getCategory().getId()).isEqualTo(c2.getId());
         assertThat(product.getSeller().getBrand()).isEqualTo(product.getBrand());
         assertThat(product.getTitle()).isEqualTo("p2");
         assertThat(product.getParents().size()).isEqualTo(2);
         assertTrue(product.getParents().stream().allMatch(op -> op.getChildren().size() == 2)); //childOption 모두 2개
+    }
+
+    @Test
+    void product_조건으로_찾기() {
+        ProductSearchRequest request = ProductSearchRequest.builder().categoryId(c1.getId()).priceFrom(2000).build();
+        PageRequest of = PageRequest.of(0, 30, Sort.by("createdAt").descending());
+        Page<Product> page = productRepository.findAllWithSeller(request, of);
+        List<Product> list = page.getContent();
+        assertThat(list.size()).isEqualTo(2);
+        assertThat(list.get(0).getId()).isEqualTo(product3.getId());
+        assertThat(list.get(1).getId()).isEqualTo(product2.getId());
     }
 }

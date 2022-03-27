@@ -293,9 +293,7 @@ class ProductControllerTest extends IntegrationBase {
 
         List<Product> products = productRepository.findAll();
         List<ProductImage> images = productImageRepository.findAll();
-        for (Product p : products) {
-            System.out.println(p.toString());
-        }
+
         assertThat(products.size()).isEqualTo(0);
         assertThat(images.size()).isEqualTo(0);
     }
@@ -310,8 +308,8 @@ class ProductControllerTest extends IntegrationBase {
         productRepository.save(Product.builder().specialPrice(true).seller(seller1).build());
 
         MvcResult mvcResult = mockMvc.perform(get(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(productSearch)))
+                        .param("specialPrice", "true")
+                        .param("deliveryFee", "true"))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
@@ -338,11 +336,9 @@ class ProductControllerTest extends IntegrationBase {
 
         String url = "http://localhost:8080/products";
         Long id = categoryRepository.findByName("컴퓨터/노트북").orElse(null).getId();
-        ProductSearchRequest productSearch = ProductSearchRequest.builder().categoryId(id).build();
 
         MvcResult mvcResult = mockMvc.perform(get(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(productSearch)))
+                        .param("categoryId", String.valueOf(id)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();

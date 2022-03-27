@@ -1,11 +1,13 @@
 package com.todayhouse.domain.category.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
+import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.dto.response.CategorySaveResponse;
 import com.todayhouse.domain.category.dto.response.CategoryUpdateResponse;
 import com.todayhouse.global.common.BaseResponse;
@@ -19,7 +21,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,7 +41,7 @@ class CategoryControllerTest extends IntegrationBase {
     @Autowired
     ObjectMapper objectMapper;
 
-    Category p1, c1, c2, cc1;
+    Category p1, c1, c2, cc1, p2;
 
     @BeforeAll
     void setUp() {
@@ -45,8 +50,10 @@ class CategoryControllerTest extends IntegrationBase {
         c1 = Category.builder().name("c1").parent(p1).build();
         c2 = Category.builder().name("c2").parent(p1).build();
         cc1 = Category.builder().name("cc1").parent(c1).build();
+        p2 = Category.builder().name("p2").build();
 
         categoryRepository.save(p1);
+        categoryRepository.save(p2);
     }
 
     @Test
@@ -72,18 +79,49 @@ class CategoryControllerTest extends IntegrationBase {
     @DisplayName("모든 카테고리 찾기")
     void findAll() throws Exception {
         String url = "http://localhost:8080/categories";
-        mockMvc.perform(get(url))
+        MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andDo(print());
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        List<CategoryResponse> categories= objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        });
+        assertThat(categories.size()).isEqualTo(2);
+        categories.stream().forEach(c->{
+            if(c.getSubCategories().size()==0)
+                assertThat(c.getName()).isEqualTo("p2");
+            else{
+                assertThat(c.getName()).isEqualTo("p1");
+                assertThat(c.getSubCategories().size()).isEqualTo(2);
+                c.getSubCategories().stream().forEach(cc->{
+                    if(cc.getSubCategories().size()==0)
+                        assertThat(cc.getName()).isEqualTo("c2");
+                    else{
+                        assertThat(cc.getName()).isEqualTo("c1");
+                        assertThat(cc.getSubCategories().size()).isEqualTo(1);
+                        assertThat(cc.getSubCategories().get(0).getName()).isEqualTo("cc1");
+                    }
+                });
+            }
+        });
     }
 
     @Test
     @DisplayName("특정 하위 카테고리 찾기")
     void findAllSub() throws Exception {
-        String url = "http://localhost:8080/categories/" + c1.getId();
-        mockMvc.perform(get(url))
+        String url = "http://localhost:8080/categories/" + p1.getId();
+        MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andDo(print());
+                .andDo(print())
+                .andReturn();
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        CategoryResponse parent = objectMapper.convertValue(response.getResult(), CategoryResponse.class);
+        List<CategoryResponse> children = parent.getSubCategories();
+        assertThat(parent.getName()).isEqualTo(p1.getName());
+        assertThat(children.size()).isEqualTo(2);
+        assertTrue(children.stream().anyMatch(c -> c.getSubCategories().size() == 1 &&
+                c.getSubCategories().get(0).getName().equals("cc1")));
     }
 
     @Test
@@ -113,6 +151,6 @@ class CategoryControllerTest extends IntegrationBase {
                 .andExpect(status().isOk());
 
         int size = categoryRepository.findAll().size();
-        assertThat(size).isEqualTo(0);
+        assertThat(size).isEqualTo(1);
     }
 }

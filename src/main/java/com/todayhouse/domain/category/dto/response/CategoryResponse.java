@@ -6,23 +6,19 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CategoryResponse {
     private Long id;
     private String name;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<CategoryResponse> subCategory;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<CategoryResponse> subCategories = new ArrayList<>();
 
     public CategoryResponse(Category category) {
         this.id = category.getId();
         this.name = category.getName();
-        if (!category.getChildren().isEmpty()) {
-            this.subCategory = category.getChildren().stream()
-                    .map(c -> new CategoryResponse(c)).collect(Collectors.toList());
-        }
     }
 }

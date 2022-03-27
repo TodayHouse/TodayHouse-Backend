@@ -12,6 +12,6 @@ public class ProductSearchRequest {
     private Long categoryId;
     private Integer priceFrom;
     private Integer priceTo;
-    private boolean deliveryFee;
-    private boolean specialPrice;
+    private Boolean deliveryFee;
+    private Boolean specialPrice;
 }
