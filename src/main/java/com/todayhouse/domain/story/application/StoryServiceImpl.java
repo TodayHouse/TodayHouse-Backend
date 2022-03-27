@@ -1,6 +1,7 @@
 package com.todayhouse.domain.story.application;
 
 import com.todayhouse.domain.image.application.ImageService;
+import com.todayhouse.domain.image.domain.Image;
 import com.todayhouse.domain.story.dao.StoryRepository;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
@@ -64,7 +65,8 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public StoryGetDetailResponse findById(Long id) {
-        return new StoryGetDetailResponse(this.getStory(id));
+
+        return new StoryGetDetailResponse(this.getStory(id), this.getStory(id).getImages().stream().map(image -> fileService.changeFileNameToUrl(image.getFileName())).collect(Collectors.toList()));
     }
 
     private Story getStory(Long id) {
