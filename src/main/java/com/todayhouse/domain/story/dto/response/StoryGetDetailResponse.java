@@ -20,13 +20,13 @@ public class StoryGetDetailResponse {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    public StoryGetDetailResponse(Story story) {
+    public StoryGetDetailResponse(Story story, List<String> imageUrls) {
         this.id = story.getId();
         this.title = story.getTitle();
         this.content = story.getContent();
         this.writer = story.getUser().getNickname();
         this.liked = story.getLiked();
-        this.imageUrls = story.getImages().stream().map(image -> image.getFileName()).collect(Collectors.toList());
+        this.imageUrls = imageUrls;
         this.category = story.getCategory();
         this.createdAt = story.getCreatedAt();
         this.updatedAt = story.getUpdatedAt();
