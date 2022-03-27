@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StoryRepository extends JpaRepository<Story, Long> {
 
-    Slice<Story> findAllByOrderByIdDesc(Pageable pageable);
+    Slice<Story> findAllByOrderById(Pageable pageable);
 
     Slice<Story> findAllByUser(User user, Pageable pageable);
 }
