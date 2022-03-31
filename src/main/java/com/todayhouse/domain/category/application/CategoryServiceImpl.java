@@ -43,8 +43,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void deleteCategory(Long id) {
-        categoryRepository.deleteById(id);
+    public void deleteCategory(Long categoryId) {
+        categoryRepository.deleteById(categoryId);
     }
 
     @Override
@@ -55,9 +55,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryResponse findOneWithChildrenAllById(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFoundException::new);
+    public CategoryResponse findOneWithChildrenAllById(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId).orElseThrow(CategoryNotFoundException::new);
         return createCategoryResponse(category);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Category> findRootPath(Long categoryId){
+        return categoryRepository.findRootPathById(categoryId);
     }
 
     private CategoryResponse createCategoryResponse(Category category) {
@@ -106,7 +112,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category.builder().name("기타").parent(주방가전).build();
 
         Category 에어컨 = Category.builder().name("에어컨").parent(가전).build();
-        Category 컴노 = Category.builder().name("컴퓨터/노트북").parent(가전).build();
+        Category 컴노 = Category.builder().name("컴퓨터+노트북").parent(가전).build();
         Category.builder().name("컴퓨터").parent(컴노).build();
         Category.builder().name("노트북").parent(컴노).build();
 

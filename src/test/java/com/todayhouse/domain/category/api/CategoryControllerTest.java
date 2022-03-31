@@ -7,6 +7,7 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
+import com.todayhouse.domain.category.dto.response.CategoryPathResponse;
 import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.dto.response.CategorySaveResponse;
 import com.todayhouse.domain.category.dto.response.CategoryUpdateResponse;
@@ -124,6 +125,24 @@ class CategoryControllerTest extends IntegrationBase {
                 c.getSubCategories().get(0).getName().equals("cc1")));
     }
 
+    @Test
+    @DisplayName("category_id부터 root까지의 경로")
+    void findRootPath() throws Exception {
+        String url = "http://localhost:8080/categories/path/" + cc1.getId();
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        CategoryPathResponse pathResponse = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        });
+        List<CategoryResponse> categoryPath = pathResponse.getCategoryPath();
+        assertThat(categoryPath.size()).isEqualTo(3);
+        assertThat(categoryPath.get(0).getName()).isEqualTo(p1.getName());
+        assertThat(categoryPath.get(1).getName()).isEqualTo(c1.getName());
+        assertThat(categoryPath.get(2).getName()).isEqualTo(cc1.getName());
+    }
     @Test
     @WithMockUser(roles = "ADMIN")
     @DisplayName("카테고리 수정")

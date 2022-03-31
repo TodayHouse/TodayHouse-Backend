@@ -3,6 +3,7 @@ package com.todayhouse.domain.category.dao;
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.category.domain.Category;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,5 +172,23 @@ class CategoryRepositoryTest extends DataJpaBase {
         }
     }
 
+    @Test
+    @DisplayName("category_id로부터 루트까지의 경로 list")
+    void rootPath(){
+        Category par1 = Category.builder().name("par1").build();
+        Category ch1 = Category.builder().name("ch1").parent(par1).build();
+        Category ch2 = Category.builder().name("ch2").parent(par1).build();
+        Category ch1ch1 = Category.builder().name("ch1ch1").parent(ch1).build();
 
+        em.persist(par1);
+        em.flush();
+        em.clear();
+
+        List<Category> categories = categoryRepository.findRootPathById(ch1ch1.getId());
+
+        assertThat(categories.size()).isEqualTo(3);
+        assertThat(categories.get(0).getName()).isEqualTo(par1.getName());
+        assertThat(categories.get(1).getName()).isEqualTo(ch1.getName());
+        assertThat(categories.get(2).getName()).isEqualTo(ch1ch1.getName());
+    }
 }

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -137,6 +138,16 @@ class CategoryServiceImplTest {
         when(categoryRepository.findById(2L)).thenReturn(Optional.ofNullable(null));
 
         assertThrows(CategoryNotFoundException.class, () -> categoryService.findOneWithChildrenAllById(2L));
+    }
+
+    @Test
+    @DisplayName("카테고리 경로 리스트로 찾기")
+    void findRootPath(){
+        when(categoryRepository.findRootPathById(anyLong()))
+                .thenReturn(List.of(Mockito.mock(Category.class),Mockito.mock(Category.class)));
+
+        List<Category> categories = categoryService.findRootPath(1L);
+        assertThat(categories.size()).isEqualTo(2);
     }
 
     private void createCategoryResponse(List<Category> categories) {

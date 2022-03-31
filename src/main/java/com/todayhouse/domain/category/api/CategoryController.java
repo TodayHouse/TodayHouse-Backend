@@ -4,12 +4,15 @@ import com.todayhouse.domain.category.application.CategoryService;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
+import com.todayhouse.domain.category.dto.response.CategoryPathResponse;
 import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.dto.response.CategorySaveResponse;
 import com.todayhouse.domain.category.dto.response.CategoryUpdateResponse;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
@@ -33,6 +36,12 @@ public class CategoryController {
     public BaseResponse findWithSubAll(@PathVariable Long id) {
         CategoryResponse response = categoryService.findOneWithChildrenAllById(id);
         return new BaseResponse(response);
+    }
+
+    @GetMapping("/path/{id}")
+    public BaseResponse findRootPath(@PathVariable Long id) {
+        List<Category> categoryPath = categoryService.findRootPath(id);
+        return new BaseResponse(new CategoryPathResponse(categoryPath));
     }
 
     @PatchMapping
