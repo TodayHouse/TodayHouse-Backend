@@ -87,9 +87,9 @@ class ProductServiceImplTest {
         ProductParentOptionSaveRequest p1 = ProductParentOptionSaveRequest.builder().content("p1").childOptions(child).build();
         Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
-        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).parentOptions(parent).build();
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryName("가전").parentOptions(parent).build();
 
-        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
         when(productRepository.save(any(Product.class))).thenReturn(product);
         when(fileService.uploadImages(list)).thenReturn(List.of("data"));
@@ -109,9 +109,9 @@ class ProductServiceImplTest {
         List<MultipartFile> list = new ArrayList<>();
         list.add(multipartFile);
 
-        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).build();
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryName("가전").build();
 
-        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
 
         assertThrows(SellerNotFoundException.class, () -> productService.saveProductRequest(list, request));
@@ -129,9 +129,9 @@ class ProductServiceImplTest {
         ProductParentOptionSaveRequest p1 = ProductParentOptionSaveRequest.builder().content("p1").build();
         Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
-        ProductSaveRequest request = ProductSaveRequest.builder().categoryId(1L).parentOptions(parent).build();
+        ProductSaveRequest request = ProductSaveRequest.builder().categoryName("가전").parentOptions(parent).build();
 
-        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
+        when(categoryRepository.findByName("가전")).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
         when(productRepository.save(any(Product.class))).thenReturn(product);
         doNothing().when(imageService).save(any(), any(Product.class));
@@ -166,9 +166,9 @@ class ProductServiceImplTest {
     @Test
     @DisplayName("product 수정")
     void updateProduct() {
-        ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).categoryId(1L).build();
+        ProductUpdateRequest request = ProductUpdateRequest.builder().id(1L).categoryName("가구").build();
         Product product = getValidProduct(request.getId());
-        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(Category.builder().build()));
+        when(categoryRepository.findByName("가구")).thenReturn(Optional.ofNullable(Category.builder().build()));
         when(productRepository.save(product)).thenReturn(product);
 
         assertThat(productService.updateProduct(request)).isEqualTo(product);

@@ -56,10 +56,10 @@ class CategoryServiceImplTest {
 
     @Test
     void 잘못된_부모_카테고리() {
-        CategorySaveRequest request = CategorySaveRequest.builder().name("c1").parentId(1L).build();
+        CategorySaveRequest request = CategorySaveRequest.builder().name("c1").parentName("par").build();
 
         when(categoryRepository.existsByName("c1")).thenReturn(false);
-        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(null));
+        when(categoryRepository.findByName("par")).thenReturn(Optional.ofNullable(null));
 
         assertThrows(CategoryNotFoundException.class, () -> categoryService.addCategory(request));
     }
@@ -67,9 +67,9 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("category 업데이트")
     void updateCategory() {
-        CategoryUpdateRequest request = CategoryUpdateRequest.builder().id(1L).changeName("new").build();
+        CategoryUpdateRequest request = CategoryUpdateRequest.builder().name("old").changeName("new").build();
         Category old = Category.builder().name("old").build();
-        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(old));
+        when(categoryRepository.findByName("old")).thenReturn(Optional.ofNullable(old));
 
         Category category = categoryService.updateCategory(request);
         assertThat(category.getName()).isEqualTo("new");
@@ -78,11 +78,11 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("category 삭제")
     void deleteCategory() {
-        doNothing().when(categoryRepository).deleteById(anyLong());
+        doNothing().when(categoryRepository).deleteByName(anyString());
 
-        categoryService.deleteCategory(1L);
+        categoryService.deleteCategory("old");
 
-        verify(categoryRepository).deleteById(anyLong());
+        verify(categoryRepository).deleteByName(anyString());
     }
 
     @Test
@@ -112,7 +112,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void 특정_카테고리_찾기() {
+    void 이름으로_특정_카테고리_찾기() {
         Category c1 = Category.builder().name("c1").build();
         Category c2 = Category.builder().name("c2").build();
         Category c3 = Category.builder().name("c3").parent(c2).build();
@@ -124,33 +124,33 @@ class CategoryServiceImplTest {
         list.add(c2);
         list.add(c3);
 
-        when(categoryRepository.findById(2L)).thenReturn(Optional.ofNullable(c2));
+        when(categoryRepository.findByName("c2")).thenReturn(Optional.ofNullable(c2));
 
         createCategoryResponse(list);
-        CategoryResponse find = categoryService.findOneWithChildrenAllById(2L);
+        CategoryResponse find = categoryService.findOneWithChildrenAllByName("c2");
         assertThat(find.getName()).isEqualTo("c2");
         assertThat(find.getSubCategories().get(0).getName()).isEqualTo("c3");
     }
 
     @Test
-    @DisplayName("해당 id의 카테고리 없음")
-    void findOneWithChildrenAllByIdException() {
-        when(categoryRepository.findById(2L)).thenReturn(Optional.ofNullable(null));
+    @DisplayName("해당 이름의 카테고리 없음")
+    void findOneWithChildrenAllByNameException() {
+        when(categoryRepository.findByName("??")).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.findOneWithChildrenAllById(2L));
+        assertThrows(CategoryNotFoundException.class, () -> categoryService.findOneWithChildrenAllByName("??"));
     }
 
     @Test
     @DisplayName("카테고리 경로 리스트로 찾기")
     void findRootPath(){
-        when(categoryRepository.findRootPathById(anyLong()))
+        when(categoryRepository.findRootPathByName(anyString()))
                 .thenReturn(List.of(Mockito.mock(Category.class),Mockito.mock(Category.class)));
 
-        List<Category> categories = categoryService.findRootPath(1L);
+        List<Category> categories = categoryService.findRootPath("c");
         assertThat(categories.size()).isEqualTo(2);
     }
 
     private void createCategoryResponse(List<Category> categories) {
-        when(categoryRepository.findOneWithAllChildrenById(anyLong())).thenReturn(categories);
+        when(categoryRepository.findOneWithAllChildrenByName(anyString())).thenReturn(categories);
     }
 }

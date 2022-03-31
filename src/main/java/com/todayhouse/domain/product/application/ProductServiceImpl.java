@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Long saveProductRequest(List<MultipartFile> multipartFiles, ProductSaveRequest request) {
-        Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(CategoryNotFoundException::new);
+        Category category = categoryRepository.findByName(request.getCategoryName()).orElseThrow(CategoryNotFoundException::new);
         // jwt로 seller 찾기
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
@@ -89,7 +89,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product updateProduct(ProductUpdateRequest request) {
-        Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(CategoryNotFoundException::new);
+        Category category = categoryRepository.findByName(request.getCategoryName()).orElseThrow(CategoryNotFoundException::new);
         Product product = getValidProduct(request.getId());
         product.update(request, category);
         return productRepository.save(product);

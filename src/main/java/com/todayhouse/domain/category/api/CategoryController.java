@@ -32,15 +32,15 @@ public class CategoryController {
     }
 
     // 해당 카테고리의 모든 하위 카테고리
-    @GetMapping("/{id}")
-    public BaseResponse findWithSubAll(@PathVariable Long id) {
-        CategoryResponse response = categoryService.findOneWithChildrenAllById(id);
+    @GetMapping("/{categoryName}")
+    public BaseResponse findWithSubAll(@PathVariable String categoryName) {
+        CategoryResponse response = categoryService.findOneWithChildrenAllByName(categoryName);
         return new BaseResponse(response);
     }
 
-    @GetMapping("/path/{id}")
-    public BaseResponse findRootPath(@PathVariable Long id) {
-        List<Category> categoryPath = categoryService.findRootPath(id);
+    @GetMapping("/path/{categoryName}")
+    public BaseResponse findRootPath(@PathVariable String categoryName) {
+        List<Category> categoryPath = categoryService.findRootPath(categoryName);
         return new BaseResponse(new CategoryPathResponse(categoryPath));
     }
 
@@ -50,9 +50,9 @@ public class CategoryController {
         return new BaseResponse(new CategoryUpdateResponse(category));
     }
 
-    @DeleteMapping("/{id}")
-    public BaseResponse deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
+    @DeleteMapping("/{categoryName}")
+    public BaseResponse deleteCategory(@PathVariable String categoryName) {
+        categoryService.deleteCategory(categoryName);
         return new BaseResponse("삭제되었습니다.");
     }
 }

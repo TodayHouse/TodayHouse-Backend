@@ -12,13 +12,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CategoryResponse {
-    private Long id;
     private String name;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<CategoryResponse> subCategories = new ArrayList<>();
 
     public CategoryResponse(Category category) {
-        this.id = category.getId();
         this.name = category.getName();
     }
 }

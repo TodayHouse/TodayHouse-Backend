@@ -28,8 +28,8 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.existsByName(request.getName()))
             throw new CategoryExistException();
 
-        Category par = request.getParentId() == null ?
-                null : categoryRepository.findById(request.getParentId()).orElseThrow(CategoryNotFoundException::new);
+        Category par = request.getParentName() == null ?
+                null : categoryRepository.findByName(request.getParentName()).orElseThrow(CategoryNotFoundException::new);
         Category child = Category.builder().name(request.getName()).parent(par).build();
 
         return categoryRepository.save(child);
@@ -37,14 +37,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category updateCategory(CategoryUpdateRequest request) {
-        Category category = categoryRepository.findById(request.getId()).orElseThrow(CategoryNotFoundException::new);
+        Category category = categoryRepository.findByName(request.getName()).orElseThrow(CategoryNotFoundException::new);
         category.updateName(request.getChangeName());
         return category;
     }
 
     @Override
-    public void deleteCategory(Long categoryId) {
-        categoryRepository.deleteById(categoryId);
+    public void deleteCategory(String categoryName) {
+        categoryRepository.deleteByName(categoryName);
     }
 
     @Override
@@ -55,19 +55,19 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryResponse findOneWithChildrenAllById(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow(CategoryNotFoundException::new);
+    public CategoryResponse findOneWithChildrenAllByName(String categoryName) {
+        Category category = categoryRepository.findByName(categoryName).orElseThrow(CategoryNotFoundException::new);
         return createCategoryResponse(category);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Category> findRootPath(Long categoryId){
-        return categoryRepository.findRootPathById(categoryId);
+    public List<Category> findRootPath(String categoryName){
+        return categoryRepository.findRootPathByName(categoryName);
     }
 
     private CategoryResponse createCategoryResponse(Category category) {
-        List<Category> categories = categoryRepository.findOneWithAllChildrenById(category.getId());
+        List<Category> categories = categoryRepository.findOneWithAllChildrenByName(category.getName());
         Map<Long, CategoryResponse> map = new HashMap<>();
         categories.stream().forEach(c -> {
             CategoryResponse response = new CategoryResponse(c);

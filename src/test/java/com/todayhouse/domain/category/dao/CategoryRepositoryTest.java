@@ -47,7 +47,7 @@ class CategoryRepositoryTest extends DataJpaBase {
 
         Category savePar = em.persist(par);
 
-        categoryRepository.deleteById(savePar.getId());
+        categoryRepository.deleteByName(savePar.getName());
 
         List<Category> categories = em.getEntityManager().createQuery("select c from Category c", Category.class).getResultList();
         assertEquals(categories.size(), 0);
@@ -105,13 +105,13 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void category_Id로_삭제() {
+    void category_name으로_삭제() {
         Category par = Category.builder().name("par").build();
         em.persist(par);
         em.flush();
         em.clear();
 
-        categoryRepository.deleteById(par.getId());
+        categoryRepository.deleteByName(par.getName());
 
         List<Category> categories = em.getEntityManager().createQuery("select c from Category c", Category.class).getResultList();
         assertEquals(0, categories.size());
@@ -141,7 +141,7 @@ class CategoryRepositoryTest extends DataJpaBase {
         em.flush();
         em.clear();
 
-        List<Category> categories = categoryRepository.findOneWithAllChildrenById(par.getId());
+        List<Category> categories = categoryRepository.findOneWithAllChildrenByName(par.getName());
         assertThat(categories.size()).isEqualTo(4);
         assertThat(categories.get(0).getId()).isEqualTo(par.getId());
         assertThat(categories.get(1).getId()).isEqualTo(ch1.getId());
@@ -173,7 +173,7 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    @DisplayName("category_id로부터 루트까지의 경로 list")
+    @DisplayName("category_이름으로부터 루트까지의 경로 list")
     void rootPath(){
         Category par1 = Category.builder().name("par1").build();
         Category ch1 = Category.builder().name("ch1").parent(par1).build();
@@ -184,7 +184,7 @@ class CategoryRepositoryTest extends DataJpaBase {
         em.flush();
         em.clear();
 
-        List<Category> categories = categoryRepository.findRootPathById(ch1ch1.getId());
+        List<Category> categories = categoryRepository.findRootPathByName(ch1ch1.getName());
 
         assertThat(categories.size()).isEqualTo(3);
         assertThat(categories.get(0).getName()).isEqualTo(par1.getName());
