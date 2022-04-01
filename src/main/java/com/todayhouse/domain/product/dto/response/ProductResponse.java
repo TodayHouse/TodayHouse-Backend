@@ -15,13 +15,12 @@ import java.util.stream.Collectors;
 public class ProductResponse {
     private Long id;
     private Long sellerId;
-    private Long categoryId;
     private String brand;
     private String title;
     private String option1;
     private String option2;
-    private String selectionOption;
     private String productDetail;
+    private String selectionOption;
     private int sales;
     private int price;
     private int deliveryFee;
@@ -35,7 +34,6 @@ public class ProductResponse {
     public ProductResponse(Product product) {
         this.id = product.getId();
         this.sellerId = product.getSeller().getId();
-        this.categoryId = product.getCategory() == null ? null: product.getCategory().getId();
         this.brand = product.getBrand();
         this.title = product.getTitle();
         this.option1 = product.getParentOption();
