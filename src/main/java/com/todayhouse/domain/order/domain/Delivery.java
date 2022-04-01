@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class Delivery {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_address_id")
+    @Column(name = "delivery_id")
     Long id;
     String sender;
     String receiver;
@@ -26,7 +26,11 @@ public class Delivery {
     @Embedded
     Address address;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id")
     Order order;
+
+    public void updateOrder(Order order) {
+        this.order = order;
+    }
 }

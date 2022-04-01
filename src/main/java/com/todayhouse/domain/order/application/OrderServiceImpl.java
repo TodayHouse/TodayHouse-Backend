@@ -1,6 +1,8 @@
 package com.todayhouse.domain.order.application;
 
+import com.todayhouse.domain.order.dao.DeliveryRepository;
 import com.todayhouse.domain.order.dao.OrderRepository;
+import com.todayhouse.domain.order.domain.Delivery;
 import com.todayhouse.domain.order.domain.Order;
 import com.todayhouse.domain.order.domain.Status;
 import com.todayhouse.domain.order.dto.request.DeliverySaveRequest;
@@ -36,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final DeliveryRepository deliveryRepository;
     private final ChildOptionRepository childOptionRepository;
     private final ParentOptionRepository parentOptionRepository;
     private final SelectionOptionRepository selectionOptionRepository;
@@ -52,19 +55,23 @@ public class OrderServiceImpl implements OrderService {
         SelectionOption selectionOption = orderRequest.getSelectionOptionId() == null ? null : selectionOptionRepository.findById(orderRequest.getSelectionOptionId())
                 .orElseThrow(SelectionOptionNotFoundException::new);
 
+        checkValidOrderRequest(product, parentOption, childOption, selectionOption);
 
-        checkValidRequest(product, parentOption, childOption, selectionOption);
         calcStock(parentOption, childOption, selectionOption,
                 -orderRequest.getProductQuantity(), -orderRequest.getSelectionQuantity());
 
+        //저장
+        Delivery delivery = deliveryRepository.save(deliveryRequest.toEntity());
         Order order = orderRequest.toEntity(user, product, parentOption, childOption, selectionOption);
-        return orderRepository.save(order);
+        delivery.updateOrder(order);
+        deliveryRepository.save(delivery);
+        return order;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Order> findByUserName(String userName) {
-        User user = userRepository.findByNickname(userName).orElseThrow(UserNotFoundException::new);
+    public List<Order> findOrders() {
+        User user = getValidUser();
         return orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
     }
 
@@ -72,6 +79,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(Long orderId) {
         getValidOrder(orderId);
         Order order = orderRepository.findByIdWithOptions(orderId);
+
         calcStock(order.getParentOption(), order.getChildOption(), order.getSelectionOption(),
                 order.getProductQuantity(), order.getSelectionQuantity());
         order.updateStatus(Status.CANCELED);
@@ -110,8 +118,8 @@ public class OrderServiceImpl implements OrderService {
             selection.addStock(selectionQuantity);
     }
 
-    private void checkValidRequest(Product product, ParentOption parent,
-                                   ChildOption child, SelectionOption selection) {
+    private void checkValidOrderRequest(Product product, ParentOption parent,
+                                        ChildOption child, SelectionOption selection) {
         if (parent.getProduct() != product ||
                 (child != null && child.getParent() != parent) ||
                 (selection != null && selection.getProduct() != product))

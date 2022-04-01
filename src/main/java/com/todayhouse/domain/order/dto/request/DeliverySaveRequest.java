@@ -25,8 +25,7 @@ public class DeliverySaveRequest {
     String address2;
 
     @Builder
-    public Delivery toEntity(String sender, String receiver, String senderPhoneNumber, String receiverPhoneNumber,
-                             String zipCode, String address1, String address2) {
+    public Delivery toEntity() {
         Address address = Address.builder().zipCode(zipCode)
                 .address1(address1)
                 .address2(address2).build();

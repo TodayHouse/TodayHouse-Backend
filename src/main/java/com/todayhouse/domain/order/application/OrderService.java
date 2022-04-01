@@ -9,7 +9,7 @@ import java.util.List;
 public interface OrderService {
     Order saveOrder(OrderSaveRequest orderRequest, DeliverySaveRequest deliveryRequest);
 
-    List<Order> findByUserName(String userName);
+    List<Order> findOrders();
 
     void cancelOrder(Long orderId);
 
