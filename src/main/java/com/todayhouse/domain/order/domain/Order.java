@@ -8,12 +8,14 @@ import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@Entity
 @Table(name = "Orders") // order는 db예약어
+@Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseTimeEntity {
     @Id
@@ -21,12 +23,17 @@ public class Order extends BaseTimeEntity {
     @Column(name = "order_id")
     Long id;
 
-    int quantity;
+    int productQuantity = 0;
+
+    int selectionQuantity = 0;
 
     String memo;
 
     @Enumerated(EnumType.STRING)
     Status status;
+
+    @Embedded
+    OrderAddress orderAddress;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -49,16 +56,18 @@ public class Order extends BaseTimeEntity {
     SelectionOption selectionOption;
 
     @Builder
-    public Order(int quantity, String memo, User user, Product product,
-                 ParentOption parentOption, ChildOption childOption, SelectionOption selectionOption) {
+    public Order(String memo, User user, Product product,
+                 ParentOption parentOption, ChildOption childOption, SelectionOption selectionOption,
+                 int productQuantity, int selectionQuantity) {
         this.memo = memo;
-        this.quantity = quantity;
         this.status = Status.PROCESSING;
         this.user = user;
         this.product = product;
         this.parentOption = parentOption;
         this.childOption = childOption;
         this.selectionOption = selectionOption;
+        this.productQuantity = productQuantity;
+        this.selectionQuantity = selectionQuantity;
     }
 
     public void updateStatus(Status status) {
