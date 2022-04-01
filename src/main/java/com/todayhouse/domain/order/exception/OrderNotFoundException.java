@@ -5,6 +5,6 @@ import com.todayhouse.global.error.BaseResponseStatus;
 
 public class OrderNotFoundException extends BaseException {
     public OrderNotFoundException() {
-        super(BaseResponseStatus.ORDER_NOT_FOUND_EXCEPTION);
+        super(BaseResponseStatus.ORDER_NOT_FOUND);
     }
 }

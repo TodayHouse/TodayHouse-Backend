@@ -32,9 +32,6 @@ public class Order extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     Status status;
 
-    @Embedded
-    OrderAddress orderAddress;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     User user;

@@ -1,4 +1,4 @@
-package com.todayhouse.domain.order.domain;
+package com.todayhouse.domain.user.domain;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -9,18 +9,27 @@ import javax.persistence.*;
 
 @Getter
 @Entity
-@Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderAddress {
+public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_address_id")
     Long id;
 
-    String zipCode;
+    String receiver;
     String address1;
     String address2;
-    String receiver;
+
+    @Column(name = "zip_code")
+    String zipCode;
+
+    @Column(name = "phone_number")
     String phoneNumber;
+
+    @Column(name = "address_name")
+    String addressName;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    User user;
 }

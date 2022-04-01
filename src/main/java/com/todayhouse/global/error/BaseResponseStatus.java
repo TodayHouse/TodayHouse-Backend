@@ -52,7 +52,7 @@ public enum BaseResponseStatus {
 
     // category
     SAME_CATEGORY_EXIST(false, 2404, "같은 카테고리가 존재합니다."),
-    CATEGORY_NOT_FOUND(false,2405, "해당 카테고리를 찾을 수 없습니다. 부모 카테고리가 없다면 parentId를 지워주세요"),
+    CATEGORY_NOT_FOUND(false, 2405, "해당 카테고리를 찾을 수 없습니다. 부모 카테고리가 없다면 parentId를 지워주세요"),
 
     // option
     PARENT_OPTION_EXIST(false, 2406, "상위 옵션을 이미 설정했습니다."),
@@ -61,7 +61,7 @@ public enum BaseResponseStatus {
     SELECTION_OPTION_NOT_FOUND(false, 2409, "선택 옵션을 찾을 수 없습니다."),
 
     // order
-    ORDER_NOT_FOUND_EXCEPTION(false, 2500, "주문을 찾을 수 없습니다."),
+    ORDER_NOT_FOUND(false, 2500, "주문을 찾을 수 없습니다."),
 
     // 3000 : Database / Server 오류
     // common
