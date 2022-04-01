@@ -26,9 +26,14 @@ public class ProductResponse {
     private int deliveryFee;
     private int discountRate;
     private boolean specialPrice;
-    private List<String> imageUrls;
-    private Set<ParentOptionResponse> parentOptions;
-    private Set<SelectionOptionResponse> selectionOptions;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<String> imageUrls = new ArrayList<>();
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<String> categoryPath = new ArrayList<>();
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Set<ParentOptionResponse> parentOptions = new LinkedHashSet<>();
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Set<SelectionOptionResponse> selectionOptions = new LinkedHashSet<>();
 
     // null safe로 parent, child, selection option 모두 response type으로 변경
     public ProductResponse(Product product) {
@@ -55,5 +60,9 @@ public class ProductResponse {
 
     public void setImages(List<String> images) {
         this.imageUrls = images;
+    }
+
+    public void addCategoryPath(String category) {
+        this.categoryPath.add(category);
     }
 }

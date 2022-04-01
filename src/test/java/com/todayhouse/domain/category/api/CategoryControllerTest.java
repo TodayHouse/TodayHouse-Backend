@@ -86,19 +86,19 @@ class CategoryControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse response = getResponseFromMvcResult(mvcResult);
-        List<CategoryResponse> categories= objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        List<CategoryResponse> categories = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
         });
         assertThat(categories.size()).isEqualTo(2);
-        categories.stream().forEach(c->{
-            if(c.getSubCategories().size()==0)
+        categories.stream().forEach(c -> {
+            if (c.getSubCategories().size() == 0)
                 assertThat(c.getName()).isEqualTo("p2");
-            else{
+            else {
                 assertThat(c.getName()).isEqualTo("p1");
                 assertThat(c.getSubCategories().size()).isEqualTo(2);
-                c.getSubCategories().stream().forEach(cc->{
-                    if(cc.getSubCategories().size()==0)
+                c.getSubCategories().stream().forEach(cc -> {
+                    if (cc.getSubCategories().size() == 0)
                         assertThat(cc.getName()).isEqualTo("c2");
-                    else{
+                    else {
                         assertThat(cc.getName()).isEqualTo("c1");
                         assertThat(cc.getSubCategories().size()).isEqualTo(1);
                         assertThat(cc.getSubCategories().get(0).getName()).isEqualTo("cc1");
@@ -126,7 +126,7 @@ class CategoryControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("category_id부터 root까지의 경로")
+    @DisplayName("category_name부터 root까지의 경로")
     void findRootPath() throws Exception {
         String url = "http://localhost:8080/categories/path/" + cc1.getName();
         MvcResult mvcResult = mockMvc.perform(get(url))
@@ -143,6 +143,7 @@ class CategoryControllerTest extends IntegrationBase {
         assertThat(categoryPath.get(1)).isEqualTo(c1.getName());
         assertThat(categoryPath.get(2)).isEqualTo(cc1.getName());
     }
+
     @Test
     @WithMockUser(roles = "ADMIN")
     @DisplayName("카테고리 수정")

@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CategoryPathResponse {
-    List<String> categoryPath = new ArrayList<>();
+    private List<String> categoryPath = new ArrayList<>();
 
     public CategoryPathResponse(List<Category> categoryPath) {
         categoryPath.stream().forEach(c -> this.categoryPath.add(c.getName()));
