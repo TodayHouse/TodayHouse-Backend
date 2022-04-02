@@ -11,10 +11,9 @@ import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.dto.response.CategorySaveResponse;
 import com.todayhouse.domain.category.dto.response.CategoryUpdateResponse;
 import com.todayhouse.global.common.BaseResponse;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -29,7 +28,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)//@BeforeAll 사용
 class CategoryControllerTest extends IntegrationBase {
 
     @Autowired
@@ -43,7 +41,7 @@ class CategoryControllerTest extends IntegrationBase {
 
     Category p1, c1, c2, cc1, p2;
 
-    @BeforeAll
+    @BeforeEach
     void setUp() {
         categoryRepository.deleteAll();
         p1 = Category.builder().name("p1").build();
@@ -85,19 +83,19 @@ class CategoryControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse response = getResponseFromMvcResult(mvcResult);
-        List<CategoryResponse> categories= objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        List<CategoryResponse> categories = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
         });
         assertThat(categories.size()).isEqualTo(2);
-        categories.stream().forEach(c->{
-            if(c.getSubCategories().size()==0)
+        categories.stream().forEach(c -> {
+            if (c.getSubCategories().size() == 0)
                 assertThat(c.getName()).isEqualTo("p2");
-            else{
+            else {
                 assertThat(c.getName()).isEqualTo("p1");
                 assertThat(c.getSubCategories().size()).isEqualTo(2);
-                c.getSubCategories().stream().forEach(cc->{
-                    if(cc.getSubCategories().size()==0)
+                c.getSubCategories().stream().forEach(cc -> {
+                    if (cc.getSubCategories().size() == 0)
                         assertThat(cc.getName()).isEqualTo("c2");
-                    else{
+                    else {
                         assertThat(cc.getName()).isEqualTo("c1");
                         assertThat(cc.getSubCategories().size()).isEqualTo(1);
                         assertThat(cc.getSubCategories().get(0).getName()).isEqualTo("cc1");

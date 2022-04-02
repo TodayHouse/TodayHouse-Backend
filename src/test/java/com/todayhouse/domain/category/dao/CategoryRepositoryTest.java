@@ -2,18 +2,17 @@ package com.todayhouse.domain.category.dao;
 
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.category.domain.Category;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)//@BeforeAll 사용
 class CategoryRepositoryTest extends DataJpaBase {
 
     @Autowired
@@ -22,7 +21,7 @@ class CategoryRepositoryTest extends DataJpaBase {
     @Autowired
     TestEntityManager em;
 
-    @BeforeAll
+    @BeforeEach
     void setUp() {
         categoryRepository.deleteAll();
     }
@@ -48,7 +47,8 @@ class CategoryRepositoryTest extends DataJpaBase {
 
         categoryRepository.deleteById(savePar.getId());
 
-        List<Category> categories = em.getEntityManager().createQuery("select c from Category c", Category.class).getResultList();
+        List<Category> categories = em.getEntityManager().createQuery("select c from Category c where c.id=:id", Category.class)
+                .setParameter("id", par.getId()).getResultList();
         assertEquals(categories.size(), 0);
     }
 
@@ -104,19 +104,6 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void category_Id로_삭제() {
-        Category par = Category.builder().name("par").build();
-        em.persist(par);
-        em.flush();
-        em.clear();
-
-        categoryRepository.deleteById(par.getId());
-
-        List<Category> categories = em.getEntityManager().createQuery("select c from Category c", Category.class).getResultList();
-        assertEquals(0, categories.size());
-    }
-
-    @Test
     void depth로_찾기() {
         Category par = Category.builder().name("par").build();
         Category ch = Category.builder().name("ch").parent(par).build();
@@ -130,7 +117,7 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void subCategory_포함하여_찾기(){
+    void subCategory_포함하여_찾기() {
         Category par = Category.builder().name("par").build();
         Category ch1 = Category.builder().name("ch1").parent(par).build();
         Category ch2 = Category.builder().name("ch2").parent(par).build();
@@ -149,7 +136,12 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    void 모든_카테고리_깊이_부모_ID_오름차순_찾기(){
+    void 모든_카테고리_깊이_부모_ID_오름차순_찾기() {
+        List<Category> all = categoryRepository.findAll();
+        for (Category c : all) {
+            System.out.println(c.getName() + ", " + c.getId());
+        }
+
         Category par1 = Category.builder().name("par1").build();
         Category ch1 = Category.builder().name("ch1").parent(par1).build();
         Category ch2 = Category.builder().name("ch2").parent(par1).build();
@@ -164,12 +156,14 @@ class CategoryRepositoryTest extends DataJpaBase {
         em.flush();
         em.clear();
 
+        List<Category> all2 = categoryRepository.findAll();
+        for (Category c : all2) {
+            System.out.println(c.getName() + ", " + c.getId());
+        }
         List<Category> expect = List.of(par1, par2, ch1, ch2, ch3, ch1ch1, ch3ch2);
         List<Category> result = categoryRepository.findAllByOrderByDepthAscParentAscIdAsc();
-        for(int i=0;i<expect.size();i++){
+        for (int i = 0; i < expect.size(); i++) {
             assertThat(result.get(i).getName()).isEqualTo(expect.get(i).getName());
         }
     }
-
-
 }
