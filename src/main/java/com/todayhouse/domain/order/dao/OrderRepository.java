@@ -6,11 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     @Query("select o from Order o left join fetch o.parentOption left join fetch o.childOption " +
             "left join fetch o.selectionOption where o.id=:orderId")
-    Order findByIdWithOptions(@Param("orderId") Long orderId);
+    Optional<Order> findByIdWithOptions(@Param("orderId") Long orderId);
 }

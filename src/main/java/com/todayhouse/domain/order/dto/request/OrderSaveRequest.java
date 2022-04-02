@@ -6,11 +6,14 @@ import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.domain.SelectionOption;
 import com.todayhouse.domain.user.domain.User;
-import lombok.Getter;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
 @Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class OrderSaveRequest {
     String memo;
     @NotNull(message = "productId를 입력해 주세요.")

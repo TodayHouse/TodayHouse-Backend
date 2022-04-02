@@ -78,7 +78,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void cancelOrder(Long orderId) {
         getValidOrder(orderId);
-        Order order = orderRepository.findByIdWithOptions(orderId);
+        Order order = orderRepository.findByIdWithOptions(orderId).orElseThrow(OrderNotFoundException::new);
 
         calcStock(order.getParentOption(), order.getChildOption(), order.getSelectionOption(),
                 order.getProductQuantity(), order.getSelectionQuantity());
@@ -114,7 +114,7 @@ public class OrderServiceImpl implements OrderService {
         else
             child.addStock(productQuantity);
 
-        if (selection == null)
+        if (selection != null)
             selection.addStock(selectionQuantity);
     }
 

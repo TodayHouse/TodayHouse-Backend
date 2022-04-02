@@ -77,12 +77,9 @@ class OrderRepositoryTest extends DataJpaBase {
         User user = User.builder().build();
         em.persist(user);
 
-        Order order1 = Order.builder().user(user)
-                .product(product1).build();
-        Order order2 = Order.builder().user(user)
-                .product(product1).build();
-        Order order3 = Order.builder().user(user)
-                .product(product1).build();
+        Order order1 = Order.builder().user(user).product(product1).build();
+        Order order2 = Order.builder().user(user).product(product1).build();
+        Order order3 = Order.builder().user(user).product(product1).build();
 
         em.persist(order1);
         em.persist(order2);
@@ -99,14 +96,12 @@ class OrderRepositoryTest extends DataJpaBase {
     @Test
     @DisplayName("OrderId로 option과 fetch join한 order 찾기")
     void findByIdWithOptions() {
-        Order order = Order.builder().product(product1)
-                .parentOption(op1)
-                .selectionOption(s1).build();
+        Order order = Order.builder().product(product1).parentOption(op1).selectionOption(s1).build();
         em.persist(order);
         em.flush();
         em.clear();
 
-        Order find = orderRepository.findByIdWithOptions(order.getId());
+        Order find = orderRepository.findByIdWithOptions(order.getId()).orElse(null);
         assertThat(find.getParentOption().getId()).isEqualTo(op1.getId());
         assertThat(find.getSelectionOption().getId()).isEqualTo(s1.getId());
     }

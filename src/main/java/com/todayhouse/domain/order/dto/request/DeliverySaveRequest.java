@@ -2,12 +2,14 @@ package com.todayhouse.domain.order.dto.request;
 
 import com.todayhouse.domain.order.domain.Address;
 import com.todayhouse.domain.order.domain.Delivery;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 
 @Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class DeliverySaveRequest {
     @NotBlank(message = "sender를 입력해주세요.")
     String sender;
@@ -24,7 +26,6 @@ public class DeliverySaveRequest {
     @NotBlank(message = "address2를 입력해주세요.")
     String address2;
 
-    @Builder
     public Delivery toEntity() {
         Address address = Address.builder().zipCode(zipCode)
                 .address1(address1)
