@@ -43,7 +43,7 @@ class ProductRepositoryTest extends DataJpaBase {
 
     @BeforeEach
     void preSet() {
-        productRepository.deleteAll();
+        productRepository.deleteAllInBatch();
         c1 = Category.builder().name("c1").build();
         c2 = Category.builder().parent(c1).name("c2").build();
         c3 = Category.builder().parent(c2).name("c3").build();

@@ -4,7 +4,6 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
-import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.exception.CategoryExistException;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import lombok.AllArgsConstructor;
@@ -12,10 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Transactional
@@ -49,48 +45,23 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryResponse> findAllWithChildrenAll() {
-        return createCategoryResponsesAll();
+    public List<Category> findAllWithChildrenAll() {
+        return categoryRepository.findAllByOrderByDepthAscParentAscIdAsc();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryResponse findOneWithChildrenAllByName(String categoryName) {
-        Category category = categoryRepository.findByName(categoryName).orElseThrow(CategoryNotFoundException::new);
-        return createCategoryResponse(category);
+    public List<Category> findOneByNameWithChildrenAll(String categoryName) {
+        List<Category> categories = categoryRepository.findOneByNameWithAllChildren(categoryName);
+        if (categories.isEmpty())
+            throw new CategoryNotFoundException();
+        return categories;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Category> findRootPath(String categoryName){
+    public List<Category> findRootPath(String categoryName) {
         return categoryRepository.findRootPathByName(categoryName);
-    }
-
-    private CategoryResponse createCategoryResponse(Category category) {
-        List<Category> categories = categoryRepository.findOneWithAllChildrenByName(category.getName());
-        Map<Long, CategoryResponse> map = new HashMap<>();
-        categories.stream().forEach(c -> {
-            CategoryResponse response = new CategoryResponse(c);
-            map.put(c.getId(), response);
-            if (c.getId() != category.getId())
-                map.get(c.getParent().getId()).getSubCategories().add(response);
-        });
-        return map.get(category.getId());
-    }
-
-    private List<CategoryResponse> createCategoryResponsesAll(){
-        List<Category> categories = categoryRepository.findAllByOrderByDepthAscParentAscIdAsc();
-        Map<Long, CategoryResponse> map = new HashMap<>();
-        List<CategoryResponse> responses = new ArrayList<>();
-        categories.stream().forEach(c -> {
-            CategoryResponse response = new CategoryResponse(c);
-            map.put(c.getId(), response);
-            if (c.getDepth() != 0)
-                map.get(c.getParent().getId()).getSubCategories().add(response);
-            else
-                responses.add(response);
-        });
-        return responses;
     }
 
     @PostConstruct

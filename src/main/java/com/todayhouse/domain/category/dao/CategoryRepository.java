@@ -22,7 +22,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             " select * from rec as r" +
             " order by r.depth, r.parent_id, r.category_id",
             nativeQuery = true)
-    List<Category> findOneWithAllChildrenByName(@Param("categoryName") String categoryName);
+    List<Category> findOneByNameWithAllChildren(@Param("categoryName") String categoryName);
 
     List<Category> findAllByOrderByDepthAscParentAscIdAsc();
 

@@ -4,7 +4,6 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
-import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.exception.CategoryExistException;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +15,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,14 +99,8 @@ class CategoryServiceImplTest {
 
         when(categoryRepository.findAllByOrderByDepthAscParentAscIdAsc()).thenReturn(list);
 
-        List<CategoryResponse> find = categoryService.findAllWithChildrenAll();
-        CategoryResponse child = find.get(1).getSubCategories().get(0);
-        CategoryResponse grand = child.getSubCategories().get(0);
-
-        assertThat(find.get(0).getName()).isEqualTo("c1");
-        assertThat(find.get(1).getName()).isEqualTo("c2");
-        assertThat(child.getName()).isEqualTo("c3");
-        assertThat(grand.getName()).isEqualTo("c4");
+        List<Category> categories = categoryService.findAllWithChildrenAll();
+        assertThat(categories).isEqualTo(list);
     }
 
     @Test
@@ -120,37 +112,33 @@ class CategoryServiceImplTest {
         ReflectionTestUtils.setField(c2, "id", 2L);
         ReflectionTestUtils.setField(c3, "id", 3L);
 
-        List<Category> list = new ArrayList<>();
-        list.add(c2);
-        list.add(c3);
+        List<Category> list = List.of(c2, c3);
 
-        when(categoryRepository.findByName("c2")).thenReturn(Optional.ofNullable(c2));
+        when(categoryRepository.findOneByNameWithAllChildren("c2")).thenReturn(list);
 
         createCategoryResponse(list);
-        CategoryResponse find = categoryService.findOneWithChildrenAllByName("c2");
-        assertThat(find.getName()).isEqualTo("c2");
-        assertThat(find.getSubCategories().get(0).getName()).isEqualTo("c3");
+        List<Category> categories = categoryService.findOneByNameWithChildrenAll("c2");
+        assertThat(categories).isEqualTo(list);
     }
 
     @Test
     @DisplayName("해당 이름의 카테고리 없음")
     void findOneWithChildrenAllByNameException() {
-        when(categoryRepository.findByName("??")).thenReturn(Optional.ofNullable(null));
+        when(categoryRepository.findOneByNameWithAllChildren("??")).thenReturn(List.of());
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.findOneWithChildrenAllByName("??"));
+        assertThrows(CategoryNotFoundException.class, () -> categoryService.findOneByNameWithChildrenAll("??"));
     }
 
     @Test
     @DisplayName("카테고리 경로 리스트로 찾기")
-    void findRootPath(){
+    void findRootPath() {
         when(categoryRepository.findRootPathByName(anyString()))
-                .thenReturn(List.of(Mockito.mock(Category.class),Mockito.mock(Category.class)));
+                .thenReturn(List.of(Mockito.mock(Category.class), Mockito.mock(Category.class)));
 
         List<Category> categories = categoryService.findRootPath("c");
         assertThat(categories.size()).isEqualTo(2);
     }
 
     private void createCategoryResponse(List<Category> categories) {
-        when(categoryRepository.findOneWithAllChildrenByName(anyString())).thenReturn(categories);
     }
 }

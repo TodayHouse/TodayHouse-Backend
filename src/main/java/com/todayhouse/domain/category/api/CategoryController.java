@@ -12,7 +12,10 @@ import com.todayhouse.global.common.BaseResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/categories")
@@ -28,13 +31,16 @@ public class CategoryController {
 
     @GetMapping
     public BaseResponse findAll() {
-        return new BaseResponse(categoryService.findAllWithChildrenAll());
+        List<Category> categories = categoryService.findAllWithChildrenAll();
+        List<CategoryResponse> responses = CategoryResponse.createCategoryResponsesAll(categories);
+        return new BaseResponse(responses);
     }
 
     // 해당 카테고리의 모든 하위 카테고리
     @GetMapping("/{categoryName}")
     public BaseResponse findWithSubAll(@PathVariable String categoryName) {
-        CategoryResponse response = categoryService.findOneWithChildrenAllByName(categoryName);
+        List<Category> categories = categoryService.findOneByNameWithChildrenAll(categoryName);
+        CategoryResponse response = CategoryResponse.createCategoryResponse(categories);
         return new BaseResponse(response);
     }
 

@@ -46,7 +46,7 @@ class CategoryControllerTest extends IntegrationBase {
 
     @BeforeAll
     void setUp() {
-        categoryRepository.deleteAll();
+        categoryRepository.deleteAllInBatch();
         p1 = Category.builder().name("p1").build();
         c1 = Category.builder().name("c1").parent(p1).build();
         c2 = Category.builder().name("c2").parent(p1).build();
@@ -123,6 +123,14 @@ class CategoryControllerTest extends IntegrationBase {
         assertThat(children.size()).isEqualTo(2);
         assertTrue(children.stream().anyMatch(c -> c.getSubCategories().size() == 1 &&
                 c.getSubCategories().get(0).getName().equals("cc1")));
+    }
+
+    @Test
+    @DisplayName("잘못된 카테고리로 하위 카테고리 찾기")
+    void findAllSubException() throws Exception {
+        String url = "http://localhost:8080/categories/a";
+        mockMvc.perform(get(url))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test

@@ -89,7 +89,7 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
             query.where(qProduct.specialPrice.isTrue());
 
         if (productSearch.getCategoryName() != null) {
-            List<Long> ids = categoryRepository.findOneWithAllChildrenByName(productSearch.getCategoryName()).stream()
+            List<Long> ids = categoryRepository.findOneByNameWithAllChildren(productSearch.getCategoryName()).stream()
                     .map(category -> category.getId()).collect(Collectors.toList());
             if (!ids.isEmpty())
                 query.where(qProduct.category.id.in(ids));
