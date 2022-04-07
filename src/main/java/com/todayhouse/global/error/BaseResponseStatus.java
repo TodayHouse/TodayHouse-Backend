@@ -62,6 +62,7 @@ public enum BaseResponseStatus {
 
     // order
     ORDER_NOT_FOUND(false, 2500, "주문을 찾을 수 없습니다."),
+    DELIVERY_NOT_FOUND(false, 2501, "주문을 찾을 수 없습니다."),
 
     // 3000 : Database / Server 오류
     // common
