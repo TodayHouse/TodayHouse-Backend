@@ -3,7 +3,7 @@ package com.todayhouse.domain.order.application;
 import com.todayhouse.domain.order.dao.DeliveryRepository;
 import com.todayhouse.domain.order.dao.OrderRepository;
 import com.todayhouse.domain.order.domain.Delivery;
-import com.todayhouse.domain.order.domain.Order;
+import com.todayhouse.domain.order.domain.Orders;
 import com.todayhouse.domain.order.domain.Status;
 import com.todayhouse.domain.order.dto.request.DeliverySaveRequest;
 import com.todayhouse.domain.order.dto.request.OrderSaveRequest;
@@ -25,11 +25,11 @@ import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.InvalidRequestException;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -44,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
     private final SelectionOptionRepository selectionOptionRepository;
 
     @Override
-    public Order saveOrder(OrderSaveRequest orderRequest, DeliverySaveRequest deliveryRequest) {
+    public Orders saveOrder(OrderSaveRequest orderRequest, DeliverySaveRequest deliveryRequest) {
         User user = getValidUser();
         Product product = productRepository.findById(orderRequest.getProductId())
                 .orElseThrow(ProductNotFoundException::new);
@@ -62,43 +62,43 @@ public class OrderServiceImpl implements OrderService {
 
         //저장
         Delivery delivery = deliveryRepository.save(deliveryRequest.toEntity());
-        Order order = orderRequest.toEntity(user, product, parentOption, childOption, selectionOption);
-        delivery.updateOrder(order);
+        Orders orders = orderRequest.toEntity(user, product, parentOption, childOption, selectionOption);
+        delivery.updateOrder(orders);
         deliveryRepository.save(delivery);
-        return order;
+        return orders;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Order> findOrders() {
+    public Page<Orders> findOrders(Pageable pageable) {
         User user = getValidUser();
-        return orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+        return orderRepository.findByUserIdWithProduct(user.getId(), pageable);
     }
 
     @Override
     public void cancelOrder(Long orderId) {
         getValidOrder(orderId);
-        Order order = orderRepository.findByIdWithOptions(orderId).orElseThrow(OrderNotFoundException::new);
+        Orders orders = orderRepository.findByIdWithOptions(orderId).orElseThrow(OrderNotFoundException::new);
 
-        calcStock(order.getParentOption(), order.getChildOption(), order.getSelectionOption(),
-                order.getProductQuantity(), order.getSelectionQuantity());
-        order.updateStatus(Status.CANCELED);
+        calcStock(orders.getParentOption(), orders.getChildOption(), orders.getSelectionOption(),
+                orders.getProductQuantity(), orders.getSelectionQuantity());
+        orders.updateStatus(Status.CANCELED);
     }
 
     @Override
     public void completeOrder(Long orderId) {
-        Order order = getValidOrder(orderId);
-        order.updateStatus(Status.COMPLETED);
+        Orders orders = getValidOrder(orderId);
+        orders.updateStatus(Status.COMPLETED);
     }
 
     // 요청 유저와 상품을 주문한 유저가 같은지 확인
-    private Order getValidOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
+    private Orders getValidOrder(Long orderId) {
+        Orders orders = orderRepository.findById(orderId)
                 .orElseThrow(OrderNotFoundException::new);
         User user = getValidUser();
-        if (order.getUser().getId() != user.getId())
+        if (orders.getUser().getId() != user.getId())
             throw new InvalidRequestException();
-        return order;
+        return orders;
     }
 
     private User getValidUser() {

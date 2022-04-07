@@ -1,15 +1,15 @@
 package com.todayhouse.domain.order.application;
 
-import com.todayhouse.domain.order.domain.Order;
+import com.todayhouse.domain.order.domain.Orders;
 import com.todayhouse.domain.order.dto.request.DeliverySaveRequest;
 import com.todayhouse.domain.order.dto.request.OrderSaveRequest;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
-    Order saveOrder(OrderSaveRequest orderRequest, DeliverySaveRequest deliveryRequest);
+    Orders saveOrder(OrderSaveRequest orderRequest, DeliverySaveRequest deliveryRequest);
 
-    List<Order> findOrders();
+    Page<Orders> findOrders(Pageable pageable);
 
     void cancelOrder(Long orderId);
 

@@ -3,7 +3,7 @@ package com.todayhouse.domain.order.application;
 import com.todayhouse.domain.order.dao.DeliveryRepository;
 import com.todayhouse.domain.order.dao.OrderRepository;
 import com.todayhouse.domain.order.domain.Delivery;
-import com.todayhouse.domain.order.domain.Order;
+import com.todayhouse.domain.order.domain.Orders;
 import com.todayhouse.domain.order.domain.Status;
 import com.todayhouse.domain.order.dto.request.DeliverySaveRequest;
 import com.todayhouse.domain.order.dto.request.OrderSaveRequest;
@@ -28,6 +28,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,7 +47,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OrderServiceImplTest {
+class OrdersServiceImplTest {
 
     @InjectMocks
     OrderServiceImpl orderService;
@@ -99,7 +103,7 @@ class OrderServiceImplTest {
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(selectionOption));
         when(deliveryRepository.save(any(Delivery.class))).thenReturn(delivery);
 
-        Order save = orderService.saveOrder(orderRequest, deliveryRequest);
+        Orders save = orderService.saveOrder(orderRequest, deliveryRequest);
         assertThat(delivery.getOrder()).isEqualTo(save);
         assertThat(childOption.getStock()).isEqualTo(0);
         assertThat(selectionOption.getStock()).isEqualTo(0);
@@ -237,6 +241,7 @@ class OrderServiceImplTest {
     void productQuantityException() {
         Product product = Product.builder().seller(Mockito.mock(Seller.class)).build();
         ParentOption parentOption = ParentOption.builder().product(product).build();
+        ChildOption childOption = ChildOption.builder().parent(parentOption).build();
 
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
                 .parentOptionId(1L)
@@ -248,6 +253,7 @@ class OrderServiceImplTest {
         getValidUser();
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(product));
         when(parentOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(parentOption));
+        when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(childOption));
 
         assertThrows(StockNotEnoughException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
     }
@@ -281,14 +287,15 @@ class OrderServiceImplTest {
     @Test
     @DisplayName("해당 user의 모든 주문 조회")
     void findOrders() {
-        Order o1 = Order.builder().build();
-        Order o2 = Order.builder().build();
-        List<Order> orders = List.of(o1, o2);
-
+        Orders o1 = Mockito.mock(Orders.class);
+        Orders o2 = Mockito.mock(Orders.class);
+        List<Orders> orders = List.of(o1, o2);
+        PageRequest request = PageRequest.of(0, 10);
         User user = getValidUser();
-        when(orderRepository.findByUserIdOrderByCreatedAtDesc(anyLong())).thenReturn(orders);
+        when(orderRepository.findByUserIdWithProduct(anyLong(), any(Pageable.class))).thenReturn(new PageImpl<>(orders));
 
-        assertThat(orderService.findOrders()).isEqualTo(orders);
+        Page<Orders> page = orderService.findOrders(request);
+        assertThat(page.getContent()).isEqualTo(orders);
     }
 
     @Test
@@ -298,19 +305,19 @@ class OrderServiceImplTest {
         Product product = Product.builder().seller(Mockito.mock(Seller.class)).build();
         ParentOption parentOption = ParentOption.builder().stock(1).product(product).build();
         SelectionOption selectionOption = SelectionOption.builder().stock(1).product(product).build();
-        Order order = Order.builder().user(user).product(product)
+        Orders orders = Orders.builder().user(user).product(product)
                 .productQuantity(1).selectionQuantity(1)
                 .parentOption(parentOption)
                 .selectionOption(selectionOption).build();
 
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(order));
-        when(orderRepository.findByIdWithOptions(anyLong())).thenReturn(Optional.ofNullable(order));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orders));
+        when(orderRepository.findByIdWithOptions(anyLong())).thenReturn(Optional.ofNullable(orders));
 
         orderService.cancelOrder(1L);
 
         assertThat(parentOption.getStock()).isEqualTo(2);
         assertThat(selectionOption.getStock()).isEqualTo(2);
-        assertThat(order.getStatus()).isEqualTo(Status.CANCELED);
+        assertThat(orders.getStatus()).isEqualTo(Status.CANCELED);
     }
 
     @Test
@@ -319,14 +326,14 @@ class OrderServiceImplTest {
         User user = getValidUser();
         Product product = Product.builder().seller(Mockito.mock(Seller.class)).build();
         ParentOption parentOption = ParentOption.builder().product(product).build();
-        Order order = Order.builder().user(user).product(product)
+        Orders orders = Orders.builder().user(user).product(product)
                 .productQuantity(1).parentOption(parentOption).build();
 
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(order));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orders));
 
         orderService.completeOrder(1L);
 
-        assertThat(order.getStatus()).isEqualTo(Status.COMPLETED);
+        assertThat(orders.getStatus()).isEqualTo(Status.COMPLETED);
     }
 
 
