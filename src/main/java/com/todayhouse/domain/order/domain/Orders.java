@@ -17,11 +17,13 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order extends BaseTimeEntity {
+public class Orders extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
     Long id;
+
+    int totalPrice;
 
     int productQuantity = 0;
 
@@ -53,9 +55,9 @@ public class Order extends BaseTimeEntity {
     SelectionOption selectionOption;
 
     @Builder
-    public Order(String memo, User user, Product product,
-                 ParentOption parentOption, ChildOption childOption, SelectionOption selectionOption,
-                 int productQuantity, int selectionQuantity) {
+    public Orders(String memo, User user, Product product,
+                  ParentOption parentOption, ChildOption childOption, SelectionOption selectionOption,
+                  int productQuantity, int selectionQuantity) {
         this.memo = memo;
         this.status = Status.PROCESSING;
         this.user = user;
@@ -65,6 +67,9 @@ public class Order extends BaseTimeEntity {
         this.selectionOption = selectionOption;
         this.productQuantity = productQuantity;
         this.selectionQuantity = selectionQuantity;
+        this.totalPrice = (childOption == null ? parentOption.getPrice() : childOption.getPrice()) * productQuantity +
+                (selectionOption == null ? 0 : selectionOption.getPrice() * selectionQuantity);
+
     }
 
     public void updateStatus(Status status) {

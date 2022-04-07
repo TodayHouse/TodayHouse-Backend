@@ -47,8 +47,8 @@ public class ProductController {
     //?page=0&size=4&sort=price,DESC&sort=id,DESC 형식으로 작성
     //ProductSearchRequest은 선택사항
     @GetMapping
-    public BaseResponse findProductsPagination(@ModelAttribute ProductSearchRequest productSearch,
-                                               Pageable pageable) {
+    public BaseResponse findProductsPaging(@ModelAttribute ProductSearchRequest productSearch,
+                                           Pageable pageable) {
         Page<ProductResponse> products = productService.findAllWithSeller(productSearch, pageable);
         return new BaseResponse(new ProductSearchResponse(products));
     }

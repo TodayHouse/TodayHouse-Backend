@@ -3,7 +3,7 @@ package com.todayhouse.domain.order.dao;
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
-import com.todayhouse.domain.order.domain.Order;
+import com.todayhouse.domain.order.domain.Orders;
 import com.todayhouse.domain.product.dao.ParentOptionRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.ChildOption;
@@ -18,12 +18,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class OrderRepositoryTest extends DataJpaBase {
+class OrdersRepositoryTest extends DataJpaBase {
 
     @Autowired
     TestEntityManager em;
@@ -73,35 +74,39 @@ class OrderRepositoryTest extends DataJpaBase {
 
     @Test
     @DisplayName("user id로 주문 내림차순 찾기")
-    void findByUserIdOrderByCreatedAtDesc() {
+    void findByUserIdWithProduct() {
         User user = User.builder().build();
         em.persist(user);
 
-        Order order1 = Order.builder().user(user).product(product1).build();
-        Order order2 = Order.builder().user(user).product(product1).build();
-        Order order3 = Order.builder().user(user).product(product1).build();
+        Orders orders1 = Orders.builder().user(user).product(product1).parentOption(op1).selectionOption(s1).build();
+        Orders orders2 = Orders.builder().user(user).product(product2).parentOption(op3).childOption(ch1).build();
+        Orders orders3 = Orders.builder().user(user).product(product1).parentOption(op1).build();
 
-        em.persist(order1);
-        em.persist(order2);
-        em.persist(order3);
+        em.persist(orders1);
+        em.persist(orders2);
+        em.persist(orders3);
         em.clear();
         em.flush();
 
-        List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
-        assertThat(orders.size()).isEqualTo(3);
-        assertThat(orders.get(0).getId()).isEqualTo(order3.getId());
-        assertThat(orders.get(2).getId()).isEqualTo(order1.getId());
+        PageRequest request = PageRequest.of(0, 10, Sort.by("id").descending());
+
+        Page<Orders> orders = orderRepository.findByUserIdWithProduct(user.getId(), request);
+        assertThat(orders.getContent().size()).isEqualTo(3);
+        assertThat(orders.getContent().get(0).getId()).isEqualTo(orders3.getId());
+        assertThat(orders.getContent().get(0).getProduct().getId()).isEqualTo(product1.getId());
+        assertThat(orders.getContent().get(2).getId()).isEqualTo(orders1.getId());
+        assertThat(orders.getContent().get(2).getProduct().getId()).isEqualTo(product1.getId());
     }
 
     @Test
     @DisplayName("OrderId로 option과 fetch join한 order 찾기")
     void findByIdWithOptions() {
-        Order order = Order.builder().product(product1).parentOption(op1).selectionOption(s1).build();
-        em.persist(order);
+        Orders orders = Orders.builder().product(product1).parentOption(op1).selectionOption(s1).build();
+        em.persist(orders);
         em.flush();
         em.clear();
 
-        Order find = orderRepository.findByIdWithOptions(order.getId()).orElse(null);
+        Orders find = orderRepository.findByIdWithOptions(orders.getId()).orElse(null);
         assertThat(find.getParentOption().getId()).isEqualTo(op1.getId());
         assertThat(find.getSelectionOption().getId()).isEqualTo(s1.getId());
     }

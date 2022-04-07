@@ -2,18 +2,16 @@ package com.todayhouse.domain.order.dao;
 
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.order.domain.Delivery;
-import com.todayhouse.domain.order.domain.Order;
+import com.todayhouse.domain.order.domain.Orders;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.user.domain.Seller;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class DeliveryRepositoryTest extends DataJpaBase {
 
@@ -29,8 +27,8 @@ class DeliveryRepositoryTest extends DataJpaBase {
         Seller seller = Seller.builder().brand("test").build();
         Product product = Product.builder().seller(seller).build();
         ParentOption op = ParentOption.builder().product(product).build();
-        Order order = Order.builder().parentOption(op).productQuantity(1).build();
-        Delivery delivery = Delivery.builder().order(order).build();
+        Orders orders = Orders.builder().parentOption(op).productQuantity(1).build();
+        Delivery delivery = Delivery.builder().order(orders).build();
         em.persist(seller);
         em.persist(op);
         em.persist(delivery);

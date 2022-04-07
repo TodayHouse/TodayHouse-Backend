@@ -1,6 +1,6 @@
 package com.todayhouse.domain.order.dto.request;
 
-import com.todayhouse.domain.order.domain.Order;
+import com.todayhouse.domain.order.domain.Orders;
 import com.todayhouse.domain.product.domain.ChildOption;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
@@ -26,9 +26,9 @@ public class OrderSaveRequest {
     int productQuantity = 0;
     int selectionQuantity = 0;
 
-    public Order toEntity(User user, Product product, ParentOption parentOption, ChildOption childOption,
-                          SelectionOption selectionOption) {
-        return Order.builder()
+    public Orders toEntity(User user, Product product, ParentOption parentOption, ChildOption childOption,
+                           SelectionOption selectionOption) {
+        return Orders.builder()
                 .memo(memo)
                 .user(user)
                 .product(product)

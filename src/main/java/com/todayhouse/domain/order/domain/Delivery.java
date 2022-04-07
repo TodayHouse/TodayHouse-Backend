@@ -28,9 +28,9 @@ public class Delivery {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id")
-    Order order;
+    Orders order;
 
-    public void updateOrder(Order order) {
-        this.order = order;
+    public void updateOrder(Orders orders) {
+        this.order = orders;
     }
 }
