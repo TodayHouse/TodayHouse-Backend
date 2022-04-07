@@ -73,14 +73,18 @@ class OrdersRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    @DisplayName("user id로 주문 내림차순 찾기")
+    @DisplayName("totalPrice 내림차순 주문 조회")
     void findByUserIdWithProduct() {
         User user = User.builder().build();
         em.persist(user);
 
-        Orders orders1 = Orders.builder().user(user).product(product1).parentOption(op1).selectionOption(s1).build();
-        Orders orders2 = Orders.builder().user(user).product(product2).parentOption(op3).childOption(ch1).build();
-        Orders orders3 = Orders.builder().user(user).product(product1).parentOption(op1).build();
+        Orders orders1 = Orders.builder().user(user).product(product1)
+                .parentOption(op1).productQuantity(1)
+                .selectionOption(s1).selectionQuantity(1).build();
+        Orders orders2 = Orders.builder().user(user).product(product2)
+                .parentOption(op3).childOption(ch1).productQuantity(100).build();
+        Orders orders3 = Orders.builder().user(user).product(product1)
+                .parentOption(op1).productQuantity(10).build();
 
         em.persist(orders1);
         em.persist(orders2);
@@ -88,12 +92,12 @@ class OrdersRepositoryTest extends DataJpaBase {
         em.clear();
         em.flush();
 
-        PageRequest request = PageRequest.of(0, 10, Sort.by("id").descending());
+        PageRequest request = PageRequest.of(0, 10, Sort.by("totalPrice").descending());
 
         Page<Orders> orders = orderRepository.findByUserIdWithProduct(user.getId(), request);
         assertThat(orders.getContent().size()).isEqualTo(3);
-        assertThat(orders.getContent().get(0).getId()).isEqualTo(orders3.getId());
-        assertThat(orders.getContent().get(0).getProduct().getId()).isEqualTo(product1.getId());
+        assertThat(orders.getContent().get(0).getId()).isEqualTo(orders2.getId());
+        assertThat(orders.getContent().get(0).getProduct().getId()).isEqualTo(product2.getId());
         assertThat(orders.getContent().get(2).getId()).isEqualTo(orders1.getId());
         assertThat(orders.getContent().get(2).getProduct().getId()).isEqualTo(product1.getId());
     }
