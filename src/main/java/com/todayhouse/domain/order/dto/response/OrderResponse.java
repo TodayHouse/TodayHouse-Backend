@@ -21,10 +21,10 @@ public class OrderResponse {
     private String parentOption;
     private String selectionOptions;
     private Status status;
-    private Integer price;
+    private Integer totalPrice;
     private Integer productQuantity;
     private Integer selectionQuantity;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private DeliveryResponse deliveryResponse;
 
@@ -43,9 +43,9 @@ public class OrderResponse {
         this.brand = orders.getProduct().getBrand();
         this.title = orders.getProduct().getTitle();
         this.status = orders.getStatus();
-        this.price = orders.getTotalPrice();
+        this.totalPrice = orders.getTotalPrice();
         this.imageUrl = orders.getProduct().getImage();
-        this.createAt = orders.getCreatedAt();
+        this.createdAt = orders.getCreatedAt();
         this.updatedAt = orders.getUpdatedAt();
         this.childOption = orders.getChildOption() == null ? null : orders.getChildOption().getContent();
         this.parentOption = orders.getParentOption().getContent();
