@@ -302,7 +302,7 @@ class OrdersServiceImplTest {
         List<Orders> orders = List.of(o1, o2);
         PageRequest request = PageRequest.of(0, 10);
         User user = getValidUser();
-        when(orderRepository.findByUserIdWithProduct(anyLong(), any(Pageable.class))).thenReturn(new PageImpl<>(orders));
+        when(orderRepository.findByUserIdWithProductAndOptions(anyLong(), any(Pageable.class))).thenReturn(new PageImpl<>(orders));
 
         Page<Orders> page = orderService.findOrders(request);
         assertThat(page.getContent()).isEqualTo(orders);
@@ -320,8 +320,7 @@ class OrdersServiceImplTest {
                 .parentOption(parentOption)
                 .selectionOption(selectionOption).build();
 
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orders));
-        when(orderRepository.findByIdWithOptions(anyLong())).thenReturn(Optional.ofNullable(orders));
+        when(orderRepository.findByIdWithProductAndOptions(anyLong())).thenReturn(Optional.ofNullable(orders));
 
         orderService.cancelOrder(1L);
 

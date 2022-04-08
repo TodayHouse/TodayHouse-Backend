@@ -5,7 +5,6 @@ import com.todayhouse.domain.order.dao.OrderRepository;
 import com.todayhouse.domain.order.domain.Delivery;
 import com.todayhouse.domain.order.domain.Orders;
 import com.todayhouse.domain.order.domain.Status;
-import com.todayhouse.domain.order.dto.request.DeliverySaveRequest;
 import com.todayhouse.domain.order.dto.request.OrderSaveRequest;
 import com.todayhouse.domain.order.exception.OrderNotFoundException;
 import com.todayhouse.domain.product.dao.ChildOptionRepository;
@@ -64,22 +63,20 @@ public class OrderServiceImpl implements OrderService {
         Delivery delivery = deliveryRepository.save(request.getDeliverySaveRequest().toEntity());
         Orders orders = request.toEntity(user, product, parentOption, childOption, selectionOption);
         delivery.updateOrder(orders);
-        deliveryRepository.save(delivery);
-        return orders;
+        return deliveryRepository.save(delivery).getOrder();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Orders> findOrders(Pageable pageable) {
         User user = getValidUser();
-        return orderRepository.findByUserIdWithProduct(user.getId(), pageable);
+        return orderRepository.findByUserIdWithProductAndOptions(user.getId(), pageable);
     }
 
     @Override
     public void cancelOrder(Long orderId) {
-        getValidOrder(orderId);
-        Orders orders = orderRepository.findByIdWithOptions(orderId).orElseThrow(OrderNotFoundException::new);
-
+        Orders orders = orderRepository.findByIdWithProductAndOptions(orderId).orElseThrow(OrderNotFoundException::new);
+        checkValidOrder(orders);
         calcStock(orders.getParentOption(), orders.getChildOption(), orders.getSelectionOption(),
                 orders.getProductQuantity(), orders.getSelectionQuantity());
         orders.updateStatus(Status.CANCELED);
@@ -87,18 +84,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void completeOrder(Long orderId) {
-        Orders orders = getValidOrder(orderId);
+        Orders orders = orderRepository.findById(orderId).orElseThrow(OrderNotFoundException::new);
+        checkValidOrder(orders);
         orders.updateStatus(Status.COMPLETED);
     }
 
     // 요청 유저와 상품을 주문한 유저가 같은지 확인
-    private Orders getValidOrder(Long orderId) {
-        Orders orders = orderRepository.findById(orderId)
-                .orElseThrow(OrderNotFoundException::new);
+    private void checkValidOrder(Orders orders) {
         User user = getValidUser();
         if (orders.getUser().getId() != user.getId())
             throw new InvalidRequestException();
-        return orders;
     }
 
     private User getValidUser() {

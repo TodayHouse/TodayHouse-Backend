@@ -21,7 +21,7 @@ public class OrderRepositoryImpl extends QuerydslRepositorySupport
     }
 
     @Override
-    public Page<Orders> findByUserIdWithProduct(Long userId, Pageable pageable) {
+    public Page<Orders> findByUserIdWithProductAndOptions(Long userId, Pageable pageable) {
         QOrders qOrder = QOrders.orders;
         QProduct qProduct = QProduct.product;
         QChildOption qChildOption = QChildOption.childOption;

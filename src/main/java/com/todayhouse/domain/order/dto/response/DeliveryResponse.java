@@ -2,22 +2,20 @@ package com.todayhouse.domain.order.dto.response;
 
 import com.todayhouse.domain.order.domain.Address;
 import com.todayhouse.domain.order.domain.Delivery;
+import lombok.AccessLevel;
 import lombok.Getter;
-
-import javax.persistence.Embedded;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryResponse {
     private String sender;
     private String receiver;
     private String senderPhoneNumber;
     private String receiverPhoneNumber;
-    @Embedded
     private Address address;
-    private OrderResponse order;
 
-    public DeliveryResponse (Delivery delivery){
-        this.order = new OrderResponse(delivery.getOrder());
+    public DeliveryResponse(Delivery delivery) {
         this.sender = delivery.getSender();
         this.receiver = delivery.getReceiver();
         this.address = delivery.getAddress();

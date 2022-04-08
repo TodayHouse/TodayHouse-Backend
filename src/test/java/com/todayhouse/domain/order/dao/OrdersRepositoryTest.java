@@ -94,7 +94,7 @@ class OrdersRepositoryTest extends DataJpaBase {
 
         PageRequest request = PageRequest.of(0, 10, Sort.by("totalPrice").descending());
 
-        Page<Orders> orders = orderRepository.findByUserIdWithProduct(user.getId(), request);
+        Page<Orders> orders = orderRepository.findByUserIdWithProductAndOptions(user.getId(), request);
         assertThat(orders.getContent().size()).isEqualTo(3);
         assertThat(orders.getContent().get(0).getId()).isEqualTo(orders2.getId());
         assertThat(orders.getContent().get(0).getProduct().getId()).isEqualTo(product2.getId());
@@ -103,14 +103,15 @@ class OrdersRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    @DisplayName("OrderId로 option과 fetch join한 order 찾기")
-    void findByIdWithOptions() {
+    @DisplayName("OrderId로 product, option과 fetch join한 order 찾기")
+    void findByIdWithProductAndOptions() {
         Orders orders = Orders.builder().product(product1).parentOption(op1).selectionOption(s1).build();
         em.persist(orders);
         em.flush();
         em.clear();
 
-        Orders find = orderRepository.findByIdWithOptions(orders.getId()).orElse(null);
+        Orders find = orderRepository.findByIdWithProductAndOptions(orders.getId()).orElse(null);
+        assertThat(find.getProduct().getId()).isEqualTo(product1.getId());
         assertThat(find.getParentOption().getId()).isEqualTo(op1.getId());
         assertThat(find.getSelectionOption().getId()).isEqualTo(s1.getId());
     }
