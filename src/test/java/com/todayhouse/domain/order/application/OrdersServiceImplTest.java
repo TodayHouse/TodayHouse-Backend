@@ -87,14 +87,14 @@ class OrdersServiceImplTest {
         SelectionOption selectionOption = SelectionOption.builder().stock(1).product(product).build();
         Delivery delivery = Delivery.builder().build();
 
+        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
                 .parentOptionId(1L)
                 .childOptionId(1L)
                 .selectionOptionId(1L)
                 .productQuantity(1)
-                .selectionQuantity(1).build();
-
-        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+                .selectionQuantity(1)
+                .deliverySaveRequest(deliveryRequest).build();
 
         getValidUser();
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(product));
@@ -103,7 +103,7 @@ class OrdersServiceImplTest {
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(selectionOption));
         when(deliveryRepository.save(any(Delivery.class))).thenReturn(delivery);
 
-        Orders save = orderService.saveOrder(orderRequest, deliveryRequest);
+        Orders save = orderService.saveOrder(orderRequest);
         assertThat(delivery.getOrder()).isEqualTo(save);
         assertThat(childOption.getStock()).isEqualTo(0);
         assertThat(selectionOption.getStock()).isEqualTo(0);
@@ -112,54 +112,59 @@ class OrdersServiceImplTest {
     @Test
     @DisplayName("product를 찾을 수 없음")
     void saveOrderProductException() {
-        OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
-                .parentOptionId(1L).build();
         DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+        OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
+                .parentOptionId(1L)
+                .deliverySaveRequest(deliveryRequest).build();
 
         getValidUser();
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(ProductNotFoundException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
+        assertThrows(ProductNotFoundException.class, () -> orderService.saveOrder(orderRequest));
     }
 
     @Test
     @DisplayName("parentOption을 찾을 수 없음")
     void saveOrderParentOptionException() {
-        OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
-                .parentOptionId(1L).build();
         DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+        OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
+                .parentOptionId(1L)
+                .deliverySaveRequest(deliveryRequest).build();
+
 
         getValidUser();
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(Product.class)));
         when(parentOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(ParentOptionNotFoundException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
+        assertThrows(ParentOptionNotFoundException.class, () -> orderService.saveOrder(orderRequest));
     }
 
     @Test
     @DisplayName("childOption을 찾을 수 없음")
     void saveOrderChildOptionException() {
+        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
                 .parentOptionId(1L)
-                .childOptionId(1L).build();
-        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+                .childOptionId(1L)
+                .deliverySaveRequest(deliveryRequest).build();
 
         getValidUser();
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(Product.class)));
         when(parentOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(ParentOption.class)));
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(ChildOptionNotFoundException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
+        assertThrows(ChildOptionNotFoundException.class, () -> orderService.saveOrder(orderRequest));
     }
 
     @Test
     @DisplayName("selctionOption을 찾을 수 없음")
     void saveOrderSelectionOptionException() {
+        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
                 .parentOptionId(1L)
                 .childOptionId(1L)
-                .selectionOptionId(1L).build();
-        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+                .selectionOptionId(1L)
+                .deliverySaveRequest(deliveryRequest).build();
 
         getValidUser();
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(Product.class)));
@@ -167,17 +172,19 @@ class OrdersServiceImplTest {
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(ChildOption.class)));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(SelectionOptionNotFoundException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
+        assertThrows(SelectionOptionNotFoundException.class, () -> orderService.saveOrder(orderRequest));
     }
 
     @Test
     @DisplayName("parentOption의 제품과 product가 다름")
     void saveOrderProductAndOptionException() {
+        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
                 .parentOptionId(1L)
                 .childOptionId(1L)
-                .selectionOptionId(1L).build();
-        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+                .selectionOptionId(1L)
+                .deliverySaveRequest(deliveryRequest).build();
+
 
         Product product1 = Product.builder().seller(Mockito.mock(Seller.class)).build();
         Product product2 = Product.builder().seller(Mockito.mock(Seller.class)).build();
@@ -189,17 +196,18 @@ class OrdersServiceImplTest {
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(ChildOption.class)));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(SelectionOption.class)));
 
-        assertThrows(InvalidRequestException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
+        assertThrows(InvalidRequestException.class, () -> orderService.saveOrder(orderRequest));
     }
 
     @Test
     @DisplayName("parentOption과 childOption의 parent가 다름")
     void saveOrderParentChildOptionException() {
+        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
                 .parentOptionId(1L)
                 .childOptionId(1L)
-                .selectionOptionId(1L).build();
-        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+                .selectionOptionId(1L)
+                .deliverySaveRequest(deliveryRequest).build();
 
         Product product = Product.builder().seller(mock(Seller.class)).build();
         ParentOption parent1 = ParentOption.builder().product(product).build();
@@ -212,16 +220,17 @@ class OrdersServiceImplTest {
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(child));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(SelectionOption.class)));
 
-        assertThrows(InvalidRequestException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
+        assertThrows(InvalidRequestException.class, () -> orderService.saveOrder(orderRequest));
     }
 
     @Test
     @DisplayName("selectionOption 제품과 product가 다름")
     void saveOrderProductAndSelectionOptionException() {
+        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
                 .parentOptionId(1L)
-                .selectionOptionId(1L).build();
-        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+                .selectionOptionId(1L)
+                .deliverySaveRequest(deliveryRequest).build();
 
         Product product1 = Product.builder().seller(mock(Seller.class)).build();
         Product product2 = Product.builder().seller(mock(Seller.class)).build();
@@ -233,7 +242,7 @@ class OrdersServiceImplTest {
         when(parentOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(parent));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(selection));
 
-        assertThrows(InvalidRequestException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
+        assertThrows(InvalidRequestException.class, () -> orderService.saveOrder(orderRequest));
     }
 
     @Test
@@ -243,19 +252,19 @@ class OrdersServiceImplTest {
         ParentOption parentOption = ParentOption.builder().product(product).build();
         ChildOption childOption = ChildOption.builder().parent(parentOption).build();
 
+        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
                 .parentOptionId(1L)
                 .childOptionId(1L)
-                .productQuantity(2).build();
-
-        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+                .productQuantity(2)
+                .deliverySaveRequest(deliveryRequest).build();
 
         getValidUser();
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(product));
         when(parentOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(parentOption));
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(childOption));
 
-        assertThrows(StockNotEnoughException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
+        assertThrows(StockNotEnoughException.class, () -> orderService.saveOrder(orderRequest));
     }
 
     @Test
@@ -266,14 +275,15 @@ class OrdersServiceImplTest {
         ChildOption childOption = ChildOption.builder().stock(1).parent(parentOption).build();
         SelectionOption selectionOption = SelectionOption.builder().stock(1).product(product).build();
 
+        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(1L)
                 .parentOptionId(1L)
                 .childOptionId(1L)
                 .selectionOptionId(1L)
                 .productQuantity(1)
-                .selectionQuantity(2).build();
-
-        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder().build();
+                .selectionQuantity(2)
+                .deliverySaveRequest(deliveryRequest).build();
 
         getValidUser();
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(product));
@@ -281,7 +291,7 @@ class OrdersServiceImplTest {
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(childOption));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(selectionOption));
 
-        assertThrows(StockNotEnoughException.class, () -> orderService.saveOrder(orderRequest, deliveryRequest));
+        assertThrows(StockNotEnoughException.class, () -> orderService.saveOrder(orderRequest));
     }
 
     @Test

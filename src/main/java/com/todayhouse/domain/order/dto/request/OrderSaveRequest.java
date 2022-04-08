@@ -15,16 +15,18 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class OrderSaveRequest {
-    String memo;
+    private String memo;
     @NotNull(message = "productId를 입력해 주세요.")
-    Long productId;
+    private Long productId;
     @NotNull(message = "parentOptionId를 입력해 주세요.")
-    Long parentOptionId;
-    Long childOptionId;
-    Long selectionOptionId;
+    private Long parentOptionId;
+    private Long childOptionId;
+    private Long selectionOptionId;
     @NotNull(message = "productQuantity를 입력해 주세요.")
-    int productQuantity = 0;
-    int selectionQuantity = 0;
+    private int productQuantity = 0;
+    private int selectionQuantity = 0;
+    @NotNull(message = "deliveryRequest를 입력해 주세요.")
+    private DeliverySaveRequest deliverySaveRequest;
 
     public Orders toEntity(User user, Product product, ParentOption parentOption, ChildOption childOption,
                            SelectionOption selectionOption) {

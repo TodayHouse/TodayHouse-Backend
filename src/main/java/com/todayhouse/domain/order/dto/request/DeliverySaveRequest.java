@@ -12,19 +12,19 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class DeliverySaveRequest {
     @NotBlank(message = "sender를 입력해주세요.")
-    String sender;
+    private String sender;
     @NotBlank(message = "receiver를 입력해주세요.")
-    String receiver;
+    private String receiver;
     @NotBlank(message = "senderPhoneNumber를 입력해주세요.")
-    String senderPhoneNumber;
+    private String senderPhoneNumber;
     @NotBlank(message = "receiverPhoneNumber를 입력해주세요.")
-    String receiverPhoneNumber;
+    private String receiverPhoneNumber;
     @NotBlank(message = "zipCode를 입력해주세요.")
-    String zipCode;
+    private String zipCode;
     @NotBlank(message = "address1를 입력해주세요.")
-    String address1;
+    private String address1;
     @NotBlank(message = "address2를 입력해주세요.")
-    String address2;
+    private String address2;
 
     public Delivery toEntity() {
         Address address = Address.builder().zipCode(zipCode)

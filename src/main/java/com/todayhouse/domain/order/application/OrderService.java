@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
-    Orders saveOrder(OrderSaveRequest orderRequest, DeliverySaveRequest deliveryRequest);
+    Orders saveOrder(OrderSaveRequest request);
 
     Page<Orders> findOrders(Pageable pageable);
 

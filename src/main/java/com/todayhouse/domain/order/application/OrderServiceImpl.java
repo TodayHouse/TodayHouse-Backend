@@ -44,25 +44,25 @@ public class OrderServiceImpl implements OrderService {
     private final SelectionOptionRepository selectionOptionRepository;
 
     @Override
-    public Orders saveOrder(OrderSaveRequest orderRequest, DeliverySaveRequest deliveryRequest) {
+    public Orders saveOrder(OrderSaveRequest request) {
         User user = getValidUser();
-        Product product = productRepository.findById(orderRequest.getProductId())
+        Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(ProductNotFoundException::new);
-        ParentOption parentOption = parentOptionRepository.findById(orderRequest.getParentOptionId())
+        ParentOption parentOption = parentOptionRepository.findById(request.getParentOptionId())
                 .orElseThrow(ParentOptionNotFoundException::new);
-        ChildOption childOption = orderRequest.getChildOptionId() == null ? null : childOptionRepository.findById(orderRequest.getChildOptionId())
+        ChildOption childOption = request.getChildOptionId() == null ? null : childOptionRepository.findById(request.getChildOptionId())
                 .orElseThrow(ChildOptionNotFoundException::new);
-        SelectionOption selectionOption = orderRequest.getSelectionOptionId() == null ? null : selectionOptionRepository.findById(orderRequest.getSelectionOptionId())
+        SelectionOption selectionOption = request.getSelectionOptionId() == null ? null : selectionOptionRepository.findById(request.getSelectionOptionId())
                 .orElseThrow(SelectionOptionNotFoundException::new);
 
         checkValidOrderRequest(product, parentOption, childOption, selectionOption);
 
         calcStock(parentOption, childOption, selectionOption,
-                -orderRequest.getProductQuantity(), -orderRequest.getSelectionQuantity());
+                -request.getProductQuantity(), -request.getSelectionQuantity());
 
         //저장
-        Delivery delivery = deliveryRepository.save(deliveryRequest.toEntity());
-        Orders orders = orderRequest.toEntity(user, product, parentOption, childOption, selectionOption);
+        Delivery delivery = deliveryRepository.save(request.getDeliverySaveRequest().toEntity());
+        Orders orders = request.toEntity(user, product, parentOption, childOption, selectionOption);
         delivery.updateOrder(orders);
         deliveryRepository.save(delivery);
         return orders;
