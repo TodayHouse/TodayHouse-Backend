@@ -4,7 +4,6 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
-import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.exception.CategoryExistException;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import lombok.AllArgsConstructor;
@@ -12,10 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Transactional
@@ -28,8 +24,8 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.existsByName(request.getName()))
             throw new CategoryExistException();
 
-        Category par = request.getParentId() == null ?
-                null : categoryRepository.findById(request.getParentId()).orElseThrow(CategoryNotFoundException::new);
+        Category par = request.getParentName() == null ?
+                null : categoryRepository.findByName(request.getParentName()).orElseThrow(CategoryNotFoundException::new);
         Category child = Category.builder().name(request.getName()).parent(par).build();
 
         return categoryRepository.save(child);
@@ -37,54 +33,35 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category updateCategory(CategoryUpdateRequest request) {
-        Category category = categoryRepository.findById(request.getId()).orElseThrow(CategoryNotFoundException::new);
+        Category category = categoryRepository.findByName(request.getName()).orElseThrow(CategoryNotFoundException::new);
         category.updateName(request.getChangeName());
         return category;
     }
 
     @Override
-    public void deleteCategory(Long id) {
-        categoryRepository.deleteById(id);
+    public void deleteCategory(String categoryName) {
+        categoryRepository.deleteByName(categoryName);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryResponse> findAllWithChildrenAll() {
-        return createCategoryResponsesAll();
+    public List<Category> findAllWithChildrenAll() {
+        return categoryRepository.findAllByOrderByDepthAscParentAscIdAsc();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryResponse findOneWithChildrenAllById(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFoundException::new);
-        return createCategoryResponse(category);
+    public List<Category> findOneByNameWithChildrenAll(String categoryName) {
+        List<Category> categories = categoryRepository.findOneByNameWithAllChildren(categoryName);
+        if (categories.isEmpty())
+            throw new CategoryNotFoundException();
+        return categories;
     }
 
-    private CategoryResponse createCategoryResponse(Category category) {
-        List<Category> categories = categoryRepository.findOneWithAllChildrenById(category.getId());
-        Map<Long, CategoryResponse> map = new HashMap<>();
-        categories.stream().forEach(c -> {
-            CategoryResponse response = new CategoryResponse(c);
-            map.put(c.getId(), response);
-            if (c.getId() != category.getId())
-                map.get(c.getParent().getId()).getSubCategories().add(response);
-        });
-        return map.get(category.getId());
-    }
-
-    private List<CategoryResponse> createCategoryResponsesAll(){
-        List<Category> categories = categoryRepository.findAllByOrderByDepthAscParentAscIdAsc();
-        Map<Long, CategoryResponse> map = new HashMap<>();
-        List<CategoryResponse> responses = new ArrayList<>();
-        categories.stream().forEach(c -> {
-            CategoryResponse response = new CategoryResponse(c);
-            map.put(c.getId(), response);
-            if (c.getDepth() != 0)
-                map.get(c.getParent().getId()).getSubCategories().add(response);
-            else
-                responses.add(response);
-        });
-        return responses;
+    @Override
+    @Transactional(readOnly = true)
+    public List<Category> findRootPath(String categoryName) {
+        return categoryRepository.findRootPathByName(categoryName);
     }
 
     @PostConstruct
@@ -106,7 +83,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category.builder().name("기타").parent(주방가전).build();
 
         Category 에어컨 = Category.builder().name("에어컨").parent(가전).build();
-        Category 컴노 = Category.builder().name("컴퓨터/노트북").parent(가전).build();
+        Category 컴노 = Category.builder().name("컴퓨터+노트북").parent(가전).build();
         Category.builder().name("컴퓨터").parent(컴노).build();
         Category.builder().name("노트북").parent(컴노).build();
 

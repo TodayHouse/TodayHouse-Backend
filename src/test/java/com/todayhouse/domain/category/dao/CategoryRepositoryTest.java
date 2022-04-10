@@ -3,6 +3,7 @@ package com.todayhouse.domain.category.dao;
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.category.domain.Category;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
@@ -45,10 +46,10 @@ class CategoryRepositoryTest extends DataJpaBase {
 
         Category savePar = em.persist(par);
 
-        categoryRepository.deleteById(savePar.getId());
+        categoryRepository.deleteByName(savePar.getName());
 
-        List<Category> categories = em.getEntityManager().createQuery("select c from Category c where c.id=:id", Category.class)
-                .setParameter("id", par.getId()).getResultList();
+        List<Category> categories = em.getEntityManager().createQuery("select c from Category c where c.name=:name", Category.class)
+                .setParameter("name", par.getName()).getResultList();
         assertEquals(categories.size(), 0);
     }
 
@@ -104,6 +105,19 @@ class CategoryRepositoryTest extends DataJpaBase {
     }
 
     @Test
+    void category_name으로_삭제() {
+        Category par = Category.builder().name("par").build();
+        em.persist(par);
+        em.flush();
+        em.clear();
+
+        categoryRepository.deleteByName(par.getName());
+
+        List<Category> categories = em.getEntityManager().createQuery("select c from Category c", Category.class).getResultList();
+        assertEquals(0, categories.size());
+    }
+
+    @Test
     void depth로_찾기() {
         Category par = Category.builder().name("par").build();
         Category ch = Category.builder().name("ch").parent(par).build();
@@ -127,7 +141,7 @@ class CategoryRepositoryTest extends DataJpaBase {
         em.flush();
         em.clear();
 
-        List<Category> categories = categoryRepository.findOneWithAllChildrenById(par.getId());
+        List<Category> categories = categoryRepository.findOneByNameWithAllChildren(par.getName());
         assertThat(categories.size()).isEqualTo(4);
         assertThat(categories.get(0).getId()).isEqualTo(par.getId());
         assertThat(categories.get(1).getId()).isEqualTo(ch1.getId());
@@ -137,11 +151,6 @@ class CategoryRepositoryTest extends DataJpaBase {
 
     @Test
     void 모든_카테고리_깊이_부모_ID_오름차순_찾기() {
-        List<Category> all = categoryRepository.findAll();
-        for (Category c : all) {
-            System.out.println(c.getName() + ", " + c.getId());
-        }
-
         Category par1 = Category.builder().name("par1").build();
         Category ch1 = Category.builder().name("ch1").parent(par1).build();
         Category ch2 = Category.builder().name("ch2").parent(par1).build();
@@ -156,14 +165,30 @@ class CategoryRepositoryTest extends DataJpaBase {
         em.flush();
         em.clear();
 
-        List<Category> all2 = categoryRepository.findAll();
-        for (Category c : all2) {
-            System.out.println(c.getName() + ", " + c.getId());
-        }
         List<Category> expect = List.of(par1, par2, ch1, ch2, ch3, ch1ch1, ch3ch2);
         List<Category> result = categoryRepository.findAllByOrderByDepthAscParentAscIdAsc();
         for (int i = 0; i < expect.size(); i++) {
             assertThat(result.get(i).getName()).isEqualTo(expect.get(i).getName());
         }
+    }
+
+    @Test
+    @DisplayName("category_이름으로부터 루트까지의 경로 list")
+    void rootPath() {
+        Category par1 = Category.builder().name("par1").build();
+        Category ch1 = Category.builder().name("ch1").parent(par1).build();
+        Category ch2 = Category.builder().name("ch2").parent(par1).build();
+        Category ch1ch1 = Category.builder().name("ch1ch1").parent(ch1).build();
+
+        em.persist(par1);
+        em.flush();
+        em.clear();
+
+        List<Category> categories = categoryRepository.findRootPathByName(ch1ch1.getName());
+
+        assertThat(categories.size()).isEqualTo(3);
+        assertThat(categories.get(0).getName()).isEqualTo(par1.getName());
+        assertThat(categories.get(1).getName()).isEqualTo(ch1.getName());
+        assertThat(categories.get(2).getName()).isEqualTo(ch1ch1.getName());
     }
 }

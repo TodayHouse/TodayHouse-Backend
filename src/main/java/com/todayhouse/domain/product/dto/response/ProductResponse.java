@@ -15,27 +15,30 @@ import java.util.stream.Collectors;
 public class ProductResponse {
     private Long id;
     private Long sellerId;
-    private Long categoryId;
     private String brand;
     private String title;
     private String option1;
     private String option2;
-    private String selectionOption;
     private String productDetail;
+    private String selectionOption;
     private int sales;
     private int price;
     private int deliveryFee;
     private int discountRate;
     private boolean specialPrice;
-    private List<String> imageUrls;
-    private Set<ParentOptionResponse> parentOptions;
-    private Set<SelectionOptionResponse> selectionOptions;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<String> imageUrls = new ArrayList<>();
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<String> categoryPath = new ArrayList<>();
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Set<ParentOptionResponse> parentOptions = new LinkedHashSet<>();
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Set<SelectionOptionResponse> selectionOptions = new LinkedHashSet<>();
 
     // null safe로 parent, child, selection option 모두 response type으로 변경
     public ProductResponse(Product product) {
         this.id = product.getId();
         this.sellerId = product.getSeller().getId();
-        this.categoryId = product.getCategory() == null ? null: product.getCategory().getId();
         this.brand = product.getBrand();
         this.title = product.getTitle();
         this.option1 = product.getParentOption();
@@ -57,5 +60,9 @@ public class ProductResponse {
 
     public void setImages(List<String> images) {
         this.imageUrls = images;
+    }
+
+    public void addCategoryPath(String category) {
+        this.categoryPath.add(category);
     }
 }

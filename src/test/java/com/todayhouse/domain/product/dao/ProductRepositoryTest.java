@@ -43,7 +43,7 @@ class ProductRepositoryTest extends DataJpaBase {
 
     @BeforeEach
     void preSet() {
-        productRepository.deleteAll();
+        productRepository.deleteAllInBatch();
         c1 = Category.builder().name("c1").build();
         c2 = Category.builder().parent(c1).name("c2").build();
         c3 = Category.builder().parent(c2).name("c3").build();
@@ -113,7 +113,9 @@ class ProductRepositoryTest extends DataJpaBase {
 
     @Test
     void product_조건으로_찾기() {
-        ProductSearchRequest request = ProductSearchRequest.builder().categoryId(c1.getId()).priceFrom(2000).build();
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .categoryName(c1.getName()).priceFrom(2000).priceTo(3000)
+                .build();
         PageRequest of = PageRequest.of(0, 30, Sort.by("createdAt").descending());
         Page<Product> page = productRepository.findAllWithSeller(request, of);
         List<Product> list = page.getContent();
