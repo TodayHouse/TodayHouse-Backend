@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class ProductSearchRequest {
     private String brand;
-    private Long categoryId;
+    private String categoryName;
     private Integer priceFrom;
     private Integer priceTo;
     private Boolean deliveryFee;

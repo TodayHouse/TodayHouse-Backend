@@ -7,6 +7,7 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
+import com.todayhouse.domain.category.dto.response.CategoryPathResponse;
 import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.dto.response.CategorySaveResponse;
 import com.todayhouse.domain.category.dto.response.CategoryUpdateResponse;
@@ -45,7 +46,7 @@ class CategoryControllerTest extends IntegrationBase {
 
     @BeforeAll
     void setUp() {
-        categoryRepository.deleteAll();
+        categoryRepository.deleteAllInBatch();
         p1 = Category.builder().name("p1").build();
         c1 = Category.builder().name("c1").parent(p1).build();
         c2 = Category.builder().name("c2").parent(p1).build();
@@ -61,7 +62,7 @@ class CategoryControllerTest extends IntegrationBase {
     @DisplayName("새 카테고리 저장")
     void saveCategory() throws Exception {
         String url = "http://localhost:8080/categories";
-        CategorySaveRequest request = CategorySaveRequest.builder().parentId(c2.getId()).name("cc2").build();
+        CategorySaveRequest request = CategorySaveRequest.builder().parentName(c2.getName()).name("cc2").build();
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -85,19 +86,19 @@ class CategoryControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse response = getResponseFromMvcResult(mvcResult);
-        List<CategoryResponse> categories= objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        List<CategoryResponse> categories = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
         });
         assertThat(categories.size()).isEqualTo(2);
-        categories.stream().forEach(c->{
-            if(c.getSubCategories().size()==0)
+        categories.stream().forEach(c -> {
+            if (c.getSubCategories().size() == 0)
                 assertThat(c.getName()).isEqualTo("p2");
-            else{
+            else {
                 assertThat(c.getName()).isEqualTo("p1");
                 assertThat(c.getSubCategories().size()).isEqualTo(2);
-                c.getSubCategories().stream().forEach(cc->{
-                    if(cc.getSubCategories().size()==0)
+                c.getSubCategories().stream().forEach(cc -> {
+                    if (cc.getSubCategories().size() == 0)
                         assertThat(cc.getName()).isEqualTo("c2");
-                    else{
+                    else {
                         assertThat(cc.getName()).isEqualTo("c1");
                         assertThat(cc.getSubCategories().size()).isEqualTo(1);
                         assertThat(cc.getSubCategories().get(0).getName()).isEqualTo("cc1");
@@ -110,7 +111,7 @@ class CategoryControllerTest extends IntegrationBase {
     @Test
     @DisplayName("특정 하위 카테고리 찾기")
     void findAllSub() throws Exception {
-        String url = "http://localhost:8080/categories/" + p1.getId();
+        String url = "http://localhost:8080/categories/" + p1.getName();
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -125,10 +126,37 @@ class CategoryControllerTest extends IntegrationBase {
     }
 
     @Test
+    @DisplayName("잘못된 카테고리로 하위 카테고리 찾기")
+    void findAllSubException() throws Exception {
+        String url = "http://localhost:8080/categories/a";
+        mockMvc.perform(get(url))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("category_name부터 root까지의 경로")
+    void findRootPath() throws Exception {
+        String url = "http://localhost:8080/categories/path/" + cc1.getName();
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        CategoryPathResponse pathResponse = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        });
+        List<String> categoryPath = pathResponse.getCategoryPath();
+        assertThat(categoryPath.size()).isEqualTo(3);
+        assertThat(categoryPath.get(0)).isEqualTo(p1.getName());
+        assertThat(categoryPath.get(1)).isEqualTo(c1.getName());
+        assertThat(categoryPath.get(2)).isEqualTo(cc1.getName());
+    }
+
+    @Test
     @WithMockUser(roles = "ADMIN")
     @DisplayName("카테고리 수정")
     void updateCategoryName() throws Exception {
-        CategoryUpdateRequest request = CategoryUpdateRequest.builder().id(c2.getId()).changeName("newc2").build();
+        CategoryUpdateRequest request = CategoryUpdateRequest.builder().name(c2.getName()).changeName("newc2").build();
         String url = "http://localhost:8080/categories";
         MvcResult mvcResult = mockMvc.perform(patch(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +174,7 @@ class CategoryControllerTest extends IntegrationBase {
     @WithMockUser(roles = "ADMIN")
     @DisplayName("카테고리 삭제")
     void deleteCategory() throws Exception {
-        String url = "http://localhost:8080/categories/" + p1.getId();
+        String url = "http://localhost:8080/categories/" + p1.getName();
         mockMvc.perform(delete(url))
                 .andExpect(status().isOk());
 

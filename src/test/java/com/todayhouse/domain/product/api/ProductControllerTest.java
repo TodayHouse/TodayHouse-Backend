@@ -87,13 +87,20 @@ class ProductControllerTest extends IntegrationBase {
 
     Seller seller1;
     Product product1;
+    Category p1, c1;
 
     @BeforeEach
     void setUp() {
         seller1 = Seller.builder().email("seller1@email.com").brand("user1").build();
         User user1 = User.builder().email("user1@email.com").seller(seller1).build();
         userRepository.save(user1);
-        product1 = Product.builder().title("p1").seller(seller1).build();
+
+        p1 = Category.builder().name("p1").build();
+        c1 = Category.builder().name("c1").parent(p1).build();
+        em.persist(p1);
+        em.persist(c1);
+
+        product1 = Product.builder().title("p1").seller(seller1).category(c1).build();
         productRepository.save(product1);
 
         em.flush();
@@ -114,7 +121,7 @@ class ProductControllerTest extends IntegrationBase {
         Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
-                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryId(1L)
+                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryName("빨래건조대")
                 .parentOptions(parent).build();
         MockMultipartFile json = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8));
         MockMultipartFile image = new MockMultipartFile("file", "image.jpa", "image/jpeg", "<<jpeg data>>".getBytes(StandardCharsets.UTF_8));
@@ -159,7 +166,7 @@ class ProductControllerTest extends IntegrationBase {
         Set<ProductParentOptionSaveRequest> parent = new LinkedHashSet<>();
         parent.add(p1);
         ProductSaveRequest request = ProductSaveRequest.builder()
-                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryId(1L)
+                .title("new").price(10000).deliveryFee(1000).discountRate(10).specialPrice(false).categoryName("가전")
                 .parentOptions(parent).build();
         MockMultipartFile json = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8));
         MockMultipartFile image = new MockMultipartFile("file", "image.jpa", "image/jpeg", "<<jpeg data>>".getBytes(StandardCharsets.UTF_8));
@@ -228,7 +235,7 @@ class ProductControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("product 찾았다")
+    @DisplayName("product id로 찾았다")
     void findProduct() throws Exception {
         String imageUrl = "saveUrl";
         ProductImage img1 = ProductImage.builder().product(product1).fileName("test1.jpg").build();
@@ -253,6 +260,8 @@ class ProductControllerTest extends IntegrationBase {
         assertThat(result.getTitle()).isEqualTo("p1");
         assertThat(result.getImageUrls().get(0)).isEqualTo(imageUrl);
         assertThat(result.getImageUrls().size()).isEqualTo(2);
+        assertThat(result.getCategoryPath().get(0)).isEqualTo(p1.getName());
+        assertThat(result.getCategoryPath().get(1)).isEqualTo(c1.getName());
     }
 
     @Test
@@ -260,7 +269,7 @@ class ProductControllerTest extends IntegrationBase {
     void updateProduct() throws Exception {
         String url = "http://localhost:8080/products";
         String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
-        ProductUpdateRequest request = ProductUpdateRequest.builder().id(product1.getId()).title("new").categoryId(2L).build();
+        ProductUpdateRequest request = ProductUpdateRequest.builder().id(product1.getId()).title("new").categoryName("가전").build();
 
         mockMvc.perform(put(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -272,6 +281,7 @@ class ProductControllerTest extends IntegrationBase {
         List<Product> products = productRepository.findAll();
         assertThat(products.size()).isEqualTo(1);
         assertThat(products.get(0).getTitle()).isEqualTo("new");
+        assertThat(products.get(0).getCategory().getName()).isEqualTo("가전");
     }
 
     @Test
@@ -302,7 +312,6 @@ class ProductControllerTest extends IntegrationBase {
     @DisplayName("배달비 존재, 특가 product를 id 내림차순 페이징")
     void findProductsPaginationBrand() throws Exception {
         String url = "http://localhost:8080/products?page=0&size=4&sort=id,DESC";
-        ProductSearchRequest productSearch = ProductSearchRequest.builder().specialPrice(true).deliveryFee(true).build();
         productRepository.save(Product.builder().specialPrice(true).deliveryFee(2000).seller(seller1).build());
         productRepository.save(Product.builder().specialPrice(false).deliveryFee(1000).seller(seller1).build());
         productRepository.save(Product.builder().specialPrice(true).seller(seller1).build());
@@ -335,10 +344,9 @@ class ProductControllerTest extends IntegrationBase {
         productRepository.save(Product.builder().title("desk").category(desktop).seller(seller1).build());
 
         String url = "http://localhost:8080/products";
-        Long id = categoryRepository.findByName("컴퓨터/노트북").orElse(null).getId();
 
         MvcResult mvcResult = mockMvc.perform(get(url)
-                        .param("categoryId", String.valueOf(id)))
+                        .param("categoryName", "컴퓨터+노트북"))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();

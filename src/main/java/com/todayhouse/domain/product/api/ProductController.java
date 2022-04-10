@@ -1,5 +1,7 @@
 package com.todayhouse.domain.product.api;
 
+import com.todayhouse.domain.category.application.CategoryService;
+import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.product.application.ProductService;
 import com.todayhouse.domain.product.domain.Product;
@@ -29,6 +31,7 @@ public class ProductController {
     private final FileService fileService;
     private final ImageService imageService;
     private final ProductService productService;
+    private final CategoryService categoryService;
 
     @PostMapping
     public BaseResponse<Long> saveProduct(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFiles,
@@ -60,6 +63,10 @@ public class ProductController {
                 map(fileName -> fileService.changeFileNameToUrl(fileName)).collect(Collectors.toList());
         ProductResponse response = new ProductResponse(product);
         response.setImages(imageUrls);
+
+        List<Category> categoryPath = categoryService.findRootPath(product.getCategory().getName());
+        categoryPath.forEach(c -> response.addCategoryPath(c.getName()));
+
         return new BaseResponse(response);
     }
 

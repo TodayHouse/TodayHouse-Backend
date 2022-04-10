@@ -4,7 +4,6 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.category.dto.request.CategorySaveRequest;
 import com.todayhouse.domain.category.dto.request.CategoryUpdateRequest;
-import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.exception.CategoryExistException;
 import com.todayhouse.domain.category.exception.CategoryNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -12,10 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,10 +54,10 @@ class CategoryServiceImplTest {
 
     @Test
     void 잘못된_부모_카테고리() {
-        CategorySaveRequest request = CategorySaveRequest.builder().name("c1").parentId(1L).build();
+        CategorySaveRequest request = CategorySaveRequest.builder().name("c1").parentName("par").build();
 
         when(categoryRepository.existsByName("c1")).thenReturn(false);
-        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(null));
+        when(categoryRepository.findByName("par")).thenReturn(Optional.ofNullable(null));
 
         assertThrows(CategoryNotFoundException.class, () -> categoryService.addCategory(request));
     }
@@ -66,9 +65,9 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("category 업데이트")
     void updateCategory() {
-        CategoryUpdateRequest request = CategoryUpdateRequest.builder().id(1L).changeName("new").build();
+        CategoryUpdateRequest request = CategoryUpdateRequest.builder().name("old").changeName("new").build();
         Category old = Category.builder().name("old").build();
-        when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(old));
+        when(categoryRepository.findByName("old")).thenReturn(Optional.ofNullable(old));
 
         Category category = categoryService.updateCategory(request);
         assertThat(category.getName()).isEqualTo("new");
@@ -77,11 +76,11 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("category 삭제")
     void deleteCategory() {
-        doNothing().when(categoryRepository).deleteById(anyLong());
+        doNothing().when(categoryRepository).deleteByName(anyString());
 
-        categoryService.deleteCategory(1L);
+        categoryService.deleteCategory("old");
 
-        verify(categoryRepository).deleteById(anyLong());
+        verify(categoryRepository).deleteByName(anyString());
     }
 
     @Test
@@ -100,18 +99,12 @@ class CategoryServiceImplTest {
 
         when(categoryRepository.findAllByOrderByDepthAscParentAscIdAsc()).thenReturn(list);
 
-        List<CategoryResponse> find = categoryService.findAllWithChildrenAll();
-        CategoryResponse child = find.get(1).getSubCategories().get(0);
-        CategoryResponse grand = child.getSubCategories().get(0);
-
-        assertThat(find.get(0).getName()).isEqualTo("c1");
-        assertThat(find.get(1).getName()).isEqualTo("c2");
-        assertThat(child.getName()).isEqualTo("c3");
-        assertThat(grand.getName()).isEqualTo("c4");
+        List<Category> categories = categoryService.findAllWithChildrenAll();
+        assertThat(categories).isEqualTo(list);
     }
 
     @Test
-    void 특정_카테고리_찾기() {
+    void 이름으로_특정_카테고리_찾기() {
         Category c1 = Category.builder().name("c1").build();
         Category c2 = Category.builder().name("c2").build();
         Category c3 = Category.builder().name("c3").parent(c2).build();
@@ -119,27 +112,33 @@ class CategoryServiceImplTest {
         ReflectionTestUtils.setField(c2, "id", 2L);
         ReflectionTestUtils.setField(c3, "id", 3L);
 
-        List<Category> list = new ArrayList<>();
-        list.add(c2);
-        list.add(c3);
+        List<Category> list = List.of(c2, c3);
 
-        when(categoryRepository.findById(2L)).thenReturn(Optional.ofNullable(c2));
+        when(categoryRepository.findOneByNameWithAllChildren("c2")).thenReturn(list);
 
         createCategoryResponse(list);
-        CategoryResponse find = categoryService.findOneWithChildrenAllById(2L);
-        assertThat(find.getName()).isEqualTo("c2");
-        assertThat(find.getSubCategories().get(0).getName()).isEqualTo("c3");
+        List<Category> categories = categoryService.findOneByNameWithChildrenAll("c2");
+        assertThat(categories).isEqualTo(list);
     }
 
     @Test
-    @DisplayName("해당 id의 카테고리 없음")
-    void findOneWithChildrenAllByIdException() {
-        when(categoryRepository.findById(2L)).thenReturn(Optional.ofNullable(null));
+    @DisplayName("해당 이름의 카테고리 없음")
+    void findOneWithChildrenAllByNameException() {
+        when(categoryRepository.findOneByNameWithAllChildren("??")).thenReturn(List.of());
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.findOneWithChildrenAllById(2L));
+        assertThrows(CategoryNotFoundException.class, () -> categoryService.findOneByNameWithChildrenAll("??"));
+    }
+
+    @Test
+    @DisplayName("카테고리 경로 리스트로 찾기")
+    void findRootPath() {
+        when(categoryRepository.findRootPathByName(anyString()))
+                .thenReturn(List.of(Mockito.mock(Category.class), Mockito.mock(Category.class)));
+
+        List<Category> categories = categoryService.findRootPath("c");
+        assertThat(categories.size()).isEqualTo(2);
     }
 
     private void createCategoryResponse(List<Category> categories) {
-        when(categoryRepository.findOneWithAllChildrenById(anyLong())).thenReturn(categories);
     }
 }

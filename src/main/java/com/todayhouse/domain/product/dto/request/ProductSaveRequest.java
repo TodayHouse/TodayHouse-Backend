@@ -34,7 +34,7 @@ public class ProductSaveRequest {
     private boolean specialPrice;
 
     @NotNull(message = "categoryId를 입력해주세요")
-    private Long categoryId;
+    private String categoryName;
 
     private String productDetail;
 
