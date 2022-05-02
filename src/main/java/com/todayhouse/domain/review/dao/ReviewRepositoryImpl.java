@@ -25,8 +25,7 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
         QReview qReview = QReview.review;
         JPQLQuery<Review> query = from(qReview)
                 .innerJoin(qReview.user).fetchJoin()
-                .innerJoin(qReview.product).fetchJoin()
-                .orderBy(qReview.createdAt.desc());
+                .innerJoin(qReview.product).fetchJoin();
         makeReviewSearchQuery(query, request);
         QueryResults<Review> results = getQuerydsl().applyPagination(pageable, query).fetchResults();
 
