@@ -72,8 +72,8 @@ class OrderControllerTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         seller = Seller.builder().brand("test").build();
-        p = Product.builder().seller(seller).build();
-        op = ParentOption.builder().product(p).stock(1).price(1000).build();
+        p = Product.builder().title("title").image("img").seller(seller).build();
+        op = ParentOption.builder().product(p).content("op").stock(1).price(1000).build();
 
         em.persist(seller);
         em.persist(p);
@@ -142,9 +142,9 @@ class OrderControllerTest extends IntegrationBase {
         List<OrderResponse> list = objectMapper.readValue(objectMapper.writeValueAsString(page.getContent()), new TypeReference<>() {
         });
         assertThat(list.size()).isEqualTo(3);
-        assertThat(list.get(0).getProductQuantity()).isEqualTo(o4.getProductQuantity());
-        assertThat(list.get(1).getProductQuantity()).isEqualTo(o3.getProductQuantity());
-        assertThat(list.get(2).getProductQuantity()).isEqualTo(o2.getProductQuantity());
+        assertThat(list.get(0).getProductInfo().get(5)).isEqualTo(Integer.toString(o4.getProductQuantity()));
+        assertThat(list.get(1).getProductInfo().get(5)).isEqualTo(Integer.toString(o3.getProductQuantity()));
+        assertThat(list.get(2).getProductInfo().get(5)).isEqualTo(Integer.toString(o2.getProductQuantity()));
     }
 
     @Test
@@ -174,9 +174,9 @@ class OrderControllerTest extends IntegrationBase {
         OrderResponse orderResponse = objectMapper.convertValue(response.getResult(), OrderResponse.class);
         DeliveryResponse deliveryResponse = objectMapper.convertValue(orderResponse.getDeliveryResponse(), DeliveryResponse.class);
         assertThat(orderResponse.getId()).isEqualTo(save.getOrder().getId());
-        assertThat(orderResponse.getBrand()).isEqualTo(p.getBrand());
-        assertThat(orderResponse.getChildOption()).isEqualTo(chop.getContent());
-        assertThat(orderResponse.getSelectionOptions()).isEqualTo(selop.getContent());
+        assertThat(orderResponse.getProductInfo().get(2)).isEqualTo(p.getBrand());
+        assertThat(orderResponse.getProductInfo().get(3)).isEqualTo(op.getContent()+" / "+chop.getContent());
+        assertThat(orderResponse.getSelectionOptionInfo().get(0)).isEqualTo(selop.getContent());
         assertTrue(deliveryResponse.getReceiver().equals(delivery.getReceiver()) &&
                 deliveryResponse.getSender().equals(delivery.getSender()));
     }

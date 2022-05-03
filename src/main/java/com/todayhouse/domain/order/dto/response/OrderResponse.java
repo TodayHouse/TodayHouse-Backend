@@ -3,29 +3,26 @@ package com.todayhouse.domain.order.dto.response;
 import com.todayhouse.domain.order.domain.Delivery;
 import com.todayhouse.domain.order.domain.Orders;
 import com.todayhouse.domain.order.domain.Status;
+import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.product.domain.SelectionOption;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderResponse {
     private Long id;
     private String memo;
-    private String brand;
-    private String title;
-    private String imageUrl;
-    private String childOption;
-    private String parentOption;
-    private String selectionOptions;
     private Status status;
-    private Integer totalPrice;
-    private Integer productQuantity;
-    private Integer selectionQuantity;
+    private Integer deliveryFee;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<String> productInfo;
+    private List<String> selectionOptionInfo;
     private DeliveryResponse deliveryResponse;
 
     public OrderResponse(Orders orders) {
@@ -40,17 +37,23 @@ public class OrderResponse {
     private void setOrder(Orders orders) {
         this.id = orders.getId();
         this.memo = orders.getMemo();
-        this.brand = orders.getProduct().getBrand();
-        this.title = orders.getProduct().getTitle();
         this.status = orders.getStatus();
-        this.totalPrice = orders.getTotalPrice();
-        this.imageUrl = orders.getProduct().getImage();
+        this.deliveryFee = orders.getDeliveryFee();
         this.createdAt = orders.getCreatedAt();
         this.updatedAt = orders.getUpdatedAt();
-        this.childOption = orders.getChildOption() == null ? null : orders.getChildOption().getContent();
-        this.parentOption = orders.getParentOption().getContent();
-        this.selectionOptions = orders.getSelectionOption() == null ? null : orders.getSelectionOption().getContent();
-        this.productQuantity = orders.getProductQuantity();
-        this.selectionQuantity = orders.getSelectionQuantity();
+        this.productInfo = createProductInfo(orders);
+        if (orders.getSelectionOption() != null)
+            this.selectionOptionInfo = createSelectionOptionInfo(orders.getSelectionOption(), orders.getSelectionQuantity());
+    }
+
+    private List<String> createProductInfo(Orders orders) {
+        Product product = orders.getProduct();
+        String optionName = orders.getParentOption().getContent();
+        if (orders.getChildOption() != null) optionName += " / " + orders.getChildOption().getContent();
+        return List.of(product.getImage(), product.getTitle(), product.getBrand(), optionName, Integer.toString(orders.getTotalPrice()), Integer.toString(orders.getProductQuantity()));
+    }
+
+    private List<String> createSelectionOptionInfo(SelectionOption selectionOption, int selectionQuantity) {
+        return List.of(selectionOption.getContent(), Integer.toString(selectionQuantity));
     }
 }

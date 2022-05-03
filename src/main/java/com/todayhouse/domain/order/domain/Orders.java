@@ -21,38 +21,41 @@ public class Orders extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
-    Long id;
+    private Long id;
 
-    int totalPrice;
+    private int totalPrice;
 
-    int productQuantity = 0;
+    @Column(name = "delivery_fee")
+    private int deliveryFee;
 
-    int selectionQuantity = 0;
+    private int productQuantity = 0;
 
-    String memo;
+    private int selectionQuantity = 0;
+
+    private String memo;
 
     @Enumerated(EnumType.STRING)
-    Status status;
+    private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    User user;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
-    Product product;
+    private Product product;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_option_id")
-    ParentOption parentOption;
+    private ParentOption parentOption;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "child_option_id")
-    ChildOption childOption;
+    private ChildOption childOption;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "selection_option_id")
-    SelectionOption selectionOption;
+    private SelectionOption selectionOption;
 
     @Builder
     public Orders(String memo, User user, Product product,
@@ -69,7 +72,6 @@ public class Orders extends BaseTimeEntity {
         this.selectionQuantity = selectionQuantity;
         this.totalPrice = (childOption == null ? parentOption.getPrice() : childOption.getPrice()) * productQuantity +
                 (selectionOption == null ? 0 : selectionOption.getPrice() * selectionQuantity);
-
     }
 
     public void updateStatus(Status status) {
