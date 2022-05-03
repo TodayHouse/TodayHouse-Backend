@@ -30,6 +30,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -43,8 +46,16 @@ public class OrderServiceImpl implements OrderService {
     private final SelectionOptionRepository selectionOptionRepository;
 
     @Override
-    public Orders saveOrder(OrderSaveRequest request) {
+    public List<Orders> saveOrders(List<OrderSaveRequest> requests) {
         User user = getValidUser();
+        List<Orders> orders = new ArrayList<>();
+        requests.forEach(request -> {
+            orders.add(saveOrder(user, request));
+        });
+        return orders;
+    }
+
+    private Orders saveOrder(User user, OrderSaveRequest request) {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(ProductNotFoundException::new);
         ParentOption parentOption = parentOptionRepository.findById(request.getParentOptionId())
@@ -61,8 +72,8 @@ public class OrderServiceImpl implements OrderService {
 
         //저장
         Delivery delivery = deliveryRepository.save(request.getDeliverySaveRequest().toEntity());
-        Orders orders = request.toEntity(user, product, parentOption, childOption, selectionOption);
-        delivery.updateOrder(orders);
+        Orders order = request.toEntity(user, product, parentOption, childOption, selectionOption);
+        delivery.updateOrder(order);
         return deliveryRepository.save(delivery).getOrder();
     }
 
@@ -88,6 +99,7 @@ public class OrderServiceImpl implements OrderService {
         checkValidOrder(orders);
         orders.updateStatus(Status.COMPLETED);
     }
+
 
     // 요청 유저와 상품을 주문한 유저가 같은지 확인
     private void checkValidOrder(Orders orders) {

@@ -13,6 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders")
@@ -21,9 +24,10 @@ public class OrderController {
     private final DeliveryService deliveryService;
 
     @PostMapping
-    public BaseResponse<Long> saveOrder(@RequestBody OrderSaveRequest orderRequest) {
-        Orders orders = orderService.saveOrder(orderRequest);
-        return new BaseResponse(orders.getId());
+    public BaseResponse<List<Long>> saveOrders(@RequestBody List<OrderSaveRequest> orderRequests) {
+        List<Orders> orders = orderService.saveOrders(orderRequests);
+        List<Long> ids = orders.stream().map(o -> o.getId()).collect(Collectors.toList());
+        return new BaseResponse(ids);
     }
 
     /*

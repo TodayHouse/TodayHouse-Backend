@@ -100,14 +100,15 @@ class OrderControllerTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwt)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(objectMapper.writeValueAsString(List.of(orderRequest))))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
 
         BaseResponse response = getResponseFromMvcResult(mvcResult);
-        Long id = objectMapper.convertValue(response.getResult(), Long.class);
-        Delivery delivery = deliveryRepository.findByOrderIdWithOrder(id).orElse(null);
+        List<Long> ids = objectMapper.convertValue(response.getResult(), new TypeReference<>() {
+        });
+        Delivery delivery = deliveryRepository.findByOrderIdWithOrder(ids.get(0)).orElse(null);
         assertThat(delivery.getReceiver().equals(deliveryRequest.getReceiver()) &&
                 delivery.getSender().equals(deliveryRequest.getSender())).isTrue();
         assertThat(delivery.getOrder().getProduct().getId()).isEqualTo(p.getId());
@@ -175,7 +176,7 @@ class OrderControllerTest extends IntegrationBase {
         DeliveryResponse deliveryResponse = objectMapper.convertValue(orderResponse.getDeliveryResponse(), DeliveryResponse.class);
         assertThat(orderResponse.getId()).isEqualTo(save.getOrder().getId());
         assertThat(orderResponse.getProductInfo().get(2)).isEqualTo(p.getBrand());
-        assertThat(orderResponse.getProductInfo().get(3)).isEqualTo(op.getContent()+" / "+chop.getContent());
+        assertThat(orderResponse.getProductInfo().get(3)).isEqualTo(op.getContent() + " / " + chop.getContent());
         assertThat(orderResponse.getSelectionOptionInfo().get(0)).isEqualTo(selop.getContent());
         assertTrue(deliveryResponse.getReceiver().equals(delivery.getReceiver()) &&
                 deliveryResponse.getSender().equals(delivery.getSender()));

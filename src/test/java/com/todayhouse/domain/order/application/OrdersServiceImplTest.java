@@ -103,8 +103,8 @@ class OrdersServiceImplTest {
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(selectionOption));
         when(deliveryRepository.save(any(Delivery.class))).thenReturn(delivery);
 
-        Orders save = orderService.saveOrder(orderRequest);
-        assertThat(delivery.getOrder()).isEqualTo(save);
+        List<Orders> save = orderService.saveOrders(List.of(orderRequest));
+        assertThat(delivery.getOrder()).isEqualTo(save.get(0));
         assertThat(childOption.getStock()).isEqualTo(0);
         assertThat(selectionOption.getStock()).isEqualTo(0);
     }
@@ -120,7 +120,7 @@ class OrdersServiceImplTest {
         getValidUser();
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(ProductNotFoundException.class, () -> orderService.saveOrder(orderRequest));
+        assertThrows(ProductNotFoundException.class, () -> orderService.saveOrders(List.of(orderRequest)));
     }
 
     @Test
@@ -136,7 +136,7 @@ class OrdersServiceImplTest {
         when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(Product.class)));
         when(parentOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(ParentOptionNotFoundException.class, () -> orderService.saveOrder(orderRequest));
+        assertThrows(ParentOptionNotFoundException.class, () -> orderService.saveOrders(List.of(orderRequest)));
     }
 
     @Test
@@ -153,7 +153,7 @@ class OrdersServiceImplTest {
         when(parentOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(ParentOption.class)));
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(ChildOptionNotFoundException.class, () -> orderService.saveOrder(orderRequest));
+        assertThrows(ChildOptionNotFoundException.class, () -> orderService.saveOrders(List.of(orderRequest)));
     }
 
     @Test
@@ -172,7 +172,7 @@ class OrdersServiceImplTest {
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(ChildOption.class)));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(SelectionOptionNotFoundException.class, () -> orderService.saveOrder(orderRequest));
+        assertThrows(SelectionOptionNotFoundException.class, () -> orderService.saveOrders(List.of(orderRequest)));
     }
 
     @Test
@@ -196,7 +196,7 @@ class OrdersServiceImplTest {
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(ChildOption.class)));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(SelectionOption.class)));
 
-        assertThrows(InvalidRequestException.class, () -> orderService.saveOrder(orderRequest));
+        assertThrows(InvalidRequestException.class, () -> orderService.saveOrders(List.of(orderRequest)));
     }
 
     @Test
@@ -220,7 +220,7 @@ class OrdersServiceImplTest {
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(child));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(Mockito.mock(SelectionOption.class)));
 
-        assertThrows(InvalidRequestException.class, () -> orderService.saveOrder(orderRequest));
+        assertThrows(InvalidRequestException.class, () -> orderService.saveOrders(List.of(orderRequest)));
     }
 
     @Test
@@ -242,7 +242,7 @@ class OrdersServiceImplTest {
         when(parentOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(parent));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(selection));
 
-        assertThrows(InvalidRequestException.class, () -> orderService.saveOrder(orderRequest));
+        assertThrows(InvalidRequestException.class, () -> orderService.saveOrders(List.of(orderRequest)));
     }
 
     @Test
@@ -264,7 +264,7 @@ class OrdersServiceImplTest {
         when(parentOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(parentOption));
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(childOption));
 
-        assertThrows(StockNotEnoughException.class, () -> orderService.saveOrder(orderRequest));
+        assertThrows(StockNotEnoughException.class, () -> orderService.saveOrders(List.of(orderRequest)));
     }
 
     @Test
@@ -291,7 +291,7 @@ class OrdersServiceImplTest {
         when(childOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(childOption));
         when(selectionOptionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(selectionOption));
 
-        assertThrows(StockNotEnoughException.class, () -> orderService.saveOrder(orderRequest));
+        assertThrows(StockNotEnoughException.class, () -> orderService.saveOrders(List.of(orderRequest)));
     }
 
     @Test
