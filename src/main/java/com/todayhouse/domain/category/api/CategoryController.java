@@ -12,6 +12,7 @@ import com.todayhouse.global.common.BaseResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -21,7 +22,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public BaseResponse saveCategory(@RequestBody CategorySaveRequest request) {
+    public BaseResponse saveCategory(@Valid @RequestBody CategorySaveRequest request) {
         Category category = categoryService.addCategory(request);
         return new BaseResponse(new CategorySaveResponse(category));
     }
@@ -48,7 +49,7 @@ public class CategoryController {
     }
 
     @PatchMapping
-    public BaseResponse updateCategoryName(@RequestBody CategoryUpdateRequest request) {
+    public BaseResponse updateCategoryName(@Valid @RequestBody CategoryUpdateRequest request) {
         Category category = categoryService.updateCategory(request);
         return new BaseResponse(new CategoryUpdateResponse(category));
     }

@@ -8,6 +8,7 @@ import com.todayhouse.domain.product.domain.SelectionOption;
 import com.todayhouse.domain.user.domain.User;
 import lombok.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -23,8 +24,9 @@ public class OrderSaveRequest {
     private Long childOptionId;
     private Long selectionOptionId;
     @NotNull(message = "productQuantity를 입력해 주세요.")
-    private int productQuantity = 0;
+    private int productQuantity;
     private int selectionQuantity = 0;
+    @Valid
     @NotNull(message = "deliveryRequest를 입력해 주세요.")
     private DeliverySaveRequest deliverySaveRequest;
 

@@ -115,6 +115,28 @@ class OrderControllerTest extends IntegrationBase {
     }
 
     @Test
+    @DisplayName("zipcode 입력 없음 valid 오류")
+    void saveOrderZipCodeValidException() throws Exception {
+        DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder()
+                .sender("from").receiver("to")
+                .address1("a1").address2("a2")
+                .receiverPhoneNumber("r")
+                .senderPhoneNumber("s").build();
+        OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(p.getId())
+                .parentOptionId(op.getId()).productQuantity(1)
+                .memo("testmemo")
+                .deliverySaveRequest(deliveryRequest).build();
+        String jwt = tokenProvider.createToken("a@a.com", List.of(Role.USER));
+        String url = "http://localhost:8080/orders";
+
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwt)
+                        .content(objectMapper.writeValueAsString(List.of(orderRequest))))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     @DisplayName("Order를 주문일 날짜 내림차순으로 페이징하여 조회")
     void findUserOrdersPaging() throws Exception {
         User user = userRepository.findByEmail("a@a.com").orElse(null);

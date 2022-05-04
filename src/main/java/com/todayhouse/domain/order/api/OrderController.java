@@ -11,11 +11,14 @@ import com.todayhouse.global.common.PageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders")
@@ -24,7 +27,7 @@ public class OrderController {
     private final DeliveryService deliveryService;
 
     @PostMapping
-    public BaseResponse<List<Long>> saveOrders(@RequestBody List<OrderSaveRequest> orderRequests) {
+    public BaseResponse<List<Long>> saveOrders(@Valid @RequestBody List<OrderSaveRequest> orderRequests) {
         List<Orders> orders = orderService.saveOrders(orderRequests);
         List<Long> ids = orders.stream().map(o -> o.getId()).collect(Collectors.toList());
         return new BaseResponse(ids);
