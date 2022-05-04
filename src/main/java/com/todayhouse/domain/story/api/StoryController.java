@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static java.util.Objects.isNull;
@@ -30,18 +31,18 @@ public class StoryController {
 
     @PostMapping
     public BaseResponse<Long> saveStory(@RequestPart(value = "file", required = false) List<MultipartFile> multipartFile,
-                                     @RequestPart(value = "request") StoryCreateRequest request) {
+                                        @RequestPart(value = "request") @Valid StoryCreateRequest request) {
         return new BaseResponse<>(storyService.saveStory(multipartFile, request));
     }
 
     @PostMapping("/{id}/image")
     public BaseResponse<Long> saveImage(@RequestPart(value = "file", required = false) MultipartFile multipartFile,
-                                        @PathVariable Long id){
+                                        @PathVariable Long id) {
         return new BaseResponse<>(storyService.saveImage(multipartFile, id));
     }
 
     @GetMapping
-    public BaseResponse<Slice<StoryGetListResponse>> findAllDesc(@PageableDefault (sort="id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public BaseResponse<Slice<StoryGetListResponse>> findAllDesc(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return new BaseResponse<>(storyService.findAllDesc(pageable));
     }
 
@@ -52,7 +53,7 @@ public class StoryController {
 
     @GetMapping("/user")
     public BaseResponse<Slice<StoryGetListResponse>> findByUser(@RequestParam(required = false) String nickname,
-                                                                @PageableDefault (sort="id", direction = Sort.Direction.DESC) Pageable pageable){
+                                                                @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         if (isNull(nickname)) return new BaseResponse<>(storyService.findByUser(pageable));
         else return new BaseResponse<>(storyService.findByUserNickname(nickname, pageable));
     }
@@ -73,7 +74,7 @@ public class StoryController {
     }
 
     @PatchMapping("/{id}")
-    public BaseResponse<Long> update(@PathVariable Long id, @RequestBody StoryUpdateRequest request) {
+    public BaseResponse<Long> update(@PathVariable Long id, @Valid @RequestBody StoryUpdateRequest request) {
         return new BaseResponse<>(storyService.update(id, request));
     }
 

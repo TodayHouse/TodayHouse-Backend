@@ -71,7 +71,7 @@ public class ProductController {
     }
 
     @PutMapping
-    public BaseResponse updateProduct(@RequestBody ProductUpdateRequest request) {
+    public BaseResponse updateProduct(@Valid @RequestBody ProductUpdateRequest request) {
         Product product = productService.updateProduct(request);
         return new BaseResponse(new ProductResponse(product));
     }
