@@ -37,11 +37,14 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
     // ReviewSearchRequest로 where절 추가
     private void makeReviewSearchQuery(JPQLQuery<Review> query, ReviewSearchRequest request) {
         QReview qReview = QReview.review;
-        if (request.getIsImage() != null) {
+        if (request.getIsImage() != null && request.getIsImage()) {
             query.where(qReview.reviewImage.isNotEmpty());
         }
         if (request.getUserId() != null) {
             query.where(qReview.user.id.eq(request.getUserId()));
+        }
+        if(request.getProductId() != null) {
+            query.where(qReview.product.id.eq(request.getProductId()));
         }
         if (request.getRate() != null) {
             query.where(qReview.rating.eq(request.getRate()));

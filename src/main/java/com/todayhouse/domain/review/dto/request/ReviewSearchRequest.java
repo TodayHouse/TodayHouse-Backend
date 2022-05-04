@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 public class ReviewSearchRequest {
     private Integer rate;
     private Long userId;
+    private Long productId;
     private Boolean isImage;
 }
