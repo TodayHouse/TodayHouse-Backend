@@ -22,7 +22,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -41,8 +40,10 @@ class UserServiceImplTest {
 
     @Mock
     UserRepository userRepository;
+
     @Mock
-    PasswordEncoder passwordEncoder;
+    BCryptPasswordEncoder bCryptPasswordEncoder;
+
     @Mock
     JwtTokenProvider jwtTokenProvider;
     @Mock
@@ -117,7 +118,7 @@ class UserServiceImplTest {
                 .roles(Collections.singletonList(Role.USER)).build();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
-        when(passwordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(true);
+        when(bCryptPasswordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(true);
         when(jwtTokenProvider.createToken(eq(email), anyList())).thenReturn(jwt);
 
         assertThat(userService.login(request).getId()).isEqualTo(findUser.getId());
@@ -133,7 +134,7 @@ class UserServiceImplTest {
                 .roles(Collections.singletonList(Role.USER)).build();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(findUser));
-        when(passwordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(false);
+        when(bCryptPasswordEncoder.matches(request.getPassword(), findUser.getPassword())).thenReturn(false);
 
         assertThrows(WrongPasswordException.class, () -> userService.login(request));
     }
