@@ -4,8 +4,8 @@ import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.review.domain.Review;
+import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
-import com.todayhouse.domain.review.dto.response.ReviewRating;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -120,10 +120,11 @@ class ReviewRepositoryTest extends DataJpaBase {
     @Test
     @DisplayName("Reivew 평점 별 개수 조회")
     void countReviewGroupByRating() {
-        List<ReviewRating> reviewRatings = reviewRepository.countReviewByProductIdGroupByRatingDesc(p1.getId());
+        List<Integer> rating = List.of(1, 2, 4, 5);
+        List<Long> count = List.of(1L, 1L, 2L, 1L);
 
-        List<Integer> rating = List.of(5, 4, 2, 1);
-        List<Long> count = List.of(1L, 2L, 1L, 1L);
+        List<ReviewRating> reviewRatings = reviewRepository.countReviewByProductIdGroupByRating(p1.getId());
+
         for (int i = 0; i < reviewRatings.size(); i++) {
             assertThat(reviewRatings.get(i).getRating()).isEqualTo(rating.get(i));
             assertThat(reviewRatings.get(i).getCount()).isEqualTo(count.get(i));

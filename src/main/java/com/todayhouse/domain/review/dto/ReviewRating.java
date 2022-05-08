@@ -1,4 +1,4 @@
-package com.todayhouse.domain.review.dto.response;
+package com.todayhouse.domain.review.dto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -5,7 +5,9 @@ import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Review;
+import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
+import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
@@ -25,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -60,11 +63,11 @@ class ReviewServiceImplTest {
         SecurityContextHolder.clearContext();
     }
 
-    final MultipartFile file = mock(MultipartFile.class);
-    final Product product = mock(Product.class);
-    final User user = mock(User.class);
-    final String url = "image.com", email = "test@test";
-    final Long productId = 1L, reviewId = 10L;
+    MultipartFile file = mock(MultipartFile.class);
+    Product product = mock(Product.class);
+    User user = mock(User.class);
+    String url = "image.com", email = "test@test";
+    Long productId = 1L, reviewId = 10L;
 
 
     @Test
@@ -122,5 +125,21 @@ class ReviewServiceImplTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(securityContext.getAuthentication().getName()).thenReturn(email);
         SecurityContextHolder.setContext(securityContext);
+    }
+
+    @Test
+    @DisplayName("review 평점 별 개수 조회")
+    void ReviewRatingResponse() {
+        List<ReviewRating> reviewRatings =
+                List.of(new ReviewRating(1, 2), new ReviewRating(2, 5), new ReviewRating(5, 3));
+        ReviewRatingResponse result = ReviewRatingResponse.builder().one(2).two(5).five(3).build();
+
+        when(reviewRepository.countReviewByProductIdGroupByRating(productId))
+                .thenReturn(reviewRatings);
+
+        ReviewRatingResponse response = reviewService.findReviewRatingByProductId(productId);
+
+        assertThat(response).usingRecursiveComparison().isEqualTo(result);
+        assertThat(response.getAverage()).isEqualTo(2.7);
     }
 }
