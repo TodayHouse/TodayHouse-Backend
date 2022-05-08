@@ -7,6 +7,7 @@ import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
+import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
@@ -20,6 +21,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -69,6 +74,19 @@ class ReviewServiceImplTest {
     String url = "image.com", email = "test@test";
     Long productId = 1L, reviewId = 10L;
 
+    @Test
+    @DisplayName("해당 상품의 리뷰 페이징 조회")
+    void findReviews(){
+        ReviewSearchRequest reviewSearchRequest = ReviewSearchRequest.builder().build();
+        PageRequest pageRequest = PageRequest.of(1, 1);
+        Page<Review> result = mock(Page.class);
+
+        when(reviewRepository.findAllReviews(reviewSearchRequest, pageRequest)).thenReturn(result);
+
+        Page<Review> reviews = reviewService.findReviews(reviewSearchRequest, pageRequest);
+
+        assertThat(reviews).isEqualTo(result);
+    }
 
     @Test
     @DisplayName("리뷰 저장")

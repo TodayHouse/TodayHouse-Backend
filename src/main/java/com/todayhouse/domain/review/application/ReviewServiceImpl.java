@@ -7,12 +7,15 @@ import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
+import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +33,10 @@ public class ReviewServiceImpl implements ReviewService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
+
+    public Page<Review> findReviews(ReviewSearchRequest request, Pageable pageable) {
+        return reviewRepository.findAllReviews(request, pageable);
+    }
 
     @Override
     public Long saveReview(MultipartFile multipartFile, ReviewSaveRequest request) {
@@ -54,6 +61,12 @@ public class ReviewServiceImpl implements ReviewService {
     private Product getValidProduct(Long productId) {
         return productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
     }
+
+//    public void deleteReviewById(Long id){
+//        User user = getValidUser();
+//        reviewRepository.find
+//        reviewRepository.deleteById(id);
+//    }
 
     @Override
     @Transactional(readOnly = true)
