@@ -9,6 +9,7 @@ import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
+import com.todayhouse.domain.review.exception.ReviewDuplicateException;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
@@ -43,8 +44,8 @@ public class ReviewServiceImpl implements ReviewService {
         User user = getValidUser();
         String imageUrl = saveFileAndGetUrl(multipartFile);
         Product product = getValidProduct(request.getProductId());
-        Review save = reviewRepository.save(request.toEntity(imageUrl, user, product));
-        return save.getId();
+        Review review = request.toEntity(imageUrl, user, product);
+        return synchSaveReview(review).getId();
     }
 
     private User getValidUser() {
@@ -62,11 +63,23 @@ public class ReviewServiceImpl implements ReviewService {
         return productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
     }
 
-//    public void deleteReviewById(Long id){
-//        User user = getValidUser();
+    private synchronized Review synchSaveReview(Review reviewWithUserAndProduct) {
+        checkReviewDuplication(reviewWithUserAndProduct.getUser().getId(), reviewWithUserAndProduct.getProduct().getId());
+        return reviewRepository.save(reviewWithUserAndProduct);
+    }
+
+    private void checkReviewDuplication(Long userId, Long productId) {
+        reviewRepository.findByUserIdAndProductId(userId, productId)
+                .ifPresent(r -> {
+                    throw new ReviewDuplicateException();
+                });
+    }
+
+    public void deleteReviewById(Long id) {
+        User user = getValidUser();
 //        reviewRepository.find
-//        reviewRepository.deleteById(id);
-//    }
+        reviewRepository.deleteById(id);
+    }
 
     @Override
     @Transactional(readOnly = true)
