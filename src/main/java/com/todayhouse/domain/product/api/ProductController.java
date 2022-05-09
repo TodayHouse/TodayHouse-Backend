@@ -10,8 +10,8 @@ import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
 import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
-import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.global.common.BaseResponse;
+import com.todayhouse.global.common.PageDto;
 import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -50,10 +50,10 @@ public class ProductController {
     //?page=0&size=4&sort=price,DESC&sort=id,DESC 형식으로 작성
     //ProductSearchRequest은 선택사항
     @GetMapping
-    public BaseResponse findProductsPagination(@ModelAttribute ProductSearchRequest productSearch,
-                                               Pageable pageable) {
+    public BaseResponse findProductsPaging(@ModelAttribute ProductSearchRequest productSearch,
+                                           Pageable pageable) {
         Page<ProductResponse> products = productService.findAllWithSeller(productSearch, pageable);
-        return new BaseResponse(new ProductSearchResponse(products));
+        return new BaseResponse(new PageDto<>(products));
     }
 
     @GetMapping("/{id}")

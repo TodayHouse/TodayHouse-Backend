@@ -98,7 +98,7 @@ class SellerControllerTest extends IntegrationBase {
         userRepository.save(User.builder().email(userEmail).seller(seller).build());
 
         SellerRequest request = SellerRequest.builder()
-                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum("010").representative("a").businessAddress("address")
+                .companyName("a").email(sellerEmail).customerCenter("a").registrationNum("010").representative("a").businessAddress("address").brand("brand")
                 .build();
         String jwt = tokenProvider.createToken(userEmail, Collections.singletonList(Role.USER));
 

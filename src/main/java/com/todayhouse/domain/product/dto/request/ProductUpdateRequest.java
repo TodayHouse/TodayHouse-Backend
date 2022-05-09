@@ -3,7 +3,6 @@ package com.todayhouse.domain.product.dto.request;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import java.util.Set;
 
 @Getter
 @Builder

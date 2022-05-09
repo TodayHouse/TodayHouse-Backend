@@ -16,13 +16,13 @@ import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.*;
 import com.todayhouse.domain.product.dto.response.ProductResponse;
-import com.todayhouse.domain.product.dto.response.ProductSearchResponse;
 import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseResponse;
+import com.todayhouse.global.common.PageDto;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import com.todayhouse.infra.S3Storage.service.FileServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -194,7 +194,7 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
-        ProductSearchResponse response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
+        PageDto<ProductResponse> response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
         });
         List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
         });
@@ -221,7 +221,7 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
-        ProductSearchResponse response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
+        PageDto<ProductResponse> response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
         });
         List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
         });
@@ -324,7 +324,7 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
-        ProductSearchResponse response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
+        PageDto<ProductResponse> response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
         });
         List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
         });
@@ -352,7 +352,7 @@ class ProductControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
-        ProductSearchResponse response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
+        PageDto<ProductResponse> response = objectMapper.readValue(objectMapper.writeValueAsString(baseResponse.getResult()), new TypeReference<>() {
         });
         List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
         });

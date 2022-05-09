@@ -60,8 +60,12 @@ public enum BaseResponseStatus {
     CHILD_OPTION_NOT_FOUND(false, 2408, "하위 옵션을 찾을 수 없습니다."),
     SELECTION_OPTION_NOT_FOUND(false, 2409, "선택 옵션을 찾을 수 없습니다."),
 
+    // order
+    ORDER_NOT_FOUND(false, 2500, "주문을 찾을 수 없습니다."),
+    DELIVERY_NOT_FOUND(false, 2501, "주문을 찾을 수 없습니다."),
+
     // review
-    REVIEW_DUPLICATE(false, 2500,"하나의 상품에 하나의 리뷰만 작성할 수 있습니다."),
+    REVIEW_DUPLICATE(false, 2600,"하나의 상품에 하나의 리뷰만 작성할 수 있습니다."),
 
     // 3000 : Database / Server 오류
     // common

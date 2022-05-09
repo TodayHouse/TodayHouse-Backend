@@ -12,10 +12,9 @@ import com.todayhouse.domain.category.dto.response.CategoryResponse;
 import com.todayhouse.domain.category.dto.response.CategorySaveResponse;
 import com.todayhouse.domain.category.dto.response.CategoryUpdateResponse;
 import com.todayhouse.global.common.BaseResponse;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -30,7 +29,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)//@BeforeAll 사용
 class CategoryControllerTest extends IntegrationBase {
 
     @Autowired
@@ -44,7 +42,7 @@ class CategoryControllerTest extends IntegrationBase {
 
     Category p1, c1, c2, cc1, p2;
 
-    @BeforeAll
+    @BeforeEach
     void setUp() {
         categoryRepository.deleteAllInBatch();
         p1 = Category.builder().name("p1").build();

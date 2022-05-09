@@ -2,10 +2,9 @@ package com.todayhouse.domain.category.dao;
 
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.category.domain.Category;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
@@ -15,7 +14,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)//@BeforeAll 사용
 class CategoryRepositoryTest extends DataJpaBase {
 
     @Autowired
@@ -24,9 +22,9 @@ class CategoryRepositoryTest extends DataJpaBase {
     @Autowired
     TestEntityManager em;
 
-    @BeforeAll
+    @BeforeEach
     void setUp() {
-        categoryRepository.deleteAllInBatch();
+        categoryRepository.deleteAll();
     }
 
     @Test
@@ -50,7 +48,8 @@ class CategoryRepositoryTest extends DataJpaBase {
 
         categoryRepository.deleteByName(savePar.getName());
 
-        List<Category> categories = em.getEntityManager().createQuery("select c from Category c", Category.class).getResultList();
+        List<Category> categories = em.getEntityManager().createQuery("select c from Category c where c.name=:name", Category.class)
+                .setParameter("name", par.getName()).getResultList();
         assertEquals(categories.size(), 0);
     }
 

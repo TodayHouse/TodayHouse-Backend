@@ -9,15 +9,26 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
+import java.io.IOException;
+
 @Slf4j
 // 모든 RestController에 적용
 @RestControllerAdvice(annotations = RestController.class)
 public class GlobalExControllerAdvice {
 
+    // @Validated 검증 실패
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public BaseResponse handleConstraintViolationException(ConstraintViolationException e) throws IOException {
+        log.error("Exception : {}", e.getMessage());
+        return new BaseResponse(e.getMessage());
+    }
+
     // @Valid 검증 실패
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public BaseResponse InvalidArgumentResponse(MethodArgumentNotValidException e){
+    public BaseResponse InvalidArgumentResponse(MethodArgumentNotValidException e) {
         log.error("Exception : {}, 입력값 : {}", e.getBindingResult().getFieldError(), e.getBindingResult().getFieldError());
         return new BaseResponse(e.getBindingResult().getFieldError().getDefaultMessage());
     }

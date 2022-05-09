@@ -2,6 +2,7 @@ package com.todayhouse.domain.product.domain;
 
 import com.todayhouse.domain.product.dto.request.ChildOptionUpdateRequest;
 import com.todayhouse.domain.product.exception.OptionExistException;
+import com.todayhouse.domain.product.exception.StockNotEnoughException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,5 +50,10 @@ public class ChildOption {
         if (option == null) return;
         this.parent = option;
         option.getChildren().add(this);
+    }
+
+    public void addStock(int quantity){
+        if(this.stock+quantity<0) throw new StockNotEnoughException();
+        this.stock+=quantity;
     }
 }
