@@ -14,4 +14,6 @@ public interface ReviewService {
     Long saveReview(MultipartFile multipartFile, ReviewSaveRequest request);
 
     ReviewRatingResponse findReviewRatingByProductId(Long productId);
+
+    boolean canWriteReview(Long productId);
 }

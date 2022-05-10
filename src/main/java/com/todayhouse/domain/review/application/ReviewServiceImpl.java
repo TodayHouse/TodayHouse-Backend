@@ -1,5 +1,8 @@
 package com.todayhouse.domain.review.application;
 
+import com.todayhouse.domain.order.dao.OrderRepository;
+import com.todayhouse.domain.order.domain.Orders;
+import com.todayhouse.domain.order.domain.Status;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
@@ -9,6 +12,7 @@ import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
+import com.todayhouse.domain.review.exception.OrderNotCompletedException;
 import com.todayhouse.domain.review.exception.ReviewDuplicateException;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
@@ -25,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -32,6 +37,7 @@ import java.util.List;
 public class ReviewServiceImpl implements ReviewService {
     private final FileService fileService;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
 
@@ -42,8 +48,16 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public Long saveReview(MultipartFile multipartFile, ReviewSaveRequest request) {
         User user = getValidUser();
-        String imageUrl = saveFileAndGetUrl(multipartFile);
         Product product = getValidProduct(request.getProductId());
+
+        if (!isOrderCompleteUser(user.getId(), product.getId()))
+            throw new OrderNotCompletedException();
+        reviewRepository.findByUserIdAndProductId(user.getId(), product.getId()).ifPresent(r -> {
+            throw new ReviewDuplicateException();
+        });
+
+        String imageUrl = saveFileAndGetUrl(multipartFile);
+
         Review review = request.toEntity(imageUrl, user, product);
         return synchSaveReview(review).getId();
     }
@@ -75,11 +89,11 @@ public class ReviewServiceImpl implements ReviewService {
                 });
     }
 
-    public void deleteReviewById(Long id) {
-        User user = getValidUser();
+//    public void deleteReviewById(Long id) {
+//        User user = getValidUser();
 //        reviewRepository.find
-        reviewRepository.deleteById(id);
-    }
+//        reviewRepository.deleteById(id);
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -93,5 +107,24 @@ public class ReviewServiceImpl implements ReviewService {
                 .three(rating.get(3))
                 .four(rating.get(4))
                 .five(rating.get(5)).build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean canWriteReview(Long productId) {
+        User user = getValidUser();
+        if (!isOrderCompleteUser(user.getId(), productId))
+            return false;
+        Optional<Review> review = reviewRepository.findByUserIdAndProductId(user.getId(), productId);
+        if (review.isPresent())
+            return false;
+        return true;
+    }
+
+    private boolean isOrderCompleteUser(Long userId, Long productId) {
+        List<Orders> orders = orderRepository.findByUserIdAndProductIdAndStatus(userId, productId, Status.COMPLETED);
+        if (orders.size() == 0)
+            return false;
+        return true;
     }
 }
