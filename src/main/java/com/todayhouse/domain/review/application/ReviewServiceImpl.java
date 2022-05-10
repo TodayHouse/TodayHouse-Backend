@@ -14,6 +14,7 @@ import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.review.exception.OrderNotCompletedException;
 import com.todayhouse.domain.review.exception.ReviewDuplicateException;
+import com.todayhouse.domain.review.exception.ReviewNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
@@ -89,12 +90,6 @@ public class ReviewServiceImpl implements ReviewService {
                 });
     }
 
-//    public void deleteReviewById(Long id) {
-//        User user = getValidUser();
-//        reviewRepository.find
-//        reviewRepository.deleteById(id);
-//    }
-
     @Override
     @Transactional(readOnly = true)
     public ReviewRatingResponse findReviewRatingByProductId(Long productId) {
@@ -126,5 +121,12 @@ public class ReviewServiceImpl implements ReviewService {
         if (orders.size() == 0)
             return false;
         return true;
+    }
+
+    @Override
+    public void deleteReview(Long productId) {
+        User user = getValidUser();
+        Review review = reviewRepository.findByUserIdAndProductId(user.getId(), productId).orElseThrow(ReviewNotFoundException::new);
+        reviewRepository.deleteById(review.getId());
     }
 }

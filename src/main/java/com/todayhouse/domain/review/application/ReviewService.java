@@ -16,4 +16,6 @@ public interface ReviewService {
     ReviewRatingResponse findReviewRatingByProductId(Long productId);
 
     boolean canWriteReview(Long productId);
+
+    void deleteReview(Long productId);
 }

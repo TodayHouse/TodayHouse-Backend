@@ -40,8 +40,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewServiceImplTest {
@@ -141,15 +140,6 @@ class ReviewServiceImplTest {
         assertThrows(ProductNotFoundException.class, () -> reviewService.saveReview(file, request));
     }
 
-    private void setSecurityName(String email) {
-        Authentication authentication = mock(Authentication.class);
-        // Mockito.whens() for your authorization object
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(securityContext.getAuthentication().getName()).thenReturn(email);
-        SecurityContextHolder.setContext(securityContext);
-    }
-
     @Test
     @DisplayName("review 평점 별 개수 조회")
     void ReviewRatingResponse() {
@@ -208,6 +198,31 @@ class ReviewServiceImplTest {
         getUserIdAndProductId();
         when(orderRepository.findByUserIdAndProductIdAndStatus(userId, productId, Status.COMPLETED))
                 .thenReturn(List.of());
+    }
+
+
+    @Test
+    @DisplayName("리뷰 삭제")
+    void deleteReview(){
+        setSecurityName(email);
+        Review review = Review.builder().build();
+        ReflectionTestUtils.setField(review,"id",reviewId);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(user.getId()).thenReturn(userId);
+        when(reviewRepository.findByUserIdAndProductId(userId, productId)).thenReturn(Optional.of(review));
+
+        reviewService.deleteReview(productId);
+
+        verify(reviewRepository).deleteById(reviewId);
+    }
+
+    private void setSecurityName(String email) {
+        Authentication authentication = mock(Authentication.class);
+        // Mockito.whens() for your authorization object
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(securityContext.getAuthentication().getName()).thenReturn(email);
+        SecurityContextHolder.setContext(securityContext);
     }
 
     private void getUserIdAndProductId() {
