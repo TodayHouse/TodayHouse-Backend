@@ -1,5 +1,6 @@
 package com.todayhouse.domain.review.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.order.dao.OrderRepository;
@@ -12,10 +13,12 @@ import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
+import com.todayhouse.domain.review.dto.response.ReviewResponse;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseResponse;
+import com.todayhouse.global.common.PageDto;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import com.todayhouse.infra.S3Storage.service.FileService;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -85,7 +89,6 @@ class ReviewControllerTest extends IntegrationBase {
         order1 = Orders.builder().product(product1).user(user1).parentOption(option1).productQuantity(1).build();
         order1.updateStatus(Status.COMPLETED);
         order1 = orderRepository.save(order1);
-
     }
 
     @Test
@@ -111,8 +114,8 @@ class ReviewControllerTest extends IntegrationBase {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
-        BaseResponse response = getResponseFromMvcResult(mvcResult);
 
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
         Review review = reviewRepository.findByUserIdAndProductId(user1.getId(), product1.getId()).orElse(null);
         assertThat((Integer) response.getResult()).isEqualTo(review.getId().intValue());
         assertThat(review.getReviewImage()).isEqualTo("img.com");
@@ -157,5 +160,36 @@ class ReviewControllerTest extends IntegrationBase {
     void saveMultipartFile() {
         when(fileService.uploadImage(any(MultipartFile.class))).thenReturn("byteImage");
         when(fileService.changeFileNameToUrl(anyString())).thenReturn("img.com");
+    }
+
+    @Test
+    @DisplayName("image있는 Review 페이징하여 최신순으로 조회")
+    void findReviews() throws Exception {
+        User user2 = userRepository.save(User.builder().email("user2@test").build());
+        User user3 = userRepository.save(User.builder().email("user3@test").build());
+        User user4 = userRepository.save(User.builder().email("user4@test").build());
+        User user5 = userRepository.save(User.builder().email("user5@test").build());
+        Review review2 = reviewRepository.save(Review.builder().user(user2).product(product1).reviewImage("img").build());
+        Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).reviewImage("img").build());
+        Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).build());
+        Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").build());
+        List<Long> ids = List.of(review5.getId(), review3.getId(), review2.getId());
+        String url = "http://localhost:8080/reviews";
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        PageDto<ReviewResponse> pageDto = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        });
+        List<ReviewResponse> reviews = objectMapper.readValue(objectMapper.writeValueAsString(pageDto.getContent()), new TypeReference<>() {
+        });
+
+        assertThat(pageDto.getTotalPages()).isEqualTo(2);
+        assertThat(pageDto.getTotalElements()).isEqualTo(3);
+        for (int i = 0; i < reviews.size(); i++) {
+            assertThat(reviews.get(i)).isEqualTo(ids.get(i));
+        }
     }
 }
