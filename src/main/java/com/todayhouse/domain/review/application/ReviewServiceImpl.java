@@ -42,6 +42,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
 
+    @Override
     public Page<Review> findReviews(ReviewSearchRequest request, Pageable pageable) {
         return reviewRepository.findAllReviews(request, pageable);
     }
