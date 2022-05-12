@@ -66,6 +66,9 @@ public class Story extends BaseTimeEntity {
     @Column(name = "family_type", nullable = false)
     private FamilyType familyType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "styleType")
+    private StyleType styleType;
 
     @Builder
     public Story(String title, String content, Integer liked, Category category, User user) {
