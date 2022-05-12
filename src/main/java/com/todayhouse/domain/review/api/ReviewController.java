@@ -4,6 +4,7 @@ import com.todayhouse.domain.review.application.ReviewService;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
+import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.review.dto.response.ReviewResponse;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.common.PageDto;
@@ -29,13 +30,19 @@ public class ReviewController {
         return new BaseResponse(saveId);
     }
 
-    //    /size=2&page=0&sort=createdAt,DESC
+    //?size=2&page=0&sort=createdAt,DESC&isImage=true
     @GetMapping
     public BaseResponse<PageDto<ReviewResponse>> findReviews(@ModelAttribute ReviewSearchRequest reviewSearchRequest,
                                                              @PageableDefault Pageable pageable) {
         Page<Review> reviews = reviewService.findReviews(reviewSearchRequest, pageable);
         PageDto<ReviewResponse> reviewResponses = new PageDto<>(reviews.map(review -> new ReviewResponse(review)));
         return new BaseResponse<>(reviewResponses);
+    }
+
+    @GetMapping("/ratings/{productId}")
+    public BaseResponse<ReviewRatingResponse> findReviewRatings(@PathVariable("productId") Long productId) {
+        ReviewRatingResponse reviewRatingResponse = reviewService.findReviewRatingByProductId(productId);
+        return new BaseResponse<>(reviewRatingResponse);
     }
 }
 

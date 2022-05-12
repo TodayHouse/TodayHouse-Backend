@@ -12,10 +12,14 @@ import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Review;
+import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
+import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.review.dto.response.ReviewResponse;
+import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
+import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.common.PageDto;
@@ -65,6 +69,9 @@ class ReviewControllerTest extends IntegrationBase {
     OrderRepository orderRepository;
 
     @Autowired
+    SellerRepository sellerRepository;
+
+    @Autowired
     ReviewRepository reviewRepository;
 
     @Autowired
@@ -77,14 +84,16 @@ class ReviewControllerTest extends IntegrationBase {
     FileService fileService;
 
     User user1;
+    Seller seller1;
     Orders order1;
     Product product1;
     ParentOption option1;
 
     @BeforeEach
     void setUp() {
-        user1 = userRepository.save(User.builder().email("test@test").build());
-        product1 = productRepository.save(Product.builder().build());
+        seller1 = sellerRepository.save(Seller.builder().brand("sell1").build());
+        user1 = userRepository.save(User.builder().seller(seller1).email("test@test").build());
+        product1 = productRepository.save(Product.builder().seller(seller1).build());
         option1 = parentOptionRepository.save(ParentOption.builder().product(product1).price(9900).stock(10).build());
         order1 = Orders.builder().product(product1).user(user1).parentOption(option1).productQuantity(1).build();
         order1.updateStatus(Status.COMPLETED);
@@ -174,7 +183,7 @@ class ReviewControllerTest extends IntegrationBase {
         Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).build());
         Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").build());
         List<Long> ids = List.of(review5.getId(), review3.getId(), review2.getId());
-        String url = "http://localhost:8080/reviews";
+        String url = "http://localhost:8080/reviews?size=2&page=0&sort=createdAt,DESC&isImage=true";
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -189,7 +198,36 @@ class ReviewControllerTest extends IntegrationBase {
         assertThat(pageDto.getTotalPages()).isEqualTo(2);
         assertThat(pageDto.getTotalElements()).isEqualTo(3);
         for (int i = 0; i < reviews.size(); i++) {
-            assertThat(reviews.get(i)).isEqualTo(ids.get(i));
+            assertThat(reviews.get(i).getId()).isEqualTo(ids.get(i));
         }
+    }
+
+    @Test
+    @DisplayName("product1 리뷰의 평점 별 개수 및 평균 조회")
+    void findReviewRating() throws Exception {
+        User user2 = userRepository.save(User.builder().email("user2@test").build());
+        User user3 = userRepository.save(User.builder().email("user3@test").build());
+        User user4 = userRepository.save(User.builder().email("user4@test").build());
+        User user5 = userRepository.save(User.builder().email("user5@test").build());
+        Review review1 = reviewRepository.save(Review.builder().user(user2).product(product1).rating(5).build());
+        Review review2 = reviewRepository.save(Review.builder().user(user2).product(product1).rating(5).build());
+        Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).rating(4).build());
+        Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(3).build());
+        Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).rating(3).build());
+        String url = "http://localhost:8080/reviews/ratings/"+product1.getId().intValue();
+
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        ReviewRatingResponse reviewRating = objectMapper.convertValue(response.getResult(), ReviewRatingResponse.class);
+        assertThat(reviewRating.getOne()).isEqualTo(0);
+        assertThat(reviewRating.getTwo()).isEqualTo(0);
+        assertThat(reviewRating.getThree()).isEqualTo(2);
+        assertThat(reviewRating.getFour()).isEqualTo(1);
+        assertThat(reviewRating.getFive()).isEqualTo(2);
+        assertThat(reviewRating.getAverage()).isEqualTo(4.0);
     }
 }
