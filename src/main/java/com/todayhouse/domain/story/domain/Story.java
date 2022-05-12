@@ -56,9 +56,12 @@ public class Story extends BaseTimeEntity {
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<StoryImage> images = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    private ResiType resiType;
 
     @Builder
     public Story(String title, String content, Integer liked, Category category, User user) {
+
         this.title = title;
         this.content = content;
         this.liked = liked;
