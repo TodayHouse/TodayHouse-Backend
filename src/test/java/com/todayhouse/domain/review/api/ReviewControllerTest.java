@@ -12,7 +12,6 @@ import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Review;
-import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.review.dto.response.ReviewResponse;
@@ -38,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -45,8 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -216,7 +215,7 @@ class ReviewControllerTest extends IntegrationBase {
         Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).rating(4).build());
         Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(3).build());
         Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).rating(3).build());
-        String url = "http://localhost:8080/reviews/ratings/"+product1.getId().intValue();
+        String url = "http://localhost:8080/reviews/ratings/" + product1.getId().intValue();
 
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
@@ -237,7 +236,7 @@ class ReviewControllerTest extends IntegrationBase {
     @DisplayName("리뷰 작성 가능한지 확인")
     void canReviewWrite() throws Exception {
         String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
-        String url = "http://localhost:8080/reviews/writing-validity/"+product1.getId().intValue();
+        String url = "http://localhost:8080/reviews/writing-validity/" + product1.getId().intValue();
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk())
@@ -254,7 +253,7 @@ class ReviewControllerTest extends IntegrationBase {
     void canReviewWriteNotOrder() throws Exception {
         User user2 = userRepository.save(User.builder().email("test").build());
         String jwt = tokenProvider.createToken(user2.getEmail(), List.of(Role.USER));
-        String url = "http://localhost:8080/reviews/writing-validity/"+product1.getId().intValue();
+        String url = "http://localhost:8080/reviews/writing-validity/" + product1.getId().intValue();
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk())
@@ -263,5 +262,32 @@ class ReviewControllerTest extends IntegrationBase {
         BaseResponse response = getResponseFromMvcResult(mvcResult);
         Boolean fail = objectMapper.convertValue(response.getResult(), Boolean.class);
         assertFalse(fail);
+    }
+
+    @Test
+    @DisplayName("리뷰 삭제하기")
+    void deleteReview() throws Exception {
+        reviewRepository.save(Review.builder().user(user1).product(product1).build());
+        String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
+        String url = "http://localhost:8080/reviews/" + product1.getId().intValue();
+
+        mockMvc.perform(delete(url)
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk());
+
+        Optional<Review> review = reviewRepository.findByUserIdAndProductId(user1.getId(), product1.getId());
+        assertTrue(review.isEmpty());
+    }
+
+    @Test
+    @DisplayName("권한 없는 유저는 리뷰 삭제 불가")
+    void deleteReviewNotAuthException() throws Exception {
+        String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.GUEST));
+        String url = "http://localhost:8080/reviews/" + product1.getId().intValue();
+
+        mockMvc.perform(delete(url)
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
     }
 }
