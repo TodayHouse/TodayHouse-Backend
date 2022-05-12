@@ -44,5 +44,11 @@ public class ReviewController {
         ReviewRatingResponse reviewRatingResponse = reviewService.findReviewRatingByProductId(productId);
         return new BaseResponse<>(reviewRatingResponse);
     }
+
+    @GetMapping("/writing-validity/{productId}")
+    public BaseResponse<Boolean> canReviewWrite(@PathVariable("productId") Long productId){
+        boolean canWrite = reviewService.canWriteReview(productId);
+        return new BaseResponse<>(canWrite);
+    }
 }
 

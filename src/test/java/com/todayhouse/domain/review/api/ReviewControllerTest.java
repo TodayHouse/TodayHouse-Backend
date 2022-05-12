@@ -40,6 +40,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -229,5 +231,37 @@ class ReviewControllerTest extends IntegrationBase {
         assertThat(reviewRating.getFour()).isEqualTo(1);
         assertThat(reviewRating.getFive()).isEqualTo(2);
         assertThat(reviewRating.getAverage()).isEqualTo(4.0);
+    }
+
+    @Test
+    @DisplayName("리뷰 작성 가능한지 확인")
+    void canReviewWrite() throws Exception {
+        String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
+        String url = "http://localhost:8080/reviews/writing-validity/"+product1.getId().intValue();
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        Boolean canWrite = objectMapper.convertValue(response.getResult(), Boolean.class);
+        assertTrue(canWrite);
+    }
+
+    @Test
+    @DisplayName("주문 하지 않은 유저로 리뷰 작성 확인")
+    void canReviewWriteNotOrder() throws Exception {
+        User user2 = userRepository.save(User.builder().email("test").build());
+        String jwt = tokenProvider.createToken(user2.getEmail(), List.of(Role.USER));
+        String url = "http://localhost:8080/reviews/writing-validity/"+product1.getId().intValue();
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        Boolean fail = objectMapper.convertValue(response.getResult(), Boolean.class);
+        assertFalse(fail);
     }
 }
