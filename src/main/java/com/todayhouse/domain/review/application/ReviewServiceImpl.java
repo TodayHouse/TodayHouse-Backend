@@ -54,9 +54,6 @@ public class ReviewServiceImpl implements ReviewService {
 
         if (!isOrderCompleteUser(user.getId(), product.getId()))
             throw new OrderNotCompletedException();
-        reviewRepository.findByUserIdAndProductId(user.getId(), product.getId()).ifPresent(r -> {
-            throw new ReviewDuplicateException();
-        });
 
         String imageUrl = saveFileAndGetUrl(multipartFile);
 

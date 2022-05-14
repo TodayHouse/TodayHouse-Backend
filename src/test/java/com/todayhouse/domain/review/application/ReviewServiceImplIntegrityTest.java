@@ -12,10 +12,7 @@ import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +69,12 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
         ids.add(productRepository.save(p4).getId());
         ids.add(productRepository.save(p5).getId());
         userRepository.save(u1);
+    }
+
+    @AfterAll
+    void cleanUp() {
+        reviewRepository.deleteAllInBatch();
+        productRepository.deleteAllInBatch();
     }
 
     @Test
