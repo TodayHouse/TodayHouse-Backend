@@ -59,16 +59,18 @@ public class Story extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ResiType resiType;
 
-    @Column(nullable = false)
     private Integer floorSpace;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "family_type", nullable = false)
+    @Column(name = "family_type")
     private FamilyType familyType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "styleType")
     private StyleType styleType;
+
+    @OneToMany(mappedBy = "story", orphanRemoval = true)
+    private List<StoryReply> storyReplies = new ArrayList<>();
 
     @Builder
     public Story(String title, String content, Integer liked, Category category, User user) {
