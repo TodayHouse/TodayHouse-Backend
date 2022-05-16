@@ -10,7 +10,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class CreateReplyResponse implements Serializable {
-    private final UUID id;
+    private final Long id;
     private final String content;
     private final LocalDateTime createdDate;
     private final Boolean isMine;

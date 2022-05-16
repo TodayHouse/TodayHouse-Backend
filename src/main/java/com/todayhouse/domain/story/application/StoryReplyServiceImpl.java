@@ -5,12 +5,16 @@ import com.todayhouse.domain.story.dao.StoryRepository;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.story.domain.StoryReply;
 import com.todayhouse.domain.story.dto.reqeust.DeleteReplyRequest;
-import com.todayhouse.domain.story.dto.reqeust.StoryReplyRequest;
+import com.todayhouse.domain.story.dto.reqeust.CreateReplyRequest;
 import com.todayhouse.domain.story.dto.response.CreateReplyResponse;
 import com.todayhouse.domain.story.exception.ReplyNotFoundException;
+import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -18,15 +22,18 @@ import static com.todayhouse.global.error.BaseResponseStatus.REPLY_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class StoryReplyServiceImpl implements StoryReplyService {
     private final StoryRepository storyRepository;
+    private final UserRepository userRepository;
     private final StoryReplyRepository replyRepository;
+
 
     @Override
     public void deleteReply(User user, DeleteReplyRequest request) {
-        Optional<StoryReply> byId = replyRepository.findById(request.getId());
+        Optional<StoryReply> byId = replyRepository.findById(request.getStoryId());
         StoryReply storyReply = byId.orElseThrow(() -> new ReplyNotFoundException(REPLY_NOT_FOUND));
-
+        user = userRepository.findByEmail(user.getEmail()).orElseThrow(UserNotFoundException::new);
         if (!user.getId().equals(storyReply.getUser().getId())) {
             throw new RuntimeException();
         }
@@ -35,8 +42,10 @@ public class StoryReplyServiceImpl implements StoryReplyService {
 
 
     @Override
-    public CreateReplyResponse replyStory(User user, StoryReplyRequest request) {
+    public CreateReplyResponse replyStory(User user, CreateReplyRequest request) {
         Story byId = storyRepository.getById(request.getStoryId());
+        user = userRepository.findByEmail(user.getEmail()).orElseThrow(UserNotFoundException::new);
+
         StoryReply storyReply = StoryReply.builder()
                 .content(request.getContent())
                 .story(byId)

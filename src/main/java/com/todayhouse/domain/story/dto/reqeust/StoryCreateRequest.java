@@ -17,6 +17,12 @@ public class StoryCreateRequest {
     @NotNull(message = "카테고리를 선택해주세요.")
     private Story.Category category;
 
+    public StoryCreateRequest(String title, String content, Story.Category category) {
+        this.title = title;
+        this.content = content;
+        this.category = category;
+    }
+
     public Story toEntity(User user) {
         return Story.builder()
                 .title(title)

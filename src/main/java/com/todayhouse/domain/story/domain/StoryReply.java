@@ -1,10 +1,7 @@
 package com.todayhouse.domain.story.domain;
 
 import com.todayhouse.domain.user.domain.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
@@ -14,12 +11,14 @@ import java.util.UUID;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class StoryReply {
     @Id
     @Column(name = "story_reply_id")
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
 
     private String content;
 
@@ -27,11 +26,11 @@ public class StoryReply {
     @CreatedDate
     private LocalDateTime createdDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "story_id")
     private Story story;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
