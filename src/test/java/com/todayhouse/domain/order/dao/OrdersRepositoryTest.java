@@ -4,6 +4,7 @@ import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.order.domain.Orders;
+import com.todayhouse.domain.order.domain.Status;
 import com.todayhouse.domain.product.dao.ParentOptionRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.ChildOption;
@@ -21,6 +22,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -114,5 +118,25 @@ class OrdersRepositoryTest extends DataJpaBase {
         assertThat(find.getProduct().getId()).isEqualTo(product1.getId());
         assertThat(find.getParentOption().getId()).isEqualTo(op1.getId());
         assertThat(find.getSelectionOption().getId()).isEqualTo(s1.getId());
+    }
+
+    @Test
+    @DisplayName("order를 userId, productId, status로 찾기")
+    void findByUserIdAndProductIdAndStatus(){
+        User user = User.builder().email("test").build();
+        em.persist(user);
+        Orders order1 = Orders.builder().product(product1).parentOption(op1).user(user).build();
+        Orders order2 = Orders.builder().product(product1).parentOption(op1).user(user).build();
+        order1.updateStatus(Status.COMPLETED);
+        order2.updateStatus(Status.COMPLETED);
+        em.persist(order1);
+        em.persist(order2);
+        em.flush();
+        em.clear();
+
+        List<Orders> orders = orderRepository.findByUserIdAndProductIdAndStatus(user.getId(), product1.getId(), Status.COMPLETED);
+
+        assertThat(orders.get(0).getId()).isEqualTo(order1.getId());
+        assertThat(orders.get(1).getId()).isEqualTo(order2.getId());
     }
 }

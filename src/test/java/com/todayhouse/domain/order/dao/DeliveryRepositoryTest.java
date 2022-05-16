@@ -30,6 +30,7 @@ class DeliveryRepositoryTest extends DataJpaBase {
         Orders orders = Orders.builder().parentOption(op).productQuantity(1).build();
         Delivery delivery = Delivery.builder().order(orders).build();
         em.persist(seller);
+        em.persist(product);
         em.persist(op);
         em.persist(delivery);
         em.flush();
