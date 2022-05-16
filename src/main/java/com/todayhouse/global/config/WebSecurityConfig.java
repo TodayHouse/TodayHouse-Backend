@@ -68,7 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyRole("USER", "ADMIN") // user, admin post 요청만 허용
                 .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**", "/options/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin delete 요청만 허용
-                .antMatchers(HttpMethod.PUT, "/products", "/options/**", "/orders/**")
+                .antMatchers(HttpMethod.PUT, "/products/**", "/options/**", "/orders/**")
                 .hasAnyRole("USER", "ADMIN")
                 .antMatchers(HttpMethod.PATCH, "/stories/**")
                 .hasAnyRole("USER", "ADMIN")
@@ -76,7 +76,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyRole("GUEST") // guest 요청만 허용
                 .antMatchers()
                 .authenticated()// 인증된 요청만 허용
-                .anyRequest().permitAll() // 그 외 모든 요청 허용
+
+                .antMatchers(HttpMethod.GET, "/categories/**", "/options/**", "/products/**", "/stories/**",
+                        "/follows/**", "/sellers/**", "/users/**", "/orders/**")
+                .permitAll()
+                .antMatchers(HttpMethod.POST, "/users/login")
+                .anonymous()
+                .antMatchers("/emails/**")
+                .permitAll()// 모든 요청 허용
+
+                .anyRequest().denyAll()//그외 모든 요청 거부
+
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class)

@@ -11,15 +11,19 @@ import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
+import com.todayhouse.domain.user.dto.response.UserFindResponse;
+import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.cookie.CookieUtils;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.Cookie;
@@ -36,6 +40,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest extends IntegrationBase {
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Autowired
     UserRepository userRepository;
@@ -106,6 +113,22 @@ class UserControllerTest extends IntegrationBase {
     }
 
     @Test
+    @DisplayName("jwt 가진 유저는 로그인 불가")
+    void loginWithJwtException() throws Exception {
+        Map<String, String> user = new HashMap<>();
+        user.put("email", "test@test.com");
+        user.put("password", "abc12345");
+        String url = "http://localhost:8080/users/login";
+        String jwt = jwtTokenProvider.createToken("test@test.com", Collections.singletonList(Role.USER));
+
+        mockMvc.perform(get(url)
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(user)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     void jwtTest() throws Exception {
         String url = "http://localhost:8080/users/test";
         String jwt = jwtTokenProvider.createToken("test", Collections.singletonList(Role.USER));
@@ -115,6 +138,21 @@ class UserControllerTest extends IntegrationBase {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("유저 찾기")
+    void findUser() throws Exception {
+        String url = "http://localhost:8080/users/emails/test@test.com";
+        User user = userRepository.findByEmail("test@test.com").orElse(null);
+        UserFindResponse userFindResponse = new UserFindResponse(user);
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        UserFindResponse result = objectMapper.convertValue(response.getResult(), UserFindResponse.class);
+        assertThat(result).usingRecursiveComparison().isEqualTo(userFindResponse);
     }
 
     @Test
