@@ -78,7 +78,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated()// 인증된 요청만 허용
 
                 .antMatchers(HttpMethod.GET, "/categories/**", "/options/**", "/products/**", "/stories/**",
-                        "/follows/**", "/sellers/**", "/users/**", "/orders/**")
+                        "/follows/**", "/sellers/**", "/users/**", "/orders/**", "/reviews/**")
                 .permitAll()
                 .antMatchers(HttpMethod.POST, "/users/login")
                 .anonymous()
