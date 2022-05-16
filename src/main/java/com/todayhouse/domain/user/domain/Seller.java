@@ -37,10 +37,6 @@ public class Seller {
     @Column(name = "business_address")
     private String businessAddress;
 
-    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<Product> products = new ArrayList<>();
-
     @Override
     public String toString() {
         return "Seller{" +

@@ -51,7 +51,6 @@ public class Product extends BaseTimeEntity {
 
     private String selectionOption;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
@@ -85,12 +84,9 @@ public class Product extends BaseTimeEntity {
     }
 
     public void setSeller(Seller seller) {
-        if (seller == null)
-            throw new SellerNotSettingException();
-        if (this.seller != null) return;
+        if (seller == null) return;
         this.seller = seller;
         this.brand = seller.getBrand();
-        seller.getProducts().add(this);
     }
 
     public void update(ProductUpdateRequest request, Category category) {

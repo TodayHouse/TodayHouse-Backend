@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SellerServiceImpl implements SellerService {
     private final UserRepository userRepository;
-    private final SellerRepository sellerRepository;
 
     @Override
     public Seller saveSellerRequest(SellerRequest request) {
