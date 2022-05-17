@@ -22,10 +22,4 @@ public class StoryImage extends Image {
         super(fileName);
         this.story = story;
     }
-
-    public static class StoryImageBuilder extends ImageBuilder {
-        StoryImageBuilder() {
-            super();
-        }
-    }
 }
