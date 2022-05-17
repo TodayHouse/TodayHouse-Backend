@@ -22,10 +22,4 @@ public class ProductImage extends Image {
         super(fileName);
         this.product = product;
     }
-
-    public static class ProductImageBuilder extends ImageBuilder {
-        ProductImageBuilder() {
-            super();
-        }
-    }
 }

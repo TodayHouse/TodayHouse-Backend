@@ -57,8 +57,7 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void deleteStoryImages(List<String> fileNames) {
-        for (String fileName : fileNames)
-            storyImageRepository.deleteByFileName(fileName);
+        fileNames.forEach(fileName -> storyImageRepository.deleteByFileName(fileName));
     }
 
     @Override
