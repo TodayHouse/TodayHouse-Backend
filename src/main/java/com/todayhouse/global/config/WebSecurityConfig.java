@@ -40,7 +40,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     // 정적 자원에 대해서는 Security 설정을 적용하지 않음.
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .and()
+                .ignoring().antMatchers("/swagger-ui/**",
+                        "/v2/api-docs", "/v3/api-docs",
+                        "/swagger-resources",
+                        "/swagger-resources/configuration/ui",
+                        "/swagger-resources/configuration/security");
     }
 
     @Override
