@@ -7,12 +7,15 @@ import com.todayhouse.domain.story.domain.StoryReply;
 import com.todayhouse.domain.story.dto.reqeust.DeleteReplyRequest;
 import com.todayhouse.domain.story.dto.reqeust.CreateReplyRequest;
 import com.todayhouse.domain.story.dto.response.CreateReplyResponse;
+import com.todayhouse.domain.story.dto.response.ReplyGetResponse;
 import com.todayhouse.domain.story.exception.ReplyNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,14 @@ public class StoryReplyServiceImpl implements StoryReplyService {
         replyRepository.delete(storyReply);
     }
 
+
+    @Override
+    public Page<ReplyGetResponse> findReplies(Long storyId, Pageable pageable) {
+        PageRequest of = PageRequest.of(0, 10);
+        Page<StoryReply> storyReplies = replyRepository.findByStoryId(storyId, of);
+        Page<ReplyGetResponse> map = storyReplies.map(r -> new ReplyGetResponse(r.getId(), r.getContent(), r.getCreatedDate(), r.getUser()));
+        return map;
+    }
 
     @Override
     public CreateReplyResponse replyStory(User user, CreateReplyRequest request) {

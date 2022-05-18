@@ -15,9 +15,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.Cookie;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -113,5 +115,17 @@ class StoryControllerTest {
         ).andExpect(status().isOk());
     }
 
-
+    @Test
+    @DisplayName("댓글 페이지 조회")
+    @Order(4)
+    void findReplies() throws Exception {
+        String url = storyUrl + "reply";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                .param("storyId", "1")
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + jwt)).andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        String contentAsString = response.getContentAsString();
+        System.out.println("contentAsString = " + contentAsString);
+    }
 }
