@@ -126,6 +126,9 @@ public class ReviewServiceImpl implements ReviewService {
     public void deleteReview(Long productId) {
         User user = getValidUser();
         Review review = reviewRepository.findByUserIdAndProductId(user.getId(), productId).orElseThrow(ReviewNotFoundException::new);
+        String reviewUrl = review.getReviewImage();
+        String fileName = reviewUrl.substring(reviewUrl.lastIndexOf('/')+1);
+        fileService.deleteOne(fileName);
         reviewRepository.deleteById(review.getId());
     }
 }

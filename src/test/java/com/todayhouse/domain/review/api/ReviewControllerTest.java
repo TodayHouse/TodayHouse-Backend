@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -113,8 +113,8 @@ class ReviewControllerTest extends IntegrationBase {
                 new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(reviewSaveRequest).getBytes(StandardCharsets.UTF_8));
         MockMultipartFile image =
                 new MockMultipartFile("file", "image.jpa", "image/jpeg", "<<jpeg data>>".getBytes(StandardCharsets.UTF_8));
-
-        saveMultipartFile();
+        when(fileService.uploadImage(any(MultipartFile.class))).thenReturn("byteImage");
+        when(fileService.changeFileNameToUrl(anyString())).thenReturn("img.com");
 
         MvcResult mvcResult = mockMvc.perform(multipart(url)
                         .file(image)
@@ -171,11 +171,6 @@ class ReviewControllerTest extends IntegrationBase {
                 .andExpect(status().is4xxClientError());
     }
 
-    void saveMultipartFile() {
-        when(fileService.uploadImage(any(MultipartFile.class))).thenReturn("byteImage");
-        when(fileService.changeFileNameToUrl(anyString())).thenReturn("img.com");
-    }
-
     @Test
     @DisplayName("image있는 Review 페이징하여 최신순으로 조회")
     void findReviews() throws Exception {
@@ -190,6 +185,7 @@ class ReviewControllerTest extends IntegrationBase {
         Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").rating(rating).build());
         List<Long> ids = List.of(review5.getId(), review3.getId(), review2.getId());
         String url = "http://localhost:8080/reviews?size=2&page=0&sort=createdAt,DESC&onlyImage=true";
+
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -272,14 +268,19 @@ class ReviewControllerTest extends IntegrationBase {
     @Test
     @DisplayName("리뷰 삭제하기")
     void deleteReview() throws Exception {
-        reviewRepository.save(Review.builder().user(user1).rating(new Rating(5, 5, 5, 5, 5)).product(product1).build());
+        String imgUrl = "s3.img.com";
+        reviewRepository.save(Review.builder()
+                .user(user1).rating(new Rating(5, 5, 5, 5, 5)).product(product1).reviewImage(imgUrl)
+                .build());
         String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
         String url = "http://localhost:8080/reviews/" + product1.getId().intValue();
+        doNothing().when(fileService).deleteOne(anyString());
 
         mockMvc.perform(delete(url)
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk());
 
+        verify(fileService).deleteOne(imgUrl);
         Optional<Review> review = reviewRepository.findByUserIdAndProductId(user1.getId(), product1.getId());
         assertTrue(review.isEmpty());
     }
