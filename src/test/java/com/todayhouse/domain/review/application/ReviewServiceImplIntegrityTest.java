@@ -7,6 +7,7 @@ import com.todayhouse.domain.order.domain.Status;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.review.dao.ReviewRepository;
+import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
@@ -55,6 +56,8 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
     @Autowired
     ReviewRepository reviewRepository;
 
+    Rating rating = new Rating(5, 5, 5, 5, 5);
+
     @BeforeAll
     void setUp() {
         Product p1 = Product.builder().title("p1").build();
@@ -90,7 +93,7 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
                 service.execute(() -> {
                     try {
                         setSecurityName("test");
-                        ReviewSaveRequest review = new ReviewSaveRequest(5, ids.get(finalJ), "good");
+                        ReviewSaveRequest review = new ReviewSaveRequest(rating, ids.get(finalJ), "good");
                         when(orderRepository.findByUserIdAndProductIdAndStatus(anyLong(), anyLong(), eq(Status.COMPLETED))).thenReturn(List.of(mock(Orders.class)));
                         //테스트 메소드
                         reviewService.saveReview(null, review);
@@ -104,7 +107,7 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
             }
             latch.await();
 
-            ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, null, ids.get(finalJ), null);
+            ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, ids.get(finalJ), null, null);
             Page<Review> reviews = reviewService.findReviews(reviewSearchRequest, PageRequest.of(1, 100));
             long count = reviews.getTotalElements();
 

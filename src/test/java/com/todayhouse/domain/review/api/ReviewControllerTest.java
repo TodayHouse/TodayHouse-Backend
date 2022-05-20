@@ -11,6 +11,7 @@ import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.review.dao.ReviewRepository;
+import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
@@ -106,7 +107,8 @@ class ReviewControllerTest extends IntegrationBase {
     void saveReviewWithImage() throws Exception {
         String url = "http://localhost:8080/reviews";
         String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
-        ReviewSaveRequest reviewSaveRequest = new ReviewSaveRequest(5, product1.getId(), "Good!");
+        Rating rating = new Rating(5, 5, 5, 5, 5);
+        ReviewSaveRequest reviewSaveRequest = new ReviewSaveRequest(rating, product1.getId(), "Good!");
         MockMultipartFile json =
                 new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(reviewSaveRequest).getBytes(StandardCharsets.UTF_8));
         MockMultipartFile image =
@@ -136,7 +138,8 @@ class ReviewControllerTest extends IntegrationBase {
     void saveReviewRatingException() throws Exception {
         String url = "http://localhost:8080/reviews";
         String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
-        ReviewSaveRequest reviewSaveRequest = new ReviewSaveRequest(6, product1.getId(), "Good!");
+        Rating rating = new Rating(5, 5, 5, 5, 6);
+        ReviewSaveRequest reviewSaveRequest = new ReviewSaveRequest(rating, product1.getId(), "Good!");
         MockMultipartFile json =
                 new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(reviewSaveRequest).getBytes(StandardCharsets.UTF_8));
 
@@ -154,7 +157,8 @@ class ReviewControllerTest extends IntegrationBase {
     void saveReviewNoAuthException() throws Exception {
         String url = "http://localhost:8080/reviews";
         String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.GUEST));
-        ReviewSaveRequest reviewSaveRequest = new ReviewSaveRequest(6, product1.getId(), "Good!");
+        Rating rating = new Rating(5, 5, 5, 5, 5);
+        ReviewSaveRequest reviewSaveRequest = new ReviewSaveRequest(rating, product1.getId(), "Good!");
         MockMultipartFile json =
                 new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(reviewSaveRequest).getBytes(StandardCharsets.UTF_8));
 
@@ -175,16 +179,17 @@ class ReviewControllerTest extends IntegrationBase {
     @Test
     @DisplayName("image있는 Review 페이징하여 최신순으로 조회")
     void findReviews() throws Exception {
+        Rating rating = new Rating(5, 5, 5, 5, 5);
         User user2 = userRepository.save(User.builder().email("user2@test").build());
         User user3 = userRepository.save(User.builder().email("user3@test").build());
         User user4 = userRepository.save(User.builder().email("user4@test").build());
         User user5 = userRepository.save(User.builder().email("user5@test").build());
-        Review review2 = reviewRepository.save(Review.builder().user(user2).product(product1).reviewImage("img").build());
-        Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).reviewImage("img").build());
-        Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).build());
-        Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").build());
+        Review review2 = reviewRepository.save(Review.builder().user(user2).product(product1).reviewImage("img").rating(rating).build());
+        Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).reviewImage("img").rating(rating).build());
+        Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(rating).build());
+        Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").rating(rating).build());
         List<Long> ids = List.of(review5.getId(), review3.getId(), review2.getId());
-        String url = "http://localhost:8080/reviews?size=2&page=0&sort=createdAt,DESC&isImage=true";
+        String url = "http://localhost:8080/reviews?size=2&page=0&sort=createdAt,DESC&onlyImage=true";
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -210,11 +215,11 @@ class ReviewControllerTest extends IntegrationBase {
         User user3 = userRepository.save(User.builder().email("user3@test").build());
         User user4 = userRepository.save(User.builder().email("user4@test").build());
         User user5 = userRepository.save(User.builder().email("user5@test").build());
-        Review review1 = reviewRepository.save(Review.builder().user(user2).product(product1).rating(5).build());
-        Review review2 = reviewRepository.save(Review.builder().user(user2).product(product1).rating(5).build());
-        Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).rating(4).build());
-        Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(3).build());
-        Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).rating(3).build());
+        Review review1 = reviewRepository.save(Review.builder().user(user2).product(product1).rating(createRating(5)).build());
+        Review review2 = reviewRepository.save(Review.builder().user(user2).product(product1).rating(createRating(5)).build());
+        Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).rating(createRating(4)).build());
+        Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(createRating(3)).build());
+        Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).rating(createRating(3)).build());
         String url = "http://localhost:8080/reviews/ratings/" + product1.getId().intValue();
 
         MvcResult mvcResult = mockMvc.perform(get(url))
@@ -267,7 +272,7 @@ class ReviewControllerTest extends IntegrationBase {
     @Test
     @DisplayName("리뷰 삭제하기")
     void deleteReview() throws Exception {
-        reviewRepository.save(Review.builder().user(user1).product(product1).build());
+        reviewRepository.save(Review.builder().user(user1).rating(new Rating(5, 5, 5, 5, 5)).product(product1).build());
         String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
         String url = "http://localhost:8080/reviews/" + product1.getId().intValue();
 
@@ -289,5 +294,9 @@ class ReviewControllerTest extends IntegrationBase {
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andDo(print());
+    }
+
+    private Rating createRating(int totalRating) {
+        return new Rating(totalRating, 5, 5, 5, 5);
     }
 }

@@ -20,9 +20,8 @@ public class Review extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int liked = 0;
-
-    private int rating;
+    @Embedded
+    private Rating rating;
 
     private String content;
 
@@ -38,7 +37,7 @@ public class Review extends BaseTimeEntity {
     private Product product;
 
     @Builder
-    public Review(int rating, String content, String reviewImage, User user, Product product){
+    public Review(Rating rating, String content, String reviewImage, User user, Product product) {
         this.rating = rating;
         this.content = content;
         this.reviewImage = reviewImage;

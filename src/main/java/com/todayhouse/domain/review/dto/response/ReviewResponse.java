@@ -1,6 +1,7 @@
 package com.todayhouse.domain.review.dto.response;
 
 import com.todayhouse.domain.product.dto.response.ProductResponse;
+import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,7 +13,7 @@ public class ReviewResponse {
     private Long id;
     private Long userId;
     private int liked;
-    private int rating;
+    private Rating rating;
     private String content;
     private String nickname;
     private String profileImage;
@@ -21,7 +22,6 @@ public class ReviewResponse {
     public ReviewResponse(Review review) {
         this.id = review.getId();
         this.userId = review.getUser().getId();
-        this.liked = review.getLiked();
         this.rating = review.getRating();
         this.content = review.getContent();
         this.nickname = review.getContent();

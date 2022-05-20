@@ -7,6 +7,7 @@ import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.review.dao.ReviewRepository;
+import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
@@ -95,7 +96,8 @@ class ReviewServiceImplTest {
     @Test
     @DisplayName("리뷰 저장")
     void saveReview() {
-        ReviewSaveRequest request = new ReviewSaveRequest(5, productId, "Good");
+        Rating rating = new Rating(5, 5, 5, 5, 5);
+        ReviewSaveRequest request = new ReviewSaveRequest(rating, productId, "Good");
         Review review = Review.builder().reviewImage(url).content("Good").build();
         ReflectionTestUtils.setField(review, "id", reviewId);
 
@@ -117,7 +119,8 @@ class ReviewServiceImplTest {
     @Test
     @DisplayName("리뷰 저장 유효하지 않은 email")
     void reviewSaveEmailException() {
-        ReviewSaveRequest request = new ReviewSaveRequest(5, productId, "Good");
+        Rating rating = new Rating(5, 5, 5, 5, 5);
+        ReviewSaveRequest request = new ReviewSaveRequest(rating, productId, "Good");
         Review review = Review.builder().reviewImage(url).content("Good").build();
         ReflectionTestUtils.setField(review, "id", reviewId);
 
@@ -130,7 +133,8 @@ class ReviewServiceImplTest {
     @Test
     @DisplayName("리뷰 저장 유효하지 않은 productId")
     void reviewSaveProductException() {
-        ReviewSaveRequest request = new ReviewSaveRequest(5, productId, "Good");
+        Rating rating = new Rating(5, 5, 5, 5, 5);
+        ReviewSaveRequest request = new ReviewSaveRequest(rating, productId, "Good");
 
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
@@ -141,8 +145,9 @@ class ReviewServiceImplTest {
 
     @Test
     @DisplayName("주문 완료되지 않은 유저는 리뷰 작성 불가")
-    void reviewSaveNotOrderCompletedException(){
-        ReviewSaveRequest request = new ReviewSaveRequest(5, productId, "Good");
+    void reviewSaveNotOrderCompletedException() {
+        Rating rating = new Rating(5, 5, 5, 5, 5);
+        ReviewSaveRequest request = new ReviewSaveRequest(rating, productId, "Good");
 
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
@@ -215,10 +220,10 @@ class ReviewServiceImplTest {
 
     @Test
     @DisplayName("리뷰 삭제")
-    void deleteReview(){
+    void deleteReview() {
         setSecurityName(email);
         Review review = Review.builder().build();
-        ReflectionTestUtils.setField(review,"id",reviewId);
+        ReflectionTestUtils.setField(review, "id", reviewId);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(user.getId()).thenReturn(userId);
         when(reviewRepository.findByUserIdAndProductId(userId, productId)).thenReturn(Optional.of(review));

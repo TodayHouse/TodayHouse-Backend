@@ -3,6 +3,7 @@ package com.todayhouse.domain.review.dao;
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
@@ -47,11 +48,21 @@ class ReviewRepositoryTest extends DataJpaBase {
         p3 = Product.builder().title("p1").build();
         p4 = Product.builder().title("p1").build();
 
-        r1 = Review.builder().reviewImage("r1Img").rating(1).user(u1).product(p1).build();
-        r2 = Review.builder().reviewImage("r2Img").rating(2).user(u1).product(p2).build();
-        r3 = Review.builder().reviewImage("r3Img").rating(5).user(u2).product(p1).build();
-        r4 = Review.builder().reviewImage("r4Img").rating(4).user(u1).product(p3).build();
-        r5 = Review.builder().user(u1).product(p4).rating(4).build();
+        r1 = Review.builder()
+                .reviewImage("r1Img").rating(new Rating(1, 5, 5, 5, 5))
+                .user(u1).product(p1).build();
+        r2 = Review.builder()
+                .reviewImage("r2Img").rating(new Rating(2, 5, 5, 5, 5))
+                .user(u1).product(p2).build();
+        r3 = Review.builder()
+                .reviewImage("r3Img").rating(new Rating(3, 5, 5, 5, 5))
+                .user(u2).product(p1).build();
+        r4 = Review.builder()
+                .reviewImage("r4Img").rating(new Rating(4, 5, 5, 5, 5))
+                .user(u1).product(p3).build();
+        r5 = Review.builder()
+                .rating(new Rating(4, 5, 5, 5, 5))
+                .user(u1).product(p4).build();
 
         em.persist(u1);
         em.persist(u2);
@@ -70,7 +81,7 @@ class ReviewRepositoryTest extends DataJpaBase {
     @Test
     @DisplayName("Review paging으로 u1의 리뷰 최신순 조회")
     void findAllReviewsLatest() {
-        ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, u1.getId(), null, false);
+        ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(u1.getId(), null, null, false);
         PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
 
         Page<Review> reviews = reviewRepository.findAllReviews(reviewSearchRequest, page);
@@ -82,7 +93,7 @@ class ReviewRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    @DisplayName("Review paging으로 사진 리뷰 추천순 조회")
+    @DisplayName("Review paging으로 사진 리뷰 평점순 조회")
     void findAllReviewsRatingWithImg() {
         ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, null, null, true);
         PageRequest page = PageRequest.of(0, 2, Sort.by("rating").descending());
@@ -91,14 +102,15 @@ class ReviewRepositoryTest extends DataJpaBase {
 
         assertThat(reviews.getTotalPages()).isEqualTo(2);
         assertThat(reviews.getTotalElements()).isEqualTo(4);
-        assertThat(reviews.getContent().get(0).getId()).isEqualTo(r3.getId());
-        assertThat(reviews.getContent().get(1).getId()).isEqualTo(r4.getId());
+        assertThat(reviews.getContent().get(0).getId()).isEqualTo(r4.getId());
+        assertThat(reviews.getContent().get(1).getId()).isEqualTo(r3.getId());
     }
 
     @Test
     @DisplayName("Review paging으로 4점 review 최신순 조회")
     void findAllReviewsRating5() {
-        ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(4, null, null, null);
+        ReviewSearchRequest reviewSearchRequest =
+                new ReviewSearchRequest(null, null, "4", null);
         PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
 
         Page<Review> reviews = reviewRepository.findAllReviews(reviewSearchRequest, page);
@@ -112,7 +124,7 @@ class ReviewRepositoryTest extends DataJpaBase {
     @Test
     @DisplayName("Review paging으로 product p1 최신순 조회")
     void findAllReviewsProductP1() {
-        ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, null, p1.getId(), null);
+        ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, p1.getId(), null, null);
         PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
 
         Page<Review> reviews = reviewRepository.findAllReviews(reviewSearchRequest, page);
@@ -130,9 +142,12 @@ class ReviewRepositoryTest extends DataJpaBase {
         User u4 = User.builder().nickname("u4").build();
         User u5 = User.builder().nickname("u5").build();
 
-        Review r6 = Review.builder().user(u3).product(p1).rating(2).build();
-        Review r7 = Review.builder().user(u4).product(p1).rating(4).build();
-        Review r8 = Review.builder().user(u5).product(p1).rating(4).build();
+        Review r6 = Review.builder()
+                .user(u3).product(p1).rating(new Rating(2, 5, 5, 5, 5)).build();
+        Review r7 = Review.builder()
+                .user(u4).product(p1).rating(new Rating(4, 5, 5, 5, 5)).build();
+        Review r8 = Review.builder()
+                .user(u5).product(p1).rating(new Rating(4, 5, 5, 5, 5)).build();
 
         em.persist(u3);
         em.persist(u4);
@@ -141,8 +156,8 @@ class ReviewRepositoryTest extends DataJpaBase {
         em.persist(r7);
         em.persist(r8);
 
-        List<Integer> rating = List.of(1, 2, 4, 5);
-        List<Long> count = List.of(1L, 1L, 2L, 1L);
+        List<Integer> rating = List.of(1, 2, 3, 4);
+        List<Long> count = List.of(1L, 1L, 1L, 2L);
 
         List<ReviewRating> reviewRatings = reviewRepository.countReviewByProductIdGroupByRating(p1.getId());
 

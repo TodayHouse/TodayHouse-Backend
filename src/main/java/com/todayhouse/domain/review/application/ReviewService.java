@@ -9,9 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ReviewService {
-    Page<Review> findReviews(ReviewSearchRequest request, Pageable pageable);
-
     Long saveReview(MultipartFile multipartFile, ReviewSaveRequest request);
+
+    Page<Review> findReviews(ReviewSearchRequest request, Pageable pageable);
 
     ReviewRatingResponse findReviewRatingByProductId(Long productId);
 
