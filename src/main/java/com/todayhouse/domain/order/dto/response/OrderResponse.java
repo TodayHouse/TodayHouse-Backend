@@ -29,9 +29,9 @@ public class OrderResponse {
         this.id = orders.getId();
         this.memo = orders.getMemo();
         this.status = orders.getStatus();
-        this.deliveryFee = orders.getDeliveryFee();
         this.createdAt = orders.getCreatedAt();
         this.updatedAt = orders.getUpdatedAt();
+        this.deliveryFee = orders.getProduct().getDeliveryFee();
         this.productInfo = createProductInfo(orders, imageUrl);
         if (orders.getSelectionOption() != null)
             this.selectionOptionInfo = createSelectionOptionInfo(orders.getSelectionOption(), orders.getSelectionQuantity());
