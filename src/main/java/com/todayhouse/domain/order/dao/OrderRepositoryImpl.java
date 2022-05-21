@@ -1,5 +1,6 @@
 package com.todayhouse.domain.order.dao;
 
+import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.JPQLQuery;
 import com.todayhouse.domain.order.domain.Orders;
 import org.springframework.data.domain.Page;
@@ -26,8 +27,9 @@ public class OrderRepositoryImpl extends QuerydslRepositorySupport
                 .leftJoin(orders.selectionOption).fetchJoin()
                 .where(orders.user.id.eq(userId));
 
-        List<Orders> ordersList = getQuerydsl().applyPagination(pageable, query).fetch();
-        long total = ordersList.size();
+        QueryResults<Orders> results = getQuerydsl().applyPagination(pageable, query).fetchResults();
+        List<Orders> ordersList = results.getResults();
+        long total = results.getTotal();
         return new PageImpl<>(ordersList, pageable, total);
     }
 }

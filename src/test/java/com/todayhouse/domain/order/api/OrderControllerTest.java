@@ -39,6 +39,7 @@ import javax.persistence.PersistenceContext;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -177,6 +178,8 @@ class OrderControllerTest extends IntegrationBase {
         BaseResponse response = getResponseFromMvcResult(mvcResult);
         PageDto<OrderResponse> page = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
         });
+        assertThat(page.getTotalElements()).isEqualTo(4);
+        assertFalse(page.isLast());
         List<OrderResponse> list = objectMapper.readValue(objectMapper.writeValueAsString(page.getContent()), new TypeReference<>() {
         });
         assertThat(list.size()).isEqualTo(3);
