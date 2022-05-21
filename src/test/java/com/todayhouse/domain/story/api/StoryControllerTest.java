@@ -76,7 +76,7 @@ class StoryControllerTest {
         MockMultipartFile multipartFile = new MockMultipartFile("file", "foo.jpg", "image/jpeg", "테스트".getBytes(StandardCharsets.UTF_8));
 
 
-        StoryCreateRequest storyCreateRequest = new StoryCreateRequest("제목1", "내용", Story.Category.STORY);
+        StoryCreateRequest storyCreateRequest = StoryCreateRequest.builder().build();
         MockMultipartFile request = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsBytes(storyCreateRequest));
         mockMvc.perform(
                 multipart(url)

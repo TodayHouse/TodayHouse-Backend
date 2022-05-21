@@ -73,13 +73,16 @@ public class Story extends BaseTimeEntity {
     private List<StoryReply> storyReplies = new ArrayList<>();
 
     @Builder
-    public Story(String title, String content, Integer liked, Category category, User user) {
-
+    public Story(String title, String content, Integer liked, Category category, User user, ResiType resiType, Integer floorSpace, FamilyType familyType, StyleType styleType) {
         this.title = title;
         this.content = content;
         this.liked = liked;
         this.category = category;
         this.user = user;
+        this.resiType = resiType;
+        this.floorSpace = floorSpace;
+        this.familyType = familyType;
+        this.styleType = styleType;
     }
 
     public void update(String title, String content, Category category) {
