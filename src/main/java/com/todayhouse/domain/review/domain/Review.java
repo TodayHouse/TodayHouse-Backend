@@ -18,7 +18,11 @@ import javax.persistence.*;
 public class Review extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "review_id")
     private Long id;
+
+    @Column(name = "liked")
+    private int like = 0;
 
     @Embedded
     private Rating rating;
