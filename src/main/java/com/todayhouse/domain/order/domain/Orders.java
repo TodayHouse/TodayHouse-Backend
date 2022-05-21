@@ -25,9 +25,6 @@ public class Orders extends BaseTimeEntity {
 
     private int totalPrice;
 
-    @Column(name = "delivery_fee")
-    private int deliveryFee;
-
     private int productQuantity = 0;
 
     private int selectionQuantity = 0;
