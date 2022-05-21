@@ -148,7 +148,7 @@ class OrderControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("Order를 주문일 날짜 내림차순으로 페이징하여 조회")
+    @DisplayName("Order를 productQuantity 내림차순으로 페이징하여 조회")
     void findUserOrdersPaging() throws Exception {
         User user = userRepository.findByEmail("a@a.com").orElse(null);
         Orders o1 = Orders.builder()
@@ -164,7 +164,7 @@ class OrderControllerTest extends IntegrationBase {
         em.persist(o3);
         em.persist(o4);
         String jwt = tokenProvider.createToken("a@a.com", List.of(Role.USER));
-        String url = "http://localhost:8080/orders?page=0&size=3&sort=createdAt,DESC";
+        String url = "http://localhost:8080/orders?page=0&size=3&sort=productQuantity,DESC";
         when(fileService.changeFileNameToUrl(anyString())).thenReturn("test.jpg");
         em.flush();
         em.clear();
