@@ -87,7 +87,7 @@ class ProductRepositoryTest extends DataJpaBase {
         List<Product> products = page.getContent();
         LocalDateTime time = LocalDateTime.now();
         for (Product p : products) {
-            assertThat(time.isAfter(p.getCreatedAt())).isTrue();
+            assertTrue(time.isAfter(p.getCreatedAt()));
             time = p.getCreatedAt();
         }
     }
@@ -119,6 +119,8 @@ class ProductRepositoryTest extends DataJpaBase {
         PageRequest of = PageRequest.of(0, 30, Sort.by("createdAt").descending());
         Page<Product> page = productRepository.findAllWithSeller(request, of);
         List<Product> list = page.getContent();
+
+
         assertThat(list.size()).isEqualTo(2);
         assertThat(list.get(0).getId()).isEqualTo(product3.getId());
         assertThat(list.get(1).getId()).isEqualTo(product2.getId());

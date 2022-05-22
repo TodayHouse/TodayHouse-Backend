@@ -1,6 +1,5 @@
 package com.todayhouse.domain.product.dao;
 
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -10,9 +9,10 @@ import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
@@ -39,22 +39,28 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
         this.categoryRepository = categoryRepository;
     }
 
-    //product 페이징, 필터링
     @Override
     public Page<Product> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable) {
-        JPQLQuery<Product> query = from(product).join(product.seller)
+        JPQLQuery<Product> query = from(product)
+                .join(product.seller)
                 .where(eqBrand(productSearch.getBrand()),
                         goePrice(productSearch.getPriceFrom()),
                         loePrice(productSearch.getPriceTo()),
                         onlyDeliveryFee(productSearch.getDeliveryFee()),
                         inCategoryName(productSearch.getCategoryName()),
-                        onlySpecialPrice(productSearch.getSpecialPrice()))
-                .fetchJoin();
+                        onlySpecialPrice(productSearch.getSpecialPrice()));
+        List<Product> products = getQuerydsl().applyPagination(pageable, query).fetch();
 
-        QueryResults<Product> results = getQuerydsl().applyPagination(pageable, query).fetchResults();
-        List<Product> products = results.getResults();
-        long total = results.getTotal();
-        return new PageImpl<>(products, pageable, total);
+        JPQLQuery<Product> countQuery = from(product)
+                .join(product.seller)
+                .where(eqBrand(productSearch.getBrand()),
+                        goePrice(productSearch.getPriceFrom()),
+                        loePrice(productSearch.getPriceTo()),
+                        onlyDeliveryFee(productSearch.getDeliveryFee()),
+                        inCategoryName(productSearch.getCategoryName()),
+                        onlySpecialPrice(productSearch.getSpecialPrice()));
+
+        return PageableExecutionUtils.getPage(products, pageable, () -> countQuery.fetchCount());
     }
 
     // product를 seller, 모든 option과 left join
@@ -72,7 +78,7 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
     }
 
     private BooleanExpression eqBrand(String brand) {
-        if (brand == null || brand.isEmpty())
+        if (ObjectUtils.isEmpty(brand))
             return null;
         return product.brand.eq(brand);
     }
@@ -102,7 +108,7 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
     }
 
     private BooleanExpression inCategoryName(String categoryName) {
-        if (categoryName == null || categoryName.isEmpty())
+        if (ObjectUtils.isEmpty(categoryName))
             return null;
         List<Long> ids = categoryRepository.findOneByNameWithAllChildren(categoryName).stream()
                 .map(category -> category.getId()).collect(Collectors.toList());

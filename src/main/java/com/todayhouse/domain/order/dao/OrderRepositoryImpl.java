@@ -1,12 +1,11 @@
 package com.todayhouse.domain.order.dao;
 
-import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.JPQLQuery;
 import com.todayhouse.domain.order.domain.Orders;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
 
@@ -19,17 +18,20 @@ public class OrderRepositoryImpl extends QuerydslRepositorySupport
     }
 
     @Override
-    public Page<Orders> findByUserIdWithProductAndOptions(Long userId, Pageable pageable) {
+    public Page<Orders> findAllByUserIdWithProductAndOptions(Long userId, Pageable pageable) {
         JPQLQuery<Orders> query = from(orders)
                 .innerJoin(orders.product).fetchJoin()
                 .innerJoin(orders.parentOption).fetchJoin()
                 .leftJoin(orders.childOption).fetchJoin()
                 .leftJoin(orders.selectionOption).fetchJoin()
                 .where(orders.user.id.eq(userId));
+        List<Orders> ordersList = getQuerydsl().applyPagination(pageable, query).fetch();
 
-        QueryResults<Orders> results = getQuerydsl().applyPagination(pageable, query).fetchResults();
-        List<Orders> ordersList = results.getResults();
-        long total = results.getTotal();
-        return new PageImpl<>(ordersList, pageable, total);
+        JPQLQuery<Orders> countQuery = from(orders)
+                .innerJoin(orders.product).fetchJoin()
+                .innerJoin(orders.parentOption).fetchJoin()
+                .where(orders.user.id.eq(userId));
+
+        return PageableExecutionUtils.getPage(ordersList, pageable, () -> countQuery.fetchCount());
     }
 }

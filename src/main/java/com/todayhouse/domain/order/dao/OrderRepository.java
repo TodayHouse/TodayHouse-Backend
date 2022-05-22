@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Orders, Long>, CustomOrderRepository {
-    Page<Orders> findByUserIdWithProductAndOptions(Long userId, Pageable pageable);
+    Page<Orders> findAllByUserIdWithProductAndOptions(Long userId, Pageable pageable);
 
     @Query("select o from Orders o join fetch o.product " +
             "left join fetch o.parentOption " +
