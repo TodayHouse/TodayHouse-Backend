@@ -12,12 +12,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Subgraph;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,18 +43,10 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
 
     @Override
     public Page<Product> findAllWithSeller(ProductSearchRequest productSearch, Pageable pageable) {
-        JPQLQuery<Product> query = from(product)
-                .join(product.seller)
-                .where(eqBrand(productSearch.getBrand()),
-                        goePrice(productSearch.getPriceFrom()),
-                        loePrice(productSearch.getPriceTo()),
-                        onlyDeliveryFee(productSearch.getDeliveryFee()),
-                        inCategoryName(productSearch.getCategoryName()),
-                        onlySpecialPrice(productSearch.getSpecialPrice()));
-        List<Product> products = getQuerydsl().applyPagination(pageable, query).fetch();
+        List<Product> products = getPagingProducts(productSearch, pageable);
 
         JPQLQuery<Product> countQuery = from(product)
-                .join(product.seller)
+                .join(product.seller).fetchJoin()
                 .where(eqBrand(productSearch.getBrand()),
                         goePrice(productSearch.getPriceFrom()),
                         loePrice(productSearch.getPriceTo()),
@@ -61,6 +55,30 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
                         onlySpecialPrice(productSearch.getSpecialPrice()));
 
         return PageableExecutionUtils.getPage(products, pageable, () -> countQuery.fetchCount());
+    }
+
+    private List<Product> getPagingProducts(ProductSearchRequest productSearch, Pageable pageable) {
+        JPAQuery<Long> idQuery = jpaQueryFactory.select(product.id)
+                .from(product)
+                .join(product.seller)
+                .where(eqBrand(productSearch.getBrand()),
+                        goePrice(productSearch.getPriceFrom()),
+                        loePrice(productSearch.getPriceTo()),
+                        onlyDeliveryFee(productSearch.getDeliveryFee()),
+                        inCategoryName(productSearch.getCategoryName()),
+                        onlySpecialPrice(productSearch.getSpecialPrice()));
+        List<Long> ids = getQuerydsl().applyPagination(pageable, idQuery).fetch();
+
+        if (CollectionUtils.isEmpty(ids)) {
+            return new ArrayList<>();
+        }
+
+        JPQLQuery<Product> query = from(product)
+                .from(product)
+                .join(product.seller).fetchJoin()
+                .where(product.id.in(ids));
+
+        return getQuerydsl().applySorting(pageable.getSort(), query).fetch();
     }
 
     // product를 seller, 모든 option과 left join

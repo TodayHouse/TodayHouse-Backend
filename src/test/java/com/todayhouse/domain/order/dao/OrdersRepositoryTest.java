@@ -138,4 +138,16 @@ class OrdersRepositoryTest extends DataJpaBase {
         assertThat(orders.get(0).getId()).isEqualTo(order1.getId());
         assertThat(orders.get(1).getId()).isEqualTo(order2.getId());
     }
+
+    @Test
+    @DisplayName("존재하지 않는 userId로 조회")
+    void findAllByUserIdWithProductAndOptions(){
+        PageRequest request = PageRequest.of(0, 10);
+
+        Page<Orders> page = orderRepository.findAllByUserIdWithProductAndOptions(10000L, request);
+
+        assertThat(page.getTotalElements()).isZero();
+        assertThat(page.getContent().size()).isZero();
+
+    }
 }

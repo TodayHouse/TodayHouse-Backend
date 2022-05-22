@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -41,6 +42,7 @@ class ProductRepositoryTest extends DataJpaBase {
 
     Product product1, product2, product3;
     Category c1, c2, c3;
+    Seller seller;
 
     @BeforeEach
     void preSet() {
@@ -50,7 +52,7 @@ class ProductRepositoryTest extends DataJpaBase {
         c3 = Category.builder().parent(c2).name("c3").build();
         em.persist(c1);
 
-        Seller seller = Seller.builder().email("seller@email.com").brand("house").build();
+        seller = Seller.builder().email("seller@email.com").brand("house").build();
         em.persist(seller);
         product1 = Product.builder().category(c1).price(1000).title("p1").seller(seller).build();
         ParentOption op1 = ParentOption.builder().product(product1).content("op1").price(1000).stock(10).build();
@@ -153,4 +155,28 @@ class ProductRepositoryTest extends DataJpaBase {
         assertThat(list.get(1).getId()).isEqualTo(product2.getId());
         assertThat(list.get(2).getId()).isEqualTo(product3.getId());
     }
+
+//    @Test
+//    @DisplayName("test")
+//    void test(){
+//        List<Product> list = new ArrayList<>();
+//        for(int i=0;i<100000;i++){
+//            Product p = Product.builder().category(c1).price(1000).title("p1").seller(seller).build();
+//            list.add(p);
+//        }
+//        productRepository.saveAll(list);
+//        em.flush();
+//        em.clear();
+//
+//        long beforeTime = System.currentTimeMillis();
+//
+//        ProductSearchRequest request = ProductSearchRequest.builder()
+//                .deliveryFee(false).specialPrice(false).build();
+//        PageRequest of = PageRequest.of(3000, 30, Sort.by("id"));
+//        productRepository.findAllWithSeller(request,of);
+//
+//        long afterTime = System.currentTimeMillis(); // 코드 실행 후에 시간 받아오기
+//        long secDiffTime = (afterTime - beforeTime); //두 시간에 차 계산
+//        System.out.println("시간차이(ms) : "+secDiffTime);
+//    }
 }
