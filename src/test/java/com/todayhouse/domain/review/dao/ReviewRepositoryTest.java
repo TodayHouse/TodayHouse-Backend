@@ -21,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ReviewRepositoryTest extends DataJpaBase {
     @Autowired
@@ -108,7 +109,7 @@ class ReviewRepositoryTest extends DataJpaBase {
 
     @Test
     @DisplayName("Review paging으로 4점 review 최신순 조회")
-    void findAllReviewsRating5() {
+    void findAllReviewsRating4() {
         ReviewSearchRequest reviewSearchRequest =
                 new ReviewSearchRequest(null, null, "4", null);
         PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
@@ -175,4 +176,12 @@ class ReviewRepositoryTest extends DataJpaBase {
         assertThat(review).usingRecursiveComparison().isEqualTo(r1);
     }
 
+    @Test
+    @DisplayName("Review Rating split 예외")
+    void findAllReviewsSplitException() {
+        ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, p1.getId(), "1a1", null);
+        PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+
+        assertThrows(RuntimeException.class, () -> reviewRepository.findAllReviews(reviewSearchRequest, page));
+    }
 }

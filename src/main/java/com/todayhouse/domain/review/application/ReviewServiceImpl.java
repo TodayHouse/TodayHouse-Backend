@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -126,9 +127,15 @@ public class ReviewServiceImpl implements ReviewService {
     public void deleteReview(Long productId) {
         User user = getValidUser();
         Review review = reviewRepository.findByUserIdAndProductId(user.getId(), productId).orElseThrow(ReviewNotFoundException::new);
-        String reviewUrl = review.getReviewImage();
-        String fileName = reviewUrl.substring(reviewUrl.lastIndexOf('/')+1);
-        fileService.deleteOne(fileName);
+        deleteImage(review);
         reviewRepository.deleteById(review.getId());
+    }
+
+    private void deleteImage(Review review) {
+        String reviewUrl = review.getReviewImage();
+        if (ObjectUtils.isEmpty(reviewUrl))
+            return;
+        String fileName = reviewUrl.substring(reviewUrl.lastIndexOf('/') + 1);
+        fileService.deleteOne(fileName);
     }
 }

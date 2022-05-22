@@ -1,14 +1,14 @@
 package com.todayhouse.domain.review.dao;
 
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.HashSet;
@@ -24,7 +24,6 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
         super(Review.class);
     }
 
-    // 제품, 유저 id, 이미지 유무 별로 페이징
     @Override
     public Page<Review> findAllReviews(ReviewSearchRequest request, Pageable pageable) {
         Set<Integer> ratings = splitToIntegerSet(request.getRatings());
@@ -33,11 +32,15 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
                 .innerJoin(review.product).fetchJoin()
                 .where(onlyImage(request.getOnlyImage()), eqUserId(request.getUserId()),
                         eqProductId(request.getProductId()), inTotalRating(ratings));
-        QueryResults<Review> results = getQuerydsl().applyPagination(pageable, query).fetchResults();
+        List<Review> reviews = getQuerydsl().applyPagination(pageable, query).fetch();
 
-        List<Review> reviews = results.getResults();
-        long total = results.getTotal();
-        return new PageImpl<>(reviews, pageable, total);
+        JPQLQuery<Review> countQuery = from(review)
+                .innerJoin(review.user).fetchJoin()
+                .innerJoin(review.product).fetchJoin()
+                .where(onlyImage(request.getOnlyImage()), eqUserId(request.getUserId()),
+                        eqProductId(request.getProductId()), inTotalRating(ratings));
+
+        return PageableExecutionUtils.getPage(reviews, pageable, () -> countQuery.fetchCount());
     }
 
     private Set<Integer> splitToIntegerSet(String string) {
@@ -57,7 +60,7 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
     }
 
     private BooleanExpression onlyImage(Boolean onlyImage) {
-        if (onlyImage == null || onlyImage == false)
+        if (onlyImage == null || !onlyImage)
             return null;
         return review.reviewImage.isNotEmpty();
     }
@@ -75,8 +78,7 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
     }
 
     private BooleanExpression inTotalRating(Set<Integer> ratings) {
-        System.out.println(ratings);
-        if (ratings == null || ratings.isEmpty())
+        if (CollectionUtils.isEmpty(ratings))
             return null;
         return review.rating.total.in(ratings);
     }

@@ -219,7 +219,23 @@ class ReviewServiceImplTest {
     }
 
     @Test
-    @DisplayName("리뷰 삭제")
+    @DisplayName("image 있는 리뷰 삭제")
+    void deleteReviewWithImage() {
+        setSecurityName(email);
+        Review review = Review.builder().reviewImage("img").build();
+        ReflectionTestUtils.setField(review, "id", reviewId);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(user.getId()).thenReturn(userId);
+        when(reviewRepository.findByUserIdAndProductId(userId, productId)).thenReturn(Optional.of(review));
+        doNothing().when(fileService).deleteOne(anyString());
+
+        reviewService.deleteReview(productId);
+
+        verify(reviewRepository).deleteById(reviewId);
+    }
+
+    @Test
+    @DisplayName("image 없는 리뷰 삭제")
     void deleteReview() {
         setSecurityName(email);
         Review review = Review.builder().build();
