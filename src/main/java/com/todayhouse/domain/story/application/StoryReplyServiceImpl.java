@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,9 +46,9 @@ public class StoryReplyServiceImpl implements StoryReplyService {
 
 
     @Override
-    public Page<ReplyGetResponse> findReplies(Long storyId, Pageable pageable) {
+    public Page<ReplyGetResponse> findReplies(Long storyId, @PageableDefault Pageable pageable) {
         PageRequest of = PageRequest.of(0, 10);
-        Page<StoryReply> storyReplies = replyRepository.findByStoryId(storyId, of);
+        Page<StoryReply> storyReplies = replyRepository.findByStoryId(storyId, pageable);
         Page<ReplyGetResponse> map = storyReplies.map(r -> new ReplyGetResponse(r.getId(), r.getContent(), r.getCreatedDate(), r.getUser()));
         return map;
     }
