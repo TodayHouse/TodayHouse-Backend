@@ -11,6 +11,7 @@ import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
 import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
@@ -114,7 +115,7 @@ class ProductRepositoryTest extends DataJpaBase {
     @Test
     void product_조건으로_찾기() {
         ProductSearchRequest request = ProductSearchRequest.builder()
-                .categoryName(c1.getName()).priceFrom(2000).priceTo(3000)
+                .categoryName(c1.getName()).priceFrom(2000).priceTo(3000).brand("house")
                 .build();
         PageRequest of = PageRequest.of(0, 30, Sort.by("createdAt").descending());
         Page<Product> page = productRepository.findAllWithSeller(request, of);
@@ -124,5 +125,32 @@ class ProductRepositoryTest extends DataJpaBase {
         assertThat(list.size()).isEqualTo(2);
         assertThat(list.get(0).getId()).isEqualTo(product3.getId());
         assertThat(list.get(1).getId()).isEqualTo(product2.getId());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 category name으로 찾기")
+    void findAllWithSeller() {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .categoryName("fail").build();
+        PageRequest of = PageRequest.of(0, 30, Sort.by("createdAt").descending());
+        Page<Product> page = productRepository.findAllWithSeller(request, of);
+        List<Product> list = page.getContent();
+
+        assertThat(list.size()).isZero();
+    }
+
+    @Test
+    @DisplayName("deliveryFee와 specialPrice가 false로 id순 페이징")
+    void findAllWithSellerFalse() {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .deliveryFee(false).specialPrice(false).build();
+        PageRequest of = PageRequest.of(0, 30, Sort.by("id"));
+        Page<Product> page = productRepository.findAllWithSeller(request, of);
+        List<Product> list = page.getContent();
+
+        assertThat(list.size()).isEqualTo(3);
+        assertThat(list.get(0).getId()).isEqualTo(product1.getId());
+        assertThat(list.get(1).getId()).isEqualTo(product2.getId());
+        assertThat(list.get(2).getId()).isEqualTo(product3.getId());
     }
 }

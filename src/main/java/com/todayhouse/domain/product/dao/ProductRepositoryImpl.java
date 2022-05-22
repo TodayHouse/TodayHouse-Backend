@@ -84,7 +84,7 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
     }
 
     private BooleanExpression goePrice(Integer price) {
-        if (price == null || price < 0)
+        if (price == null)
             return null;
         return product.price.goe(price);
     }
@@ -112,8 +112,6 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
             return null;
         List<Long> ids = categoryRepository.findOneByNameWithAllChildren(categoryName).stream()
                 .map(category -> category.getId()).collect(Collectors.toList());
-        if (ids.isEmpty())
-            return null;
         return product.category.id.in(ids);
     }
 }
