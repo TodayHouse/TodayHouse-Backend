@@ -68,6 +68,8 @@ public enum BaseResponseStatus {
     REVIEW_DUPLICATE(false, 2600, "하나의 상품에 하나의 리뷰만 작성할 수 있습니다."),
     REVIEW_NOT_FOUND(false, 2601, "리뷰를 찾을 수 없습니다."),
     ORDER_NOT_COMPLETED(false, 2602, "주문을 완료한 유저만 리뷰를 작성할 수 있습니다."),
+    INVALID_REVIEW_LIKE(false, 2604, "유효하지 않은 좋아요입니다."),
+    REVIEW_LIKE_DUPLICATE(false, 2604, "중복된 좋아요입니다."),
 
     // 3000 : Database / Server 오류
     // common
