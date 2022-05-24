@@ -43,7 +43,7 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
         if (review.getUser().getId() == user.getId()) {
             throw new InvalidReviewLikeException();
         }
-        Optional<ReviewLike> reviewLike = reviewLikeRepository.findByUserIdAndReviewId(user.getId(), review.getId());
+        Optional<ReviewLike> reviewLike = reviewLikeRepository.findByUserAndReview(user, review);
         reviewLike.ifPresent(r -> {
             throw new ReviewLikeDuplicationException();
         });
@@ -59,7 +59,9 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
     @Override
     public void deleteReviewLike(Long reviewId) {
         User user = findUser();
-        reviewLikeRepository.deleteByUserIdAndReviewId(user.getId(), reviewId);
+        Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewNotFoundException::new);
+        reviewLikeRepository.delete(reviewLikeRepository.findByUserAndReview(user, review)
+                .orElseThrow(InvalidReviewLikeException::new));
     }
 
     private User findUser() {

@@ -65,7 +65,7 @@ class ReviewLikeServiceImplTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(reviewRepository.findById(anyLong())).thenReturn(Optional.of(review));
-        when(reviewLikeRepository.findByUserIdAndReviewId(anyLong(), anyLong())).thenReturn(Optional.ofNullable(null));
+        when(reviewLikeRepository.findByUserAndReview(any(User.class), any(Review.class))).thenReturn(Optional.ofNullable(null));
         when(reviewLikeRepository.save(any(ReviewLike.class))).thenReturn(reviewLike);
         when(reviewLike.getId()).thenReturn(10L);
 
@@ -105,7 +105,7 @@ class ReviewLikeServiceImplTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(reviewRepository.findById(anyLong())).thenReturn(Optional.of(review));
-        when(reviewLikeRepository.findByUserIdAndReviewId(anyLong(), anyLong())).thenReturn(Optional.of(mock(ReviewLike.class)));
+        when(reviewLikeRepository.findByUserAndReview(any(User.class), any(Review.class))).thenReturn(Optional.of(mock(ReviewLike.class)));
 
         assertThrows(ReviewLikeDuplicationException.class, () -> reviewLikeService.saveReviewLike(1L));
     }
@@ -114,12 +114,18 @@ class ReviewLikeServiceImplTest {
     @DisplayName("좋아요 삭제")
     void deleteReviewLike() {
         setSecurityName(email);
+        Review review = mock(Review.class);
+        User user = mock(User.class);
+        ReviewLike reviewLike = mock(ReviewLike.class);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        doNothing().when(reviewLikeRepository).deleteByUserIdAndReviewId(anyLong(), anyLong());
+        when(reviewRepository.findById(anyLong())).thenReturn(Optional.of(review));
+        when(reviewLikeRepository.findByUserAndReview(user, review))
+                .thenReturn(Optional.of(reviewLike));
+        doNothing().when(reviewLikeRepository).delete(reviewLike);
 
         reviewLikeService.deleteReviewLike(1L);
 
-        verify(reviewLikeRepository).deleteByUserIdAndReviewId(user.getId(), 1L);
+        verify(reviewLikeRepository).delete(reviewLike);
     }
 
     @Test
@@ -129,6 +135,29 @@ class ReviewLikeServiceImplTest {
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(null));
 
         assertThrows(UserNotFoundException.class, () -> reviewLikeService.deleteReviewLike(1L));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 review id로 삭제는 예외처리")
+    void deleteReviewLikeReviewIdException() {
+        setSecurityName(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(reviewRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+
+        assertThrows(ReviewNotFoundException.class, () -> reviewLikeService.deleteReviewLike(1L));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 reviewLike 삭제는 예외처리")
+    void deleteReviewLikeReviewLikeException() {
+        Review review = mock(Review.class);
+
+        setSecurityName(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(reviewRepository.findById(anyLong())).thenReturn(Optional.ofNullable(review));
+        when(reviewLikeRepository.findByUserAndReview(user, review))
+                .thenReturn(Optional.ofNullable(null));
+        assertThrows(InvalidReviewLikeException.class, () -> reviewLikeService.deleteReviewLike(1L));
     }
 
     private void setSecurityName(String email) {
