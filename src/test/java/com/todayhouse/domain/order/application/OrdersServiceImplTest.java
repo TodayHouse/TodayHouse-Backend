@@ -302,7 +302,7 @@ class OrdersServiceImplTest {
         List<Orders> orders = List.of(o1, o2);
         PageRequest request = PageRequest.of(0, 10);
         User user = getValidUser();
-        when(orderRepository.findByUserIdWithProductAndOptions(anyLong(), any(Pageable.class))).thenReturn(new PageImpl<>(orders));
+        when(orderRepository.findAllByUserIdWithProductAndOptions(anyLong(), any(Pageable.class))).thenReturn(new PageImpl<>(orders));
 
         Page<Orders> page = orderService.findOrders(request);
         assertThat(page.getContent()).isEqualTo(orders);

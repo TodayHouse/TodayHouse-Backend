@@ -39,6 +39,7 @@ import javax.persistence.PersistenceContext;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -147,7 +148,7 @@ class OrderControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("Order를 주문일 날짜 내림차순으로 페이징하여 조회")
+    @DisplayName("Order를 productQuantity 내림차순으로 페이징하여 조회")
     void findUserOrdersPaging() throws Exception {
         User user = userRepository.findByEmail("a@a.com").orElse(null);
         Orders o1 = Orders.builder()
@@ -163,7 +164,7 @@ class OrderControllerTest extends IntegrationBase {
         em.persist(o3);
         em.persist(o4);
         String jwt = tokenProvider.createToken("a@a.com", List.of(Role.USER));
-        String url = "http://localhost:8080/orders?page=0&size=3&sort=createdAt,DESC";
+        String url = "http://localhost:8080/orders?page=0&size=3&sort=productQuantity,DESC";
         when(fileService.changeFileNameToUrl(anyString())).thenReturn("test.jpg");
         em.flush();
         em.clear();
@@ -177,6 +178,8 @@ class OrderControllerTest extends IntegrationBase {
         BaseResponse response = getResponseFromMvcResult(mvcResult);
         PageDto<OrderResponse> page = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
         });
+        assertThat(page.getTotalElements()).isEqualTo(4);
+        assertFalse(page.isLast());
         List<OrderResponse> list = objectMapper.readValue(objectMapper.writeValueAsString(page.getContent()), new TypeReference<>() {
         });
         assertThat(list.size()).isEqualTo(3);

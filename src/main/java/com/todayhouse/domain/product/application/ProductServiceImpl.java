@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -120,7 +121,7 @@ public class ProductServiceImpl implements ProductService {
                             User user, Category category) {
         List<String> fileNames = saveFiles(multipartFiles);
         String first = null;
-        if (fileNames != null && !fileNames.isEmpty())
+        if (!CollectionUtils.isEmpty(fileNames))
             first = fileNames.get(0);
         Product product = productRepository.save(request.toEntityWithParentAndSelection(user.getSeller(), category, first));
         imageService.save(fileNames, product);
@@ -128,7 +129,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private List<String> saveFiles(List<MultipartFile> multipartFiles) {
-        if (multipartFiles != null && !multipartFiles.isEmpty()) {
+        if (!CollectionUtils.isEmpty(multipartFiles)) {
             return fileService.uploadImages(multipartFiles);
         }
         return null;

@@ -225,6 +225,7 @@ class ProductControllerTest extends IntegrationBase {
         });
         List<ProductResponse> products = objectMapper.readValue(objectMapper.writeValueAsString(response.getContent()), new TypeReference<>() {
         });
+        assertTrue(response.isLast());
         assertThat(response.getTotalPages()).isEqualTo(1);
         assertThat(response.getTotalElements()).isEqualTo(4);
         int price = 10000;
