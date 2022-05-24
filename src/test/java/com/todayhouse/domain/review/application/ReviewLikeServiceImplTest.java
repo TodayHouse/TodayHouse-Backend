@@ -9,6 +9,7 @@ import com.todayhouse.domain.review.exception.ReviewLikeDuplicationException;
 import com.todayhouse.domain.review.exception.ReviewNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.domain.user.exception.UserNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,8 +30,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewLikeServiceImplTest {
@@ -108,6 +108,27 @@ class ReviewLikeServiceImplTest {
         when(reviewLikeRepository.findByUserIdAndReviewId(anyLong(), anyLong())).thenReturn(Optional.of(mock(ReviewLike.class)));
 
         assertThrows(ReviewLikeDuplicationException.class, () -> reviewLikeService.saveReviewLike(1L));
+    }
+
+    @Test
+    @DisplayName("좋아요 삭제")
+    void deleteReviewLike() {
+        setSecurityName(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        doNothing().when(reviewLikeRepository).deleteByUserIdAndReviewId(anyLong(), anyLong());
+
+        reviewLikeService.deleteReviewLike(1L);
+
+        verify(reviewLikeRepository).deleteByUserIdAndReviewId(user.getId(), 1L);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 user id로 삭제는 예외처리")
+    void deleteReviewLikeUserIdException() {
+        setSecurityName(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(null));
+
+        assertThrows(UserNotFoundException.class, () -> reviewLikeService.deleteReviewLike(1L));
     }
 
     private void setSecurityName(String email) {

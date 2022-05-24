@@ -12,7 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ReviewLikeRepositoryTest extends DataJpaBase {
     @Autowired
@@ -60,5 +63,18 @@ class ReviewLikeRepositoryTest extends DataJpaBase {
         ReviewLike find = reviewLikeRepository.findByUserIdAndReviewId(user1.getId(), review1.getId()).orElse(null);
 
         assertThat(find.getId()).isEqualTo(reviewLike.getId());
+    }
+
+    @Test
+    @DisplayName("user id와 review id로 reviewLike 삭제")
+    void deleteByUserIdAndReviewId(){
+        ReviewLike reviewLike = reviewLikeRepository.save(new ReviewLike(user1, review1));
+        em.flush();
+        em.clear();
+
+        reviewLikeRepository.deleteByUserIdAndReviewId(user1.getId(), review1.getId());
+
+        Optional<ReviewLike> find = reviewLikeRepository.findById(reviewLike.getId());
+        assertTrue(find.isEmpty());
     }
 }

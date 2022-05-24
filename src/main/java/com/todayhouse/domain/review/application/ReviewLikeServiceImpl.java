@@ -33,12 +33,6 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
         return reviewLike.getId();
     }
 
-    private User findUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        return user;
-    }
-
     private synchronized ReviewLike syncSaveReviewLike(User user, Review review) {
         checkReviewValidation(user, review);
         ReviewLike reviewLike = new ReviewLike(user, review);
@@ -58,11 +52,19 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
     @Override
     @Transactional(readOnly = true)
     public ReviewLike findReviewLike(Long userId, Long reviewId) {
+
         return null;
     }
 
     @Override
     public void deleteReviewLike(Long reviewId) {
+        User user = findUser();
+        reviewLikeRepository.deleteByUserIdAndReviewId(user.getId(), reviewId);
+    }
 
+    private User findUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        return user;
     }
 }
