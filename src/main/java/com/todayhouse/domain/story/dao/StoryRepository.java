@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface StoryRepository extends JpaRepository<Story, Long> {
+public interface StoryRepository extends JpaRepository<Story, Long>, CustomStoryRepository {
 
     Slice<Story> findAllByOrderById(Pageable pageable);
 

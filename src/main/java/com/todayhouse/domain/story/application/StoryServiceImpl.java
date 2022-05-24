@@ -1,10 +1,13 @@
 package com.todayhouse.domain.story.application;
 
 import com.todayhouse.domain.image.application.ImageService;
-import com.todayhouse.domain.image.domain.Image;
 import com.todayhouse.domain.story.dao.StoryRepository;
+import com.todayhouse.domain.story.domain.FamilyType;
+import com.todayhouse.domain.story.domain.ResiType;
 import com.todayhouse.domain.story.domain.Story;
+import com.todayhouse.domain.story.domain.StyleType;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
+import com.todayhouse.domain.story.dto.reqeust.StorySearchRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryUpdateRequest;
 import com.todayhouse.domain.story.dto.response.StoryGetDetailResponse;
 import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
@@ -15,15 +18,19 @@ import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,6 +68,11 @@ public class StoryServiceImpl implements StoryService {
     public Slice<StoryGetListResponse> findAllDesc(Pageable pageable) {
         return storyRepository.findAllByOrderById(pageable)
                 .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
+    }
+
+    @Override
+    public Page<StoryGetListResponse> searchStory(StorySearchRequest request, Pageable pageable) {
+        return storyRepository.searchCondition(request, pageable).map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
     }
 
     @Override

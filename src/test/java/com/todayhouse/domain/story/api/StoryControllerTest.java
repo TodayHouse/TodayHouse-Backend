@@ -2,12 +2,16 @@ package com.todayhouse.domain.story.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.domain.story.dao.StoryRepository;
+import com.todayhouse.domain.story.domain.FamilyType;
+import com.todayhouse.domain.story.domain.ResiType;
 import com.todayhouse.domain.story.domain.Story;
+import com.todayhouse.domain.story.domain.StyleType;
 import com.todayhouse.domain.story.dto.reqeust.CreateReplyRequest;
 import com.todayhouse.domain.story.dto.reqeust.DeleteReplyRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
+import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -128,4 +135,49 @@ class StoryControllerTest {
         String contentAsString = response.getContentAsString();
         System.out.println("contentAsString = " + contentAsString);
     }
+
+    @Test
+    @DisplayName("스토리 필터링 조회")
+    @Order(5)
+    void searchStory() throws Exception {
+        String url = storyUrl;
+
+        List<FamilyType> familyTypes = Arrays.asList(FamilyType.values());
+        List<StyleType> styleTypes = Arrays.asList(StyleType.values());
+        List<ResiType> resiTypes = Arrays.asList(ResiType.values());
+        Optional<User> byId = userRepository.findById(1L);
+
+        for (ResiType resiType : resiTypes) {
+            for (StyleType styleType : styleTypes) {
+                for (FamilyType familyType : familyTypes) {
+                    for (int floorSpace = 0; floorSpace < 5; floorSpace++) {
+                        Story build = Story.builder()
+                                .styleType(styleType)
+                                .category(Story.Category.STORY)
+                                .floorSpace(floorSpace)
+                                .resiType(resiType)
+                                .familyType(familyType)
+                                .content("내용")
+                                .title("제목")
+                                .liked(0)
+                                .user(byId.get())
+                                .build();
+                        storyRepository.save(build);
+
+                    }
+                }
+            }
+        }
+
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                .param("floorSpace", "3")
+                .header("Authorization", "Bearer " + jwt)
+                .contentType("application/json")
+        ).andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        String contentAsString = response.getContentAsString();
+        System.out.println("response = " + contentAsString);
+
+    }
+
 }

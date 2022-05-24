@@ -37,7 +37,8 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-    private final UserRepository userRepository;
+    private final
+    UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final DeliveryRepository deliveryRepository;
