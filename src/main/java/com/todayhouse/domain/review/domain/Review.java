@@ -48,4 +48,12 @@ public class Review extends BaseTimeEntity {
         this.user = user;
         this.product = product;
     }
+
+    public void addLike(){
+        like+=1;
+    }
+
+    public void subLike(){
+        like-=1;
+    }
 }

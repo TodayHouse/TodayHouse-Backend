@@ -36,6 +36,7 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
     private synchronized ReviewLike syncSaveReviewLike(User user, Review review) {
         checkReviewValidation(user, review);
         ReviewLike reviewLike = new ReviewLike(user, review);
+        review.addLike();
         return reviewLikeRepository.save(reviewLike);
     }
 
@@ -60,6 +61,7 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
     public void deleteReviewLike(Long reviewId) {
         User user = findUser();
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewNotFoundException::new);
+        review.subLike();
         reviewLikeRepository.delete(reviewLikeRepository.findByUserAndReview(user, review)
                 .orElseThrow(InvalidReviewLikeException::new));
     }
