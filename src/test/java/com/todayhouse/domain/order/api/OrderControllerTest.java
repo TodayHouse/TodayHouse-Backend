@@ -160,7 +160,7 @@ class OrderControllerTest extends IntegrationBase {
         em.persist(o3);
         em.persist(o4);
         String jwt = tokenProvider.createToken("a@a.com", List.of(Role.USER));
-        String url = "http://localhost:8080/orders?page=0&size=3&sort=createdAt,DESC";
+        String url = "http://localhost:8080/orders?page=0&size=3&sort=productQuantity,DESC";
         when(fileService.changeFileNameToUrl(anyString())).thenReturn("test.jpg");
 
         MvcResult mvcResult = mockMvc.perform(get(url)
