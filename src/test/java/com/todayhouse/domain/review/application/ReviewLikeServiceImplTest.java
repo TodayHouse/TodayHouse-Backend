@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -158,6 +159,18 @@ class ReviewLikeServiceImplTest {
         when(reviewLikeRepository.findByUserAndReview(user, review))
                 .thenReturn(Optional.ofNullable(null));
         assertThrows(InvalidReviewLikeException.class, () -> reviewLikeService.deleteReviewLike(1L));
+    }
+
+    @Test
+    @DisplayName("Reivew가 포함된 자신의 ReviewLike 조회")
+    void findMyReviewLikesWithReviews() {
+        List<Review> reviews = mock(List.class);
+        List<ReviewLike> reviewLikes = List.of(mock(ReviewLike.class));
+        setSecurityName(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(reviewLikeRepository.findByUserAndReviewIn(any(User.class), anyList())).thenReturn(reviewLikes);
+
+        assertThat(reviewLikeService.findMyReviewLikesInReviews(reviews)).isEqualTo(reviewLikes);
     }
 
     private void setSecurityName(String email) {

@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/reviews")
@@ -34,12 +37,21 @@ public class ReviewController {
     }
 
     //?size=2&page=0&sort=createdAt,DESC&isImage=true
+    //평점을 정렬할 땐 rating.total
     @GetMapping
     public BaseResponse<PageDto<ReviewResponse>> findReviews(@ModelAttribute ReviewSearchRequest reviewSearchRequest,
                                                              @PageableDefault Pageable pageable) {
         Page<Review> reviews = reviewService.findReviews(reviewSearchRequest, pageable);
-        PageDto<ReviewResponse> reviewResponses = new PageDto<>(reviews.map(review -> new ReviewResponse(review, true)));
-        return new BaseResponse<>(reviewResponses);
+        List<ReviewLike> reviewLikes = reviewLikeService.findMyReviewLikesInReviews(reviews.getContent());
+        Map<Long, Boolean> liked = getLikedMap(reviewLikes);
+        return new BaseResponse(new PageDto<>(reviews.map(review ->
+                new ReviewResponse(review, !liked.getOrDefault(review.getId(), false)))));
+    }
+
+    private Map<Long, Boolean> getLikedMap(List<ReviewLike> reviewLikes) {
+        Map<Long, Boolean> liked = new HashMap<>();
+        reviewLikes.forEach(reviewLike -> liked.put(reviewLike.getReview().getId(), true));
+        return liked;
     }
 
     @GetMapping("/ratings/{productId}")

@@ -12,7 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 class ReviewLikeRepositoryTest extends DataJpaBase {
     @Autowired
@@ -60,5 +63,16 @@ class ReviewLikeRepositoryTest extends DataJpaBase {
         ReviewLike find = reviewLikeRepository.findByUserAndReview(user1, review1).orElse(null);
 
         assertThat(find.getId()).isEqualTo(reviewLike.getId());
+    }
+
+    @Test
+    @DisplayName("Review가 포함된 ReviewLike 조회")
+    void findByReviewIn() {
+        ReviewLike reviewLike1 = reviewLikeRepository.save(new ReviewLike(user1, review1));
+        reviewLikeRepository.save(new ReviewLike(user2, review1));
+        List<Review> reviews = List.of(review1);
+
+        List<ReviewLike> find = reviewLikeRepository.findByUserAndReviewIn(user1, reviews);
+        assertThat(find).containsOnlyOnce(reviewLike1);
     }
 }

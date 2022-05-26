@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -51,19 +52,20 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ReviewLike findReviewLike(Long userId, Long reviewId) {
-
-        return null;
-    }
-
-    @Override
     public void deleteReviewLike(Long reviewId) {
         User user = findUser();
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewNotFoundException::new);
         review.subLike();
         reviewLikeRepository.delete(reviewLikeRepository.findByUserAndReview(user, review)
                 .orElseThrow(InvalidReviewLikeException::new));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReviewLike> findMyReviewLikesInReviews(List<Review> reviews) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElse(null);
+        return reviewLikeRepository.findByUserAndReviewIn(user, reviews);
     }
 
     private User findUser() {

@@ -38,8 +38,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -218,11 +216,11 @@ class ReviewControllerTest extends IntegrationBase {
         User user3 = userRepository.save(User.builder().email("user3@test").build());
         User user4 = userRepository.save(User.builder().email("user4@test").build());
         User user5 = userRepository.save(User.builder().email("user5@test").build());
-        Review review1 = reviewRepository.save(Review.builder().user(user2).product(product1).rating(createRating(5)).build());
-        Review review2 = reviewRepository.save(Review.builder().user(user2).product(product1).rating(createRating(5)).build());
-        Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).rating(createRating(4)).build());
-        Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(createRating(3)).build());
-        Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).rating(createRating(3)).build());
+        reviewRepository.save(Review.builder().user(user2).product(product1).rating(createRating(5)).build());
+        reviewRepository.save(Review.builder().user(user2).product(product1).rating(createRating(5)).build());
+        reviewRepository.save(Review.builder().user(user3).product(product1).rating(createRating(4)).build());
+        reviewRepository.save(Review.builder().user(user4).product(product1).rating(createRating(3)).build());
+        reviewRepository.save(Review.builder().user(user5).product(product1).rating(createRating(3)).build());
         String url = "http://localhost:8080/reviews/ratings/" + product1.getId().intValue();
 
         MvcResult mvcResult = mockMvc.perform(get(url))
@@ -342,6 +340,37 @@ class ReviewControllerTest extends IntegrationBase {
 
         Optional<ReviewLike> find = reviewLikeRepository.findByUserAndReview(user2, review);
         assertTrue(find.isEmpty());
+    }
+
+    @Test
+    @DisplayName("좋아요 가능한지 포함하여 Review 페이징 조회")
+    void findReviewWithCanLike() throws Exception {
+        User user2 = userRepository.save(User.builder().email("user2@test").build());
+        User user3 = userRepository.save(User.builder().email("user3@test").build());
+        Review review1 = reviewRepository.save(Review.builder().user(user1).product(product1).rating(createRating(4)).build());
+        Review review2 = reviewRepository.save(Review.builder().user(user2).product(product1).rating(createRating(3)).build());
+        Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).rating(createRating(5)).build());
+        reviewLikeRepository.save(new ReviewLike(user1, review2));
+        reviewLikeRepository.save(new ReviewLike(user1, review3));
+
+        String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
+        String url = "http://localhost:8080/reviews?size=2&page=0&sort=rating.total,DESC";
+
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        PageDto<ReviewResponse> pageDto = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        });
+        assertThat(pageDto.getSize()).isEqualTo(2);
+        assertThat(pageDto.getTotalElements()).isEqualTo(3);
+        List<ReviewResponse> reviews = objectMapper.readValue(objectMapper.writeValueAsString(pageDto.getContent()), new TypeReference<>() {
+        });
+        assertFalse(reviews.get(0).isCanLike());
+        assertTrue(reviews.get(1).isCanLike());
     }
 
     private Rating createRating(int totalRating) {
