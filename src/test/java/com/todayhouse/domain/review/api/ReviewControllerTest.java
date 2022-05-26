@@ -10,9 +10,11 @@ import com.todayhouse.domain.product.dao.ParentOptionRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.review.dao.ReviewLikeRepository;
 import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
+import com.todayhouse.domain.review.domain.ReviewLike;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.review.dto.response.ReviewResponse;
@@ -36,6 +38,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +82,9 @@ class ReviewControllerTest extends IntegrationBase {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    ReviewLikeRepository reviewLikeRepository;
 
     @Autowired
     ParentOptionRepository parentOptionRepository;
@@ -295,6 +302,46 @@ class ReviewControllerTest extends IntegrationBase {
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().is4xxClientError())
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("ReviewLike 저장")
+    void saveReviewLike() throws Exception {
+        User user2 = userRepository.save(User.builder().email("user2@test").build());
+        Review review = reviewRepository.save(Review.builder()
+                .user(user1).rating(new Rating(5, 5, 5, 5, 5)).product(product1)
+                .build());
+        String jwt = tokenProvider.createToken(user2.getEmail(), List.of(Role.USER));
+        String url = "http://localhost:8080/reviews/like/" + review.getId();
+
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        Long id = objectMapper.convertValue(response.getResult(), Long.class);
+        Optional<ReviewLike> find = reviewLikeRepository.findById(id);
+        assertTrue(find.isPresent());
+    }
+
+    @Test
+    @DisplayName("ReviewLike 삭제")
+    void deleteReviewLike() throws Exception {
+        User user2 = userRepository.save(User.builder().email("user2@test").build());
+        Review review = reviewRepository.save(Review.builder()
+                .user(user1).rating(new Rating(5, 5, 5, 5, 5)).product(product1)
+                .build());
+        reviewLikeRepository.save(new ReviewLike(user2, review));
+        String jwt = tokenProvider.createToken(user2.getEmail(), List.of(Role.USER));
+        String url = "http://localhost:8080/reviews/like/" + review.getId();
+
+        mockMvc.perform(delete(url)
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk());
+
+        Optional<ReviewLike> find = reviewLikeRepository.findByUserAndReview(user2, review);
+        assertTrue(find.isEmpty());
     }
 
     private Rating createRating(int totalRating) {

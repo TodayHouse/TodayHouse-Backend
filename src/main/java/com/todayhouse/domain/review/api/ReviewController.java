@@ -1,7 +1,9 @@
 package com.todayhouse.domain.review.api;
 
+import com.todayhouse.domain.review.application.ReviewLikeService;
 import com.todayhouse.domain.review.application.ReviewService;
 import com.todayhouse.domain.review.domain.Review;
+import com.todayhouse.domain.review.domain.ReviewLike;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
@@ -22,6 +24,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
+    private final ReviewLikeService reviewLikeService;
 
     @PostMapping
     public BaseResponse<Long> saveReview(@RequestPart(value = "file", required = false) MultipartFile multipartFile,
@@ -35,7 +38,7 @@ public class ReviewController {
     public BaseResponse<PageDto<ReviewResponse>> findReviews(@ModelAttribute ReviewSearchRequest reviewSearchRequest,
                                                              @PageableDefault Pageable pageable) {
         Page<Review> reviews = reviewService.findReviews(reviewSearchRequest, pageable);
-        PageDto<ReviewResponse> reviewResponses = new PageDto<>(reviews.map(review -> new ReviewResponse(review)));
+        PageDto<ReviewResponse> reviewResponses = new PageDto<>(reviews.map(review -> new ReviewResponse(review, true)));
         return new BaseResponse<>(reviewResponses);
     }
 
@@ -55,6 +58,18 @@ public class ReviewController {
     public BaseResponse deleteReview(@PathVariable("productId") Long productId) {
         reviewService.deleteReview(productId);
         return new BaseResponse("리뷰가 삭제되었습니다.");
+    }
+
+    @PostMapping("/like/{reviewId}")
+    public BaseResponse<Long> saveReviewLike(@PathVariable("reviewId") Long reviewId) {
+        Long id = reviewLikeService.saveReviewLike(reviewId);
+        return new BaseResponse(id);
+    }
+
+    @DeleteMapping("/like/{reviewId}")
+    public BaseResponse<Long> deleteReviewLike(@PathVariable("reviewId") Long reviewId) {
+        reviewLikeService.deleteReviewLike(reviewId);
+        return new BaseResponse("삭제되었습니다.");
     }
 }
 
