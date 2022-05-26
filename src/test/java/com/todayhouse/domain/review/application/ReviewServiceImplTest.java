@@ -10,7 +10,6 @@ import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.ReviewRating;
-import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.review.exception.OrderNotCompletedException;
@@ -97,9 +96,9 @@ class ReviewServiceImplTest {
     @DisplayName("리뷰 저장")
     void saveReview() {
         Rating rating = new Rating(5, 5, 5, 5, 5);
-        ReviewSaveRequest request = new ReviewSaveRequest(rating, productId, "Good");
-        Review review = Review.builder().reviewImage(url).content("Good").build();
-        ReflectionTestUtils.setField(review, "id", reviewId);
+        Review review = Review.builder().rating(rating).content("Good").build();
+        Review save = Review.builder().reviewImage(url).content("Good").build();
+        ReflectionTestUtils.setField(save, "id", reviewId);
 
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
@@ -109,9 +108,9 @@ class ReviewServiceImplTest {
         when(fileService.uploadImage(file)).thenReturn("byteImage");
         when(fileService.changeFileNameToUrl(anyString())).thenReturn(url);
 
-        when(reviewRepository.save(any(Review.class))).thenReturn(review);
+        when(reviewRepository.save(any(Review.class))).thenReturn(save);
 
-        Long saveId = reviewService.saveReview(file, request);
+        Long saveId = reviewService.saveReview(file, review, productId);
 
         assertThat(saveId).isEqualTo(reviewId);
     }
@@ -120,34 +119,34 @@ class ReviewServiceImplTest {
     @DisplayName("리뷰 저장 유효하지 않은 email")
     void reviewSaveEmailException() {
         Rating rating = new Rating(5, 5, 5, 5, 5);
-        ReviewSaveRequest request = new ReviewSaveRequest(rating, productId, "Good");
-        Review review = Review.builder().reviewImage(url).content("Good").build();
-        ReflectionTestUtils.setField(review, "id", reviewId);
+        Review review = Review.builder().rating(rating).content("Good").build();
+        Review save = Review.builder().reviewImage(url).content("Good").build();
+        ReflectionTestUtils.setField(save, "id", reviewId);
 
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenThrow(UserNotFoundException.class);
 
-        assertThrows(UserNotFoundException.class, () -> reviewService.saveReview(file, request));
+        assertThrows(UserNotFoundException.class, () -> reviewService.saveReview(file, review, productId));
     }
 
     @Test
     @DisplayName("리뷰 저장 유효하지 않은 productId")
     void reviewSaveProductException() {
         Rating rating = new Rating(5, 5, 5, 5, 5);
-        ReviewSaveRequest request = new ReviewSaveRequest(rating, productId, "Good");
+        Review review = Review.builder().rating(rating).content("Good").build();
 
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(productRepository.findById(productId)).thenThrow(ProductNotFoundException.class);
 
-        assertThrows(ProductNotFoundException.class, () -> reviewService.saveReview(file, request));
+        assertThrows(ProductNotFoundException.class, () -> reviewService.saveReview(file, review, productId));
     }
 
     @Test
     @DisplayName("주문 완료되지 않은 유저는 리뷰 작성 불가")
     void reviewSaveNotOrderCompletedException() {
         Rating rating = new Rating(5, 5, 5, 5, 5);
-        ReviewSaveRequest request = new ReviewSaveRequest(rating, productId, "Good");
+        Review review = Review.builder().rating(rating).content("Good").build();
 
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
@@ -155,7 +154,7 @@ class ReviewServiceImplTest {
         getUserIdAndProductId();
         when(orderRepository.findByUserIdAndProductIdAndStatus(anyLong(), anyLong(), eq(Status.COMPLETED)))
                 .thenReturn(List.of());
-        assertThrows(OrderNotCompletedException.class, () -> reviewService.saveReview(file, request));
+        assertThrows(OrderNotCompletedException.class, () -> reviewService.saveReview(file, review, productId));
     }
 
     @Test
@@ -222,7 +221,7 @@ class ReviewServiceImplTest {
     @DisplayName("image 있는 리뷰 삭제")
     void deleteReviewWithImage() {
         setSecurityName(email);
-        Review review = Review.builder().reviewImage("img").build();
+        Review review = Review.builder().reviewImage("https://todayhouse.s3.amazonaws.com/1fb43ba8-efc2-4951-9294-60c38a83c0d3.png").build();
         ReflectionTestUtils.setField(review, "id", reviewId);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(user.getId()).thenReturn(userId);

@@ -29,7 +29,7 @@ public class ReviewResponse {
         this.content = review.getContent();
         this.canLike = canLike;
         this.nickname = review.getUser().getNickname();
-        this.productImage = review.getReviewImage();
+        this.productImage = review.getReviewImageUrl();
         this.profileImage = review.getUser().getProfileImage();
         this.productResponse = new ProductResponse(review.getProduct());
     }

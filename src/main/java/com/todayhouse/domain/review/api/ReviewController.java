@@ -32,7 +32,7 @@ public class ReviewController {
     @PostMapping
     public BaseResponse<Long> saveReview(@RequestPart(value = "file", required = false) MultipartFile multipartFile,
                                          @RequestPart(value = "request") @Valid ReviewSaveRequest reviewSaveRequest) {
-        Long saveId = reviewService.saveReview(multipartFile, reviewSaveRequest);
+        Long saveId = reviewService.saveReview(multipartFile, reviewSaveRequest.toEntity(), reviewSaveRequest.getProductId());
         return new BaseResponse(saveId);
     }
 

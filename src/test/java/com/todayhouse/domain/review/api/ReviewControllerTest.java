@@ -135,7 +135,7 @@ class ReviewControllerTest extends IntegrationBase {
         BaseResponse response = getResponseFromMvcResult(mvcResult);
         Review review = reviewRepository.findByUserIdAndProductId(user1.getId(), product1.getId()).orElse(null);
         assertThat((Integer) response.getResult()).isEqualTo(review.getId().intValue());
-        assertThat(review.getReviewImage()).isEqualTo("img.com");
+        assertThat(review.getReviewImageUrl()).isEqualTo("img.com");
     }
 
     @Test

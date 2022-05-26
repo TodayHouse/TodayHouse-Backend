@@ -62,7 +62,7 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
     private BooleanExpression onlyImage(Boolean onlyImage) {
         if (onlyImage == null || !onlyImage)
             return null;
-        return review.reviewImage.isNotEmpty();
+        return review.reviewImageUrl.isNotEmpty();
     }
 
     private BooleanExpression eqUserId(Long userId) {

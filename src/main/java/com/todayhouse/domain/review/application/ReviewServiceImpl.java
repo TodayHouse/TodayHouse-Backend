@@ -9,7 +9,6 @@ import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.ReviewRating;
-import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.review.exception.OrderNotCompletedException;
@@ -50,16 +49,19 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Long saveReview(MultipartFile multipartFile, ReviewSaveRequest request) {
+    public Long saveReview(MultipartFile multipartFile, Review review, Long productId) {
         User user = getValidUser();
-        Product product = getValidProduct(request.getProductId());
+        Product product = getValidProduct(productId);
 
         if (!isOrderCompleteUser(user.getId(), product.getId()))
             throw new OrderNotCompletedException();
 
         String imageUrl = saveFileAndGetUrl(multipartFile);
 
-        Review review = request.toEntity(imageUrl, user, product);
+        review.updateUser(user);
+        review.updateProduct(product);
+        review.updateReviewImageUrl(imageUrl);
+
         return synchSaveReview(review).getId();
     }
 
@@ -111,16 +113,12 @@ public class ReviewServiceImpl implements ReviewService {
         if (!isOrderCompleteUser(user.getId(), productId))
             return false;
         Optional<Review> review = reviewRepository.findByUserIdAndProductId(user.getId(), productId);
-        if (review.isPresent())
-            return false;
-        return true;
+        return review.isEmpty();
     }
 
     private boolean isOrderCompleteUser(Long userId, Long productId) {
         List<Orders> orders = orderRepository.findByUserIdAndProductIdAndStatus(userId, productId, Status.COMPLETED);
-        if (orders.size() == 0)
-            return false;
-        return true;
+        return orders.size() != 0;
     }
 
     @Override
@@ -132,7 +130,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     private void deleteImage(Review review) {
-        String reviewUrl = review.getReviewImage();
+        String reviewUrl = review.getReviewImageUrl();
         if (ObjectUtils.isEmpty(reviewUrl))
             return;
         String fileName = reviewUrl.substring(reviewUrl.lastIndexOf('/') + 1);

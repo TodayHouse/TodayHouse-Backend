@@ -9,7 +9,6 @@ import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
-import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
@@ -39,7 +38,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ReviewServiceImplIntegrityTest extends IntegrationBase {
-    private static List<Long> ids = new ArrayList<>();
+    private static final List<Long> ids = new ArrayList<>();
 
     @MockBean
     OrderRepository orderRepository;
@@ -93,10 +92,10 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
                 service.execute(() -> {
                     try {
                         setSecurityName("test");
-                        ReviewSaveRequest review = new ReviewSaveRequest(rating, ids.get(finalJ), "good");
+                        Review review = Review.builder().rating(rating).content("good").build();
                         when(orderRepository.findByUserIdAndProductIdAndStatus(anyLong(), anyLong(), eq(Status.COMPLETED))).thenReturn(List.of(mock(Orders.class)));
                         //테스트 메소드
-                        reviewService.saveReview(null, review);
+                        reviewService.saveReview(null, review, ids.get(finalJ));
 
                         SecurityContextHolder.clearContext();
                     } catch (Exception e) {

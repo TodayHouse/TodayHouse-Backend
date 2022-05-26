@@ -1,9 +1,7 @@
 package com.todayhouse.domain.review.dto.request;
 
-import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
-import com.todayhouse.domain.user.domain.User;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,12 +25,10 @@ public class ReviewSaveRequest {
     @NotBlank(message = "내용을 입력해주세요")
     private String content;
 
-    public Review toEntity(String imageUrl, User user, Product product) {
+    public Review toEntity() {
         return Review.builder()
                 .rating(rating)
                 .content(content)
-                .reviewImage(imageUrl)
-                .user(user)
-                .product(product).build();
+                .build();
     }
 }
