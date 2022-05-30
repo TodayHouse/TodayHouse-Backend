@@ -11,6 +11,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,12 +28,8 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
     @Override
     public Page<Review> findAllReviews(ReviewSearchRequest request, Pageable pageable) {
         Set<Integer> ratings = splitToIntegerSet(request.getRatings());
-        JPQLQuery<Review> query = from(review)
-                .innerJoin(review.user).fetchJoin()
-                .innerJoin(review.product).fetchJoin()
-                .where(onlyImage(request.getOnlyImage()), eqUserId(request.getUserId()),
-                        eqProductId(request.getProductId()), inTotalRating(ratings));
-        List<Review> reviews = getQuerydsl().applyPagination(pageable, query).fetch();
+
+        List<Review> reviews = getPagingReviews(request, pageable, ratings);
 
         JPQLQuery<Review> countQuery = from(review)
                 .innerJoin(review.user).fetchJoin()
@@ -57,6 +54,27 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
             throw new RuntimeException("정확한 평점을 입력해주세요.");
         }
         return numbers;
+    }
+
+    private List<Review> getPagingReviews(ReviewSearchRequest request, Pageable pageable, Set<Integer> ratings) {
+        JPQLQuery<Long> idQuery = from(review)
+                .select(review.id)
+                .innerJoin(review.user)
+                .innerJoin(review.product)
+                .where(onlyImage(request.getOnlyImage()), eqUserId(request.getUserId()),
+                        eqProductId(request.getProductId()), inTotalRating(ratings));
+        List<Long> ids = getQuerydsl().applyPagination(pageable, idQuery).fetch();
+
+        if (CollectionUtils.isEmpty(ids)) {
+            return new ArrayList<>();
+        }
+
+        JPQLQuery<Review> query = from(review)
+                .innerJoin(review.user).fetchJoin()
+                .innerJoin(review.product).fetchJoin()
+                .where(review.id.in(ids));
+
+        return getQuerydsl().applySorting(pageable.getSort(), query).fetch();
     }
 
     private BooleanExpression onlyImage(Boolean onlyImage) {

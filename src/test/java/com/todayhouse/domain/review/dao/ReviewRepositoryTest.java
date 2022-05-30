@@ -184,4 +184,16 @@ class ReviewRepositoryTest extends DataJpaBase {
 
         assertThrows(RuntimeException.class, () -> reviewRepository.findAllReviews(reviewSearchRequest, page));
     }
+
+    @Test
+    @DisplayName("페이징으로 조회한 review가 0")
+    void findAllReviews(){
+        ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, p1.getId() + 100L, null, null);
+        PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+
+        Page<Review> reviews = reviewRepository.findAllReviews(reviewSearchRequest, page);
+
+        assertThat(reviews.getTotalPages()).isEqualTo(0);
+        assertThat(reviews.getTotalElements()).isEqualTo(0);
+    }
 }
