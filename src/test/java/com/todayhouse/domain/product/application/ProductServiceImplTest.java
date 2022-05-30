@@ -7,10 +7,8 @@ import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
-import com.todayhouse.domain.product.dto.request.ProductChildOptionSaveRequest;
-import com.todayhouse.domain.product.dto.request.ProductParentOptionSaveRequest;
-import com.todayhouse.domain.product.dto.request.ProductSaveRequest;
-import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
+import com.todayhouse.domain.product.dto.request.*;
+import com.todayhouse.domain.product.dto.response.ProductResponse;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
@@ -24,6 +22,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -140,17 +142,26 @@ class ProductServiceImplTest {
         assertThat(id).isEqualTo(product.getId());
     }
 
-//    @Test
-//    void findAll() {
-//        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
-//        Page<ProductResponse> response = Mockito.spy(Page.class);
-//        Page<Product> products = Mockito.spy(Page.class);
-//
-//        when(customProductRepository.findAll(pageRequest)).thenReturn(products);
-//
-//        Page<ProductResponse> result = productService.findAll(pageRequest);
-//        assertThat(result).isEqualTo(response);
-//    }
+    @Test
+    @DisplayName("product 페이징 조회")
+    void findAll() {
+        Seller seller = Seller.builder().brand("test").build();
+        ProductSearchRequest search = ProductSearchRequest.builder().build();
+        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        Product product1 = Product.builder().image("img").seller(seller).build();
+        Product product2 = Product.builder().image("img").seller(seller).build();
+        List<Product> productList = List.of(product1, product2);
+        Page<Product> products = new PageImpl<>(productList, pageRequest, 2);
+
+        when(productRepository.findAllWithSeller(search, pageRequest)).thenReturn(products);
+        when(fileService.changeFileNameToUrl(anyString())).thenReturn("s3.img.com");
+
+        Page<ProductResponse> result = productService.findAllWithSeller(search, pageRequest);
+        List<ProductResponse> contents = result.getContent();
+        assertThat(contents.size()).isEqualTo(2);
+        assertThat(contents.get(0).getBrand()).isEqualTo("test");
+        assertThat(contents.get(0).getImageUrls()).isEqualTo(List.of("s3.img.com"));
+    }
 
     @Test
     @DisplayName("product id로 찾기")

@@ -47,23 +47,23 @@ public class OrderController {
         return new BaseResponse(response);
     }
 
-    @GetMapping("/{id}")
-    public BaseResponse<OrderResponse> findOrderDetail(@PathVariable Long id) {
-        Delivery delivery = deliveryService.findDeliveryByOrderIdWithOrder(id);
+    @GetMapping("/{orderId}")
+    public BaseResponse<OrderResponse> findOrderDetail(@PathVariable Long orderId) {
+        Delivery delivery = deliveryService.findDeliveryByOrderIdWithOrder(orderId);
         String imageUrl = fileService.changeFileNameToUrl(delivery.getOrder().getProduct().getImage());
         OrderResponse response = new OrderResponse(delivery, imageUrl);
         return new BaseResponse(response);
     }
 
-    @PutMapping("/cancel/{id}")
-    public BaseResponse cancelOrder(@PathVariable Long id) {
-        orderService.cancelOrder(id);
+    @PutMapping("/cancel/{orderId}")
+    public BaseResponse cancelOrder(@PathVariable Long orderId) {
+        orderService.cancelOrder(orderId);
         return new BaseResponse("취소되었습니다.");
     }
 
-    @PutMapping("/complete/{id}")
-    public BaseResponse completeOrder(@PathVariable Long id) {
-        orderService.completeOrder(id);
+    @PutMapping("/complete/{orderId}")
+    public BaseResponse completeOrder(@PathVariable Long orderId) {
+        orderService.completeOrder(orderId);
         return new BaseResponse("완료되었습니다.");
     }
 }
