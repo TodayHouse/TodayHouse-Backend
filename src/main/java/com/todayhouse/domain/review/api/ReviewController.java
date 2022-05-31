@@ -39,7 +39,7 @@ public class ReviewController {
     //?size=2&page=0&sort=createdAt,DESC&isImage=true
     //평점을 정렬할 땐 rating.total
     @GetMapping
-    public BaseResponse<PageDto<ReviewResponse>> findReviews(@ModelAttribute ReviewSearchRequest reviewSearchRequest,
+    public BaseResponse<PageDto<ReviewResponse>> findReviews(@Valid @ModelAttribute ReviewSearchRequest reviewSearchRequest,
                                                              @PageableDefault Pageable pageable) {
         Page<Review> reviews = reviewService.findReviews(reviewSearchRequest, pageable);
         List<ReviewLike> reviewLikes = reviewLikeService.findMyReviewLikesInReviews(reviews.getContent());

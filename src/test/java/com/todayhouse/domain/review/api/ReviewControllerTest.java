@@ -16,6 +16,7 @@ import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.domain.ReviewLike;
 import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
+import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.review.dto.response.ReviewResponse;
 import com.todayhouse.domain.user.dao.SellerRepository;
@@ -178,7 +179,7 @@ class ReviewControllerTest extends IntegrationBase {
 
     @Test
     @DisplayName("image있는 Review 페이징하여 최신순으로 조회")
-    void findReviews() throws Exception {
+    void findReviewsWithImage() throws Exception {
         Rating rating = new Rating(5, 5, 5, 5, 5);
         User user2 = userRepository.save(User.builder().email("user2@test").build());
         User user3 = userRepository.save(User.builder().email("user3@test").build());
@@ -188,7 +189,7 @@ class ReviewControllerTest extends IntegrationBase {
         Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).reviewImage("img").rating(rating).build());
         Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(rating).build());
         Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").rating(rating).build());
-        List<Long> ids = List.of(review5.getId(), review3.getId(), review2.getId());
+        List<Long> ids = List.of(review5.getId(), review3.getId());
         String url = "http://localhost:8080/reviews?size=2&page=0&sort=createdAt,DESC&onlyImage=true";
 
         MvcResult mvcResult = mockMvc.perform(get(url))
@@ -207,6 +208,66 @@ class ReviewControllerTest extends IntegrationBase {
         for (int i = 0; i < reviews.size(); i++) {
             assertThat(reviews.get(i).getId()).isEqualTo(ids.get(i));
         }
+    }
+
+    @Test
+    @DisplayName("ReviewSearchRequest로 1,2점 Review 페이징하여 평점순으로 조회")
+    void findReviewsWithReviewSearchRequest() throws Exception {
+        ReviewSearchRequest request = ReviewSearchRequest.builder().productId(product1.getId()).ratings("1,2").build();
+        Rating rating1 = new Rating(1, 5, 5, 5, 5);
+        Rating rating2 = new Rating(2, 5, 5, 5, 5);
+        Rating rating3 = new Rating(3, 5, 5, 5, 5);
+        User user2 = userRepository.save(User.builder().email("user2@test").build());
+        User user3 = userRepository.save(User.builder().email("user3@test").build());
+        User user4 = userRepository.save(User.builder().email("user4@test").build());
+        User user5 = userRepository.save(User.builder().email("user5@test").build());
+        Review review2 = reviewRepository.save(Review.builder().user(user2).product(product1).reviewImage("img").rating(rating1).build());
+        Review review3 = reviewRepository.save(Review.builder().user(user3).product(product1).reviewImage("img").rating(rating2).build());
+        Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(rating2).build());
+        Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").rating(rating3).build());
+        List<Long> ids = List.of(review4.getId(), review3.getId());
+        String url = "http://localhost:8080/reviews?size=2&page=0&sort=rating.total,DESC&sort=createdAt,DESC&";
+
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .param("ratings", "1,2")
+                        .param("productId", product1.getId().toString()))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        PageDto<ReviewResponse> pageDto = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        });
+        List<ReviewResponse> reviews = objectMapper.readValue(objectMapper.writeValueAsString(pageDto.getContent()), new TypeReference<>() {
+        });
+
+        assertThat(pageDto.getTotalPages()).isEqualTo(2);
+        assertThat(pageDto.getTotalElements()).isEqualTo(3);
+        for (int i = 0; i < reviews.size(); i++) {
+            assertThat(reviews.get(i).getId()).isEqualTo(ids.get(i));
+        }
+    }
+
+    @Test
+    @DisplayName("ReviewSearchRequest로 string 패턴 오류")
+    void findReviewsWithReviewSearchRequestException() throws Exception {
+        String url = "http://localhost:8080/reviews?size=2&page=0";
+
+        mockMvc.perform(get(url)
+                        .param("ratings", "9"))
+                .andExpect(status().is4xxClientError());
+
+        mockMvc.perform(get(url)
+                        .param("ratings", ",1"))
+                .andExpect(status().is4xxClientError());
+
+        mockMvc.perform(get(url)
+                        .param("ratings", "1,2,3,4,5,6"))
+                .andExpect(status().is4xxClientError());
+
+        mockMvc.perform(get(url)
+                        .param("ratings", "1,2,3^4"))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
