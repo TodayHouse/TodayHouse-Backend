@@ -94,6 +94,7 @@ public enum BaseResponseStatus {
     INVALID_FILE_EXTENSION_EXCEPTION(false, 4002, "잘못된 형식의 파일입니다."),
 
     // 그 밖의
+    VALID_EXCEPTION(false, 9998, ""),
     OTHERS(false, 9999, "내부 오류가 발생했습니다.");
 
     private final boolean isSuccess;
