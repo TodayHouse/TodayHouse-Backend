@@ -4,6 +4,7 @@ import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseTimeEntity;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -32,11 +33,21 @@ public class Inquiry extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "answer_id")
+    private Answer answer;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "answer_id")
-    private Answer answer;
+    @Builder
+    public Inquiry(boolean isBuy, boolean isPrivate, String content, User user, Product product, Answer answer) {
+        this.isBuy = isBuy;
+        this.isPrivate = isPrivate;
+        this.content = content;
+        this.user = user;
+        this.answer = answer;
+        this.product = product;
+    }
 }

@@ -1,8 +1,8 @@
 package com.todayhouse.domain.inquiry.domain;
 
-import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseTimeEntity;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -23,7 +23,9 @@ public class Answer extends BaseTimeEntity {
 
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Builder
+    public Answer(String name, String content) {
+        this.name = name;
+        this.content = content;
+    }
 }
