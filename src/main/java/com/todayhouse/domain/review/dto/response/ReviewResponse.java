@@ -1,7 +1,6 @@
 package com.todayhouse.domain.review.dto.response;
 
 import com.todayhouse.domain.product.dto.response.ProductResponse;
-import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -13,8 +12,9 @@ public class ReviewResponse {
     private Long id;
     private Long userId;
     private int like;
+    private int rating;
+
     private boolean canLike;
-    private Rating rating;
     private String content;
     private String nickname;
     private String productImage;

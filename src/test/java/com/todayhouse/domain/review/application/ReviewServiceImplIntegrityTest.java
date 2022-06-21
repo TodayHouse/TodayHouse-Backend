@@ -7,7 +7,6 @@ import com.todayhouse.domain.order.domain.Status;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.review.dao.ReviewRepository;
-import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
@@ -55,7 +54,6 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
     @Autowired
     ReviewRepository reviewRepository;
 
-    Rating rating = new Rating(5, 5, 5, 5, 5);
 
     @BeforeAll
     void setUp() {
@@ -92,7 +90,7 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
                 service.execute(() -> {
                     try {
                         setSecurityName("test");
-                        Review review = Review.builder().rating(rating).content("good").build();
+                        Review review = Review.builder().rating(5).content("good").build();
                         when(orderRepository.findByUserIdAndProductIdAndStatus(anyLong(), anyLong(), eq(Status.COMPLETED))).thenReturn(List.of(mock(Orders.class)));
                         //테스트 메소드
                         reviewService.saveReview(null, review, ids.get(finalJ));

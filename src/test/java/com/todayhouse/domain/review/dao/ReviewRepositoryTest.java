@@ -3,7 +3,6 @@ package com.todayhouse.domain.review.dao;
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
-import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
@@ -50,19 +49,19 @@ class ReviewRepositoryTest extends DataJpaBase {
         p4 = Product.builder().title("p1").build();
 
         r1 = Review.builder()
-                .reviewImage("r1Img").rating(new Rating(1, 5, 5, 5, 5))
+                .reviewImage("r1Img").rating(1)
                 .user(u1).product(p1).build();
         r2 = Review.builder()
-                .reviewImage("r2Img").rating(new Rating(2, 5, 5, 5, 5))
+                .reviewImage("r2Img").rating(2)
                 .user(u1).product(p2).build();
         r3 = Review.builder()
-                .reviewImage("r3Img").rating(new Rating(3, 5, 5, 5, 5))
+                .reviewImage("r3Img").rating(3)
                 .user(u2).product(p1).build();
         r4 = Review.builder()
-                .reviewImage("r4Img").rating(new Rating(4, 5, 5, 5, 5))
+                .reviewImage("r4Img").rating(4)
                 .user(u1).product(p3).build();
         r5 = Review.builder()
-                .rating(new Rating(4, 5, 5, 5, 5))
+                .rating(4)
                 .user(u1).product(p4).build();
 
         em.persist(u1);
@@ -144,11 +143,11 @@ class ReviewRepositoryTest extends DataJpaBase {
         User u5 = User.builder().nickname("u5").build();
 
         Review r6 = Review.builder()
-                .user(u3).product(p1).rating(new Rating(2, 5, 5, 5, 5)).build();
+                .user(u3).product(p1).rating(2).build();
         Review r7 = Review.builder()
-                .user(u4).product(p1).rating(new Rating(4, 5, 5, 5, 5)).build();
+                .user(u4).product(p1).rating(4).build();
         Review r8 = Review.builder()
-                .user(u5).product(p1).rating(new Rating(4, 5, 5, 5, 5)).build();
+                .user(u5).product(p1).rating(4).build();
 
         em.persist(u3);
         em.persist(u4);
@@ -187,7 +186,7 @@ class ReviewRepositoryTest extends DataJpaBase {
 
     @Test
     @DisplayName("페이징으로 조회한 review가 0")
-    void findAllReviews(){
+    void findAllReviews() {
         ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, p1.getId() + 100L, null, null);
         PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
 

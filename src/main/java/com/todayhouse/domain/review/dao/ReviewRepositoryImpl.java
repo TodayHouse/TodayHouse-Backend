@@ -35,7 +35,7 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
                 .innerJoin(review.user).fetchJoin()
                 .innerJoin(review.product).fetchJoin()
                 .where(onlyImage(request.getOnlyImage()), eqUserId(request.getUserId()),
-                        eqProductId(request.getProductId()), inTotalRating(ratings));
+                        eqProductId(request.getProductId()), inRating(ratings));
 
         return PageableExecutionUtils.getPage(reviews, pageable, () -> countQuery.fetchCount());
     }
@@ -62,7 +62,7 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
                 .innerJoin(review.user)
                 .innerJoin(review.product)
                 .where(onlyImage(request.getOnlyImage()), eqUserId(request.getUserId()),
-                        eqProductId(request.getProductId()), inTotalRating(ratings));
+                        eqProductId(request.getProductId()), inRating(ratings));
         List<Long> ids = getQuerydsl().applyPagination(pageable, idQuery).fetch();
 
         if (CollectionUtils.isEmpty(ids)) {
@@ -95,9 +95,9 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
         return review.product.id.eq(productId);
     }
 
-    private BooleanExpression inTotalRating(Set<Integer> ratings) {
+    private BooleanExpression inRating(Set<Integer> ratings) {
         if (CollectionUtils.isEmpty(ratings))
             return null;
-        return review.rating.total.in(ratings);
+        return review.rating.in(ratings);
     }
 }

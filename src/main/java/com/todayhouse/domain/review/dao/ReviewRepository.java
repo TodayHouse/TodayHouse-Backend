@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long>, CustomReviewRepository {
-    @Query("select new com.todayhouse.domain.review.dto.ReviewRating(r.rating.total, count(r)) " +
+    @Query("select new com.todayhouse.domain.review.dto.ReviewRating(r.rating, count(r)) " +
             "from Review r " +
             "where r.product.id=:productId " +
             "group by r.rating " +
-            "order by r.rating.total")
+            "order by r.rating")
     List<ReviewRating> countReviewByProductIdGroupByRating(@Param("productId") Long productId);
 
     Optional<Review> findByUserIdAndProductId(Long userId, Long productId);

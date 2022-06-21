@@ -7,7 +7,6 @@ import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.review.dao.ReviewRepository;
-import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.ReviewRating;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
@@ -95,8 +94,7 @@ class ReviewServiceImplTest {
     @Test
     @DisplayName("리뷰 저장")
     void saveReview() {
-        Rating rating = new Rating(5, 5, 5, 5, 5);
-        Review review = Review.builder().rating(rating).content("Good").build();
+        Review review = Review.builder().rating(5).content("Good").build();
         Review save = Review.builder().reviewImage(url).content("Good").build();
         ReflectionTestUtils.setField(save, "id", reviewId);
 
@@ -118,8 +116,7 @@ class ReviewServiceImplTest {
     @Test
     @DisplayName("리뷰 저장 유효하지 않은 email")
     void reviewSaveEmailException() {
-        Rating rating = new Rating(5, 5, 5, 5, 5);
-        Review review = Review.builder().rating(rating).content("Good").build();
+        Review review = Review.builder().rating(5).content("Good").build();
         Review save = Review.builder().reviewImage(url).content("Good").build();
         ReflectionTestUtils.setField(save, "id", reviewId);
 
@@ -132,8 +129,7 @@ class ReviewServiceImplTest {
     @Test
     @DisplayName("리뷰 저장 유효하지 않은 productId")
     void reviewSaveProductException() {
-        Rating rating = new Rating(5, 5, 5, 5, 5);
-        Review review = Review.builder().rating(rating).content("Good").build();
+        Review review = Review.builder().rating(5).content("Good").build();
 
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
@@ -145,8 +141,7 @@ class ReviewServiceImplTest {
     @Test
     @DisplayName("주문 완료되지 않은 유저는 리뷰 작성 불가")
     void reviewSaveNotOrderCompletedException() {
-        Rating rating = new Rating(5, 5, 5, 5, 5);
-        Review review = Review.builder().rating(rating).content("Good").build();
+        Review review = Review.builder().rating(5).content("Good").build();
 
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));

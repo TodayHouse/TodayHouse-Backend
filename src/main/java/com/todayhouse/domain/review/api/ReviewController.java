@@ -37,7 +37,7 @@ public class ReviewController {
     }
 
     //?size=2&page=0&sort=createdAt,DESC&isImage=true
-    //평점을 정렬할 땐 rating.total
+    //평점을 정렬할 땐 rating
     @GetMapping
     public BaseResponse<PageDto<ReviewResponse>> findReviews(@Valid @ModelAttribute ReviewSearchRequest reviewSearchRequest,
                                                              @PageableDefault Pageable pageable) {

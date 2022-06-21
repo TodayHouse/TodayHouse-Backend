@@ -24,8 +24,7 @@ public class Review extends BaseTimeEntity {
     @Column(name = "liked")
     private int like = 0;
 
-    @Embedded
-    private Rating rating;
+    private int rating;
 
     private String content;
 
@@ -41,7 +40,7 @@ public class Review extends BaseTimeEntity {
     private Product product;
 
     @Builder
-    public Review(Rating rating, String content, String reviewImage, User user, Product product) {
+    public Review(int rating, String content, String reviewImage, User user, Product product) {
         this.rating = rating;
         this.content = content;
         this.reviewImageUrl = reviewImage;

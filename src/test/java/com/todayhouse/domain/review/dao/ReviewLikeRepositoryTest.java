@@ -1,7 +1,6 @@
 package com.todayhouse.domain.review.dao;
 
 import com.todayhouse.DataJpaBase;
-import com.todayhouse.domain.review.domain.Rating;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.domain.ReviewLike;
 import com.todayhouse.domain.user.dao.UserRepository;
@@ -37,7 +36,7 @@ class ReviewLikeRepositoryTest extends DataJpaBase {
     void setUp() {
         user1 = userRepository.save(User.builder().build());
         user2 = userRepository.save(User.builder().build());
-        review1 = reviewRepository.save(Review.builder().rating(new Rating(5, 5, 5, 5, 5)).user(user1).build());
+        review1 = reviewRepository.save(Review.builder().rating(5).user(user1).build());
     }
 
     @Test
