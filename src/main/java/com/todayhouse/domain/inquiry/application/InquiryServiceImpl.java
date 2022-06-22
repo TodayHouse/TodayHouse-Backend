@@ -15,10 +15,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
-public class InquiryServiceImpl implements InquiryService{
+public class InquiryServiceImpl implements InquiryService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final InquiryRepository inquiryRepository;
@@ -34,6 +36,7 @@ public class InquiryServiceImpl implements InquiryService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<Inquiry> findAllInquiries(InquirySearchRequest request, Pageable pageable) {
         return inquiryRepository.findAllInquiries(request, pageable);
     }
