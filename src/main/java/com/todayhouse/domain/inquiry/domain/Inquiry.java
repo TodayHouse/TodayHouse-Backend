@@ -27,6 +27,8 @@ public class Inquiry extends BaseTimeEntity {
     @Column(name = "is_private")
     private boolean isPrivate;
 
+    private String category;
+
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,12 +44,26 @@ public class Inquiry extends BaseTimeEntity {
     private Product product;
 
     @Builder
-    public Inquiry(boolean isBuy, boolean isPrivate, String content, User user, Product product, Answer answer) {
+    public Inquiry(boolean isBuy, boolean isPrivate, String category, String content,
+                   User user, Product product, Answer answer) {
         this.isBuy = isBuy;
         this.isPrivate = isPrivate;
         this.content = content;
+        this.category = category;
         this.user = user;
+        this.product = product;
         this.answer = answer;
+    }
+
+    public void setUser(User user){
+        this.user = user;
+    }
+
+    public void setAnswer(Answer answer){
+        this.answer = answer;
+    }
+
+    public void setProduct(Product product){
         this.product = product;
     }
 }

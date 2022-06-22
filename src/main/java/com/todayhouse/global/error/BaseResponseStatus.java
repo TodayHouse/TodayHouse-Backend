@@ -69,6 +69,9 @@ public enum BaseResponseStatus {
     REVIEW_NOT_FOUND(false, 2601, "리뷰를 찾을 수 없습니다."),
     ORDER_NOT_COMPLETED(false, 2602, "주문을 완료한 유저만 리뷰를 작성할 수 있습니다."),
 
+    // inquiry
+    INQUIRY_NOT_FOUND(false, 2700, "문의를 찾을 수 없습니다."),
+
     // 3000 : Database / Server 오류
     // common
     DATABASE_ERROR(false, 3000, "데이터베이스 연결에 실패하였습니다."),

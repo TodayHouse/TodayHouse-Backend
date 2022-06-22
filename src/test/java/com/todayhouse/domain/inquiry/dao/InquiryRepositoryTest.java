@@ -3,7 +3,7 @@ package com.todayhouse.domain.inquiry.dao;
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.inquiry.domain.Answer;
 import com.todayhouse.domain.inquiry.domain.Inquiry;
-import com.todayhouse.domain.inquiry.dto.InquirySearchRequest;
+import com.todayhouse.domain.inquiry.dto.request.InquirySearchRequest;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.user.domain.User;
 import org.junit.jupiter.api.AfterEach;

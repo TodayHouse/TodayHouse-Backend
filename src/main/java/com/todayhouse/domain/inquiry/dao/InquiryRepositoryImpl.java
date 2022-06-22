@@ -3,7 +3,7 @@ package com.todayhouse.domain.inquiry.dao;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.todayhouse.domain.inquiry.domain.Inquiry;
-import com.todayhouse.domain.inquiry.dto.InquirySearchRequest;
+import com.todayhouse.domain.inquiry.dto.request.InquirySearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;

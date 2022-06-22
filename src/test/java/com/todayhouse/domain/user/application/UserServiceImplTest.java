@@ -164,7 +164,7 @@ class UserServiceImplTest {
         assertThrows(SignupPasswordException.class, () -> userService.updatePassword(request));
     }
 
-    private void checkEmailInvalidation(String email) {
+    public static void checkEmailInvalidation(String email) {
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
