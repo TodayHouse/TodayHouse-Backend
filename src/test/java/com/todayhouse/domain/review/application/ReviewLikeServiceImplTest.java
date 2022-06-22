@@ -6,6 +6,7 @@ import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.domain.ReviewLike;
 import com.todayhouse.domain.review.exception.InvalidReviewLikeException;
 import com.todayhouse.domain.review.exception.ReviewLikeDuplicationException;
+import com.todayhouse.domain.review.exception.ReviewLikeNotFoundException;
 import com.todayhouse.domain.review.exception.ReviewNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
@@ -158,7 +159,7 @@ class ReviewLikeServiceImplTest {
         when(reviewRepository.findById(anyLong())).thenReturn(Optional.ofNullable(review));
         when(reviewLikeRepository.findByUserAndReview(user, review))
                 .thenReturn(Optional.ofNullable(null));
-        assertThrows(InvalidReviewLikeException.class, () -> reviewLikeService.deleteReviewLike(1L));
+        assertThrows(ReviewLikeNotFoundException.class, () -> reviewLikeService.deleteReviewLike(1L));
     }
 
     @Test

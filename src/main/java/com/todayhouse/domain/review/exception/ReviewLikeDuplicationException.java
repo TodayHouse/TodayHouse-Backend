@@ -5,6 +5,6 @@ import com.todayhouse.global.error.BaseResponseStatus;
 
 public class ReviewLikeDuplicationException extends BaseException {
     public ReviewLikeDuplicationException() {
-        super(BaseResponseStatus.REVIEW_DUPLICATE);
+        super(BaseResponseStatus.REVIEW_LIKE_DUPLICATE);
     }
 }
