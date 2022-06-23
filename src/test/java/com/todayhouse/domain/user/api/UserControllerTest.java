@@ -41,6 +41,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -268,8 +269,12 @@ class UserControllerTest extends IntegrationBase {
                 .birth("2022-01-01")
                 .gender("m")
                 .nickname("test")
+                .profileImage("https://oldImg.jpg")
                 .introduction("hello world").build();
+
         userRepository.save(oldUser);
+        when(fileService.changeUrlToFileName(anyString())).thenReturn("oldImg");
+        doNothing().when(fileService).deleteOne("oldImg");
         when(fileService.uploadImage(any(MultipartFile.class))).thenReturn("byteImg");
         when(fileService.changeFileNameToUrl(anyString())).thenReturn(newImgUrl);
 

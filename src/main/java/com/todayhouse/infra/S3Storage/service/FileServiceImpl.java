@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import com.todayhouse.global.error.BaseException;
+import com.todayhouse.infra.S3Storage.exception.InvalidUrlException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import static com.todayhouse.global.error.BaseResponseStatus.IMAGE_FILE_IO_EXCEPTION;
 import static com.todayhouse.global.error.BaseResponseStatus.INVALID_FILE_EXTENSION_EXCEPTION;
@@ -94,5 +96,15 @@ public class FileServiceImpl implements FileService {
     @Override
     public String changeFileNameToUrl(String fileName) {
         return amazonS3.getUrl(bucketName, fileName).toString();
+    }
+
+    @Override
+    public String changeUrlToFileName(String url) {
+        String pattern = "^https://.+/.+$";
+        if (!Pattern.matches(pattern, url))
+            throw new InvalidUrlException();
+
+        int idx = url.lastIndexOf("/") + 1;
+        return url.substring(idx);
     }
 }

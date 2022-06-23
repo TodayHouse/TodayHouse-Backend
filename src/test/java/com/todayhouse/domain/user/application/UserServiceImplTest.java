@@ -32,8 +32,7 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -175,6 +174,7 @@ class UserServiceImplTest {
     void updateUserInfo() {
         String email = "test@test";
         String uploadImg = "newImg";
+        String oldImg = "oldImg";
         String newImgUrl = "newImg.com";
         String newNickname = "newNickname";
         MultipartFile profileImg = mock(MultipartFile.class);
@@ -183,7 +183,7 @@ class UserServiceImplTest {
                 .gender("male")
                 .birth("2022-1-1")
                 .nickname("oldNickname")
-                .profileImage("oldImg")
+                .profileImage("https://todayhouse/oldImg")
                 .introduction("hello world!").build();
 
         User newUser = User.builder()
@@ -196,6 +196,8 @@ class UserServiceImplTest {
         checkEmailInvalidation(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(oldUser));
         when(userRepository.existsByNickname(anyString())).thenReturn(false);
+        when(fileService.changeUrlToFileName(anyString())).thenReturn(oldImg);
+        doNothing().when(fileService).deleteOne(anyString());
         when(fileService.uploadImage(any(MultipartFile.class))).thenReturn(uploadImg);
         when(fileService.changeFileNameToUrl(uploadImg)).thenReturn(newImgUrl);
 
@@ -205,7 +207,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("중복된 닉네임으로 유저 정보 변경")
+    @DisplayName("다른 중복된 닉네임으로 유저 정보 변경")
     void updateUserInfoNicknameDuplicateException() {
         String email = "test@test";
         User newUser = User.builder()

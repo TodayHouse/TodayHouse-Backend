@@ -94,6 +94,7 @@ public class UserServiceImpl implements UserService {
         User user = getValidUser();
         updateUserProfile(profileImg, request);
         user.updateUserInfo(request);
+        deleteUserProfile(user);
     }
 
     private void validateSignupRequest(UserSignupRequest request) {
@@ -129,6 +130,11 @@ public class UserServiceImpl implements UserService {
             return;
         String newImgUrl = fileService.changeFileNameToUrl(fileService.uploadImage(newImg));
         user.updateProfileImage(newImgUrl);
+    }
+
+    private void deleteUserProfile(User user){
+        String oldImgUrl = fileService.changeUrlToFileName(user.getProfileImage());
+        fileService.deleteOne(oldImgUrl);
     }
 
     //테스트 계정
