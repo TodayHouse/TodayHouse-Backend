@@ -93,8 +93,8 @@ public class UserServiceImpl implements UserService {
         checkNicknameDuplication(request.getNickname());
         User user = getValidUser();
         updateUserProfile(profileImg, request);
-        user.updateUserInfo(request);
         deleteUserProfile(user);
+        user.updateUserInfo(request);
     }
 
     private void validateSignupRequest(UserSignupRequest request) {
@@ -132,7 +132,9 @@ public class UserServiceImpl implements UserService {
         user.updateProfileImage(newImgUrl);
     }
 
-    private void deleteUserProfile(User user){
+    private void deleteUserProfile(User user) {
+        if (ObjectUtils.isEmpty(user.getProfileImage()))
+            return;
         String oldImgUrl = fileService.changeUrlToFileName(user.getProfileImage());
         fileService.deleteOne(oldImgUrl);
     }

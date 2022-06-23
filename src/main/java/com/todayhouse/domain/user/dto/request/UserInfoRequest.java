@@ -13,7 +13,7 @@ import javax.validation.constraints.Pattern;
 public class UserInfoRequest {
     String email;
     String birth;
-    @Pattern(regexp = "^m|f|$", message = "남자는 m, 여지는 f로 입력해주세요.")
+    @Pattern(regexp = "^m|f|$", message = "남자는 m, 여자는 f로 입력해주세요.")
     String gender;
     String nickname;
     String introduction;
