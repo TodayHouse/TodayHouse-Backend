@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -43,8 +44,7 @@ public class User implements UserDetails {
     @Column(length = 15, unique = true)
     private String nickname;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+    private String gender;
 
     private String birth;
 
@@ -123,5 +123,22 @@ public class User implements UserDetails {
     public void createSeller(SellerRequest request) {
         Seller seller = request.toEntity();
         this.seller = seller;
+    }
+
+    public void updateProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public void updateUserInfo(User user) {
+        if (!ObjectUtils.isEmpty(user.getBirth()))
+            this.birth = user.getBirth();
+        if (!ObjectUtils.isEmpty(user.getGender()))
+            this.gender = user.getGender();
+        if (!ObjectUtils.isEmpty(user.getNickname()))
+            this.nickname = user.getNickname();
+        if (!ObjectUtils.isEmpty(user.getIntroduction()))
+            this.introduction = user.getIntroduction();
+        if (!ObjectUtils.isEmpty(user.profileImage))
+            this.profileImage = user.getProfileImage();
     }
 }

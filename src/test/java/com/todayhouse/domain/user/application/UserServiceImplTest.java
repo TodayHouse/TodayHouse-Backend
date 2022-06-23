@@ -9,8 +9,10 @@ import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.exception.SignupPasswordException;
+import com.todayhouse.domain.user.exception.UserNicknameExistException;
 import com.todayhouse.domain.user.exception.WrongPasswordException;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
+import com.todayhouse.infra.S3Storage.service.FileServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -40,6 +43,9 @@ class UserServiceImplTest {
 
     @Mock
     UserRepository userRepository;
+
+    @Mock
+    FileServiceImpl fileService;
 
     @Mock
     BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -162,6 +168,82 @@ class UserServiceImplTest {
                 .password1("abcde").password2("abcdea")
                 .build();
         assertThrows(SignupPasswordException.class, () -> userService.updatePassword(request));
+    }
+
+    @Test
+    @DisplayName("유저 정보 수정")
+    void updateUserInfo() {
+        String email = "test@test";
+        String uploadImg = "newImg";
+        String newImgUrl = "newImg.com";
+        String newNickname = "newNickname";
+        MultipartFile profileImg = mock(MultipartFile.class);
+        User oldUser = User.builder()
+                .email(email)
+                .gender("male")
+                .birth("2022-1-1")
+                .nickname("oldNickname")
+                .profileImage("oldImg")
+                .introduction("hello world!").build();
+
+        User newUser = User.builder()
+                .email(email)
+                .gender("female")
+                .birth("2022-1-11")
+                .nickname(newNickname)
+                .introduction("hello world!^^").build();
+
+        checkEmailInvalidation(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(oldUser));
+        when(userRepository.existsByNickname(anyString())).thenReturn(false);
+        when(fileService.uploadImage(any(MultipartFile.class))).thenReturn(uploadImg);
+        when(fileService.changeFileNameToUrl(uploadImg)).thenReturn(newImgUrl);
+
+        userService.updateUserInfo(profileImg, newUser);
+        assertThat(oldUser).usingRecursiveComparison().isEqualTo(newUser);
+        assertThat(oldUser.getProfileImage()).isEqualTo(newImgUrl);
+    }
+
+    @Test
+    @DisplayName("중복된 닉네임으로 유저 정보 변경")
+    void updateUserInfoNicknameDuplicateException() {
+        String email = "test@test";
+        User newUser = User.builder()
+                .email(email)
+                .nickname("duplicate").build();
+
+        when(userRepository.existsByNickname(anyString())).thenReturn(true);
+
+        assertThrows(UserNicknameExistException.class, () ->
+                userService.updateUserInfo(null, newUser));
+    }
+
+    @Test
+    @DisplayName("유저 정보 수정에 MultipartFile은 null로 요청")
+    void updateUserInfoFileNull() {
+        String email = "test@test";
+        User oldUser = User.builder()
+                .email(email)
+                .gender("m")
+                .birth("2022-1-1")
+                .nickname("oldNickname")
+                .profileImage("oldImg")
+                .introduction("hello world!").build();
+
+        User newUser = User.builder()
+                .email(email)
+                .birth("")
+                .gender("")
+                .nickname("")
+                .introduction("").build();
+
+        checkEmailInvalidation(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(oldUser));
+        when(userRepository.existsByNickname(anyString())).thenReturn(false);
+
+        userService.updateUserInfo(null, newUser);
+        assertThat(oldUser.getGender()).isEqualTo("m");
+        assertThat(oldUser.getProfileImage()).isEqualTo("oldImg");
     }
 
     private void checkEmailInvalidation(String email) {

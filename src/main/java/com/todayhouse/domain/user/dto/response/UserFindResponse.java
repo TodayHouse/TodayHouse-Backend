@@ -1,7 +1,6 @@
 package com.todayhouse.domain.user.dto.response;
 
 import com.todayhouse.domain.user.domain.AuthProvider;
-import com.todayhouse.domain.user.domain.Gender;
 import com.todayhouse.domain.user.domain.User;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,7 +14,7 @@ public class UserFindResponse {
     private String nickname;
     private AuthProvider authProvider;
     private String birth;
-    private Gender gender;
+    private String gender;
     private String profileImage;
     private String introduction;
     private boolean agreeAge;

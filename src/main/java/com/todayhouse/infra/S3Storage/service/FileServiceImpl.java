@@ -86,11 +86,13 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void deleteOne(String fileName) {
+        if (fileName.isEmpty())
+            return;
         amazonS3.deleteObject(bucketName, fileName);
     }
 
     @Override
-    public String changeFileNameToUrl(String fileName){
+    public String changeFileNameToUrl(String fileName) {
         return amazonS3.getUrl(bucketName, fileName).toString();
     }
 }

@@ -5,6 +5,7 @@ import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.dto.response.UserLoginResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -22,4 +23,6 @@ public interface UserService {
     UserLoginResponse login(UserLoginRequest request);
 
     void updatePassword(PasswordUpdateRequest request);
+
+    void updateUserInfo(MultipartFile profileImg, User request);
 }

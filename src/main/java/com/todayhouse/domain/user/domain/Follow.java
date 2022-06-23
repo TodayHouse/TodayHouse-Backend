@@ -33,12 +33,4 @@ public class Follow {
         this.from = from;
         this.to = to;
     }
-
-    @Override
-    public String toString() {
-        return "Follow{" +
-                "id=" + id +
-                ", createdAt=" + createdAt +
-                '}';
-    }
 }

@@ -9,11 +9,14 @@ import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.dto.response.UserLoginResponse;
 import com.todayhouse.domain.user.exception.*;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
+import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
@@ -23,6 +26,7 @@ import java.util.Optional;
 @Transactional
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private final FileService fileService;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -80,17 +84,23 @@ public class UserServiceImpl implements UserService {
     public void updatePassword(PasswordUpdateRequest request) {
         if (!request.getPassword1().equals(request.getPassword2()))
             throw new SignupPasswordException();
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        User user = getValidUser();
         user.updatePassword(request.getPassword1());
+    }
+
+    @Override
+    public void updateUserInfo(MultipartFile profileImg, User request) {
+        checkNicknameDuplication(request.getNickname());
+        User user = getValidUser();
+        updateUserProfile(profileImg, request);
+        user.updateUserInfo(request);
     }
 
     private void validateSignupRequest(UserSignupRequest request) {
         if (userRepository.existsByEmailAndNicknameIsNotNull(request.getEmail()))
             throw new UserEmailExistExcecption();
 
-        if (userRepository.existsByNickname(request.getNickname()))
-            throw new UserNicknameExistException();
+        checkNicknameDuplication(request.getNickname());
 
         if (!request.getPassword1().equals(request.getPassword2()))
             throw new SignupPasswordException();
@@ -102,6 +112,23 @@ public class UserServiceImpl implements UserService {
                     u.updateUser(request.toEntity());
                     return u;
                 }).orElseGet(() -> userRepository.save(request.toEntity()));
+    }
+
+    private User getValidUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+    }
+
+    private void checkNicknameDuplication(String nickname) {
+        if (userRepository.existsByNickname(nickname))
+            throw new UserNicknameExistException();
+    }
+
+    private void updateUserProfile(MultipartFile newImg, User user) {
+        if (ObjectUtils.isEmpty(newImg))
+            return;
+        String newImgUrl = fileService.changeFileNameToUrl(fileService.uploadImage(newImg));
+        user.updateProfileImage(newImgUrl);
     }
 
     //테스트 계정

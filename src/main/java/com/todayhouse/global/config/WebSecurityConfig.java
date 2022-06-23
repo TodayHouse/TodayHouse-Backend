@@ -66,11 +66,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests() // 요청에 대한 사용권한 체크
                 .antMatchers(HttpMethod.POST, "/categories")
                 .hasAnyRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/categories/*")
+                .antMatchers(HttpMethod.DELETE, "/categories/**")
                 .hasAnyRole("ADMIN")
                 .antMatchers(HttpMethod.PATCH, "/categories")
                 .hasAnyRole("ADMIN")
-                .antMatchers(HttpMethod.POST, "/follows", "/sellers", "/products/**", "/stories/**", "/options/**", "/orders/**", "/reviews/**")
+                .antMatchers(HttpMethod.POST, "/follows", "/sellers", "/products/**", "/stories/**",
+                        "/options/**", "/orders/**", "/reviews/**", "/users/info")
                 .hasAnyRole("USER", "ADMIN") // user, admin post 요청만 허용
                 .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**", "/options/**", "/reviews/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin delete 요청만 허용

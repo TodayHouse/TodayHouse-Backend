@@ -10,29 +10,38 @@ import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
+import com.todayhouse.domain.user.dto.request.UserInfoRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.dto.response.UserFindResponse;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.cookie.CookieUtils;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
+import com.todayhouse.infra.S3Storage.service.FileServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.Cookie;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -55,6 +64,9 @@ class UserControllerTest extends IntegrationBase {
 
     @MockBean
     Principal principal;
+
+    @MockBean
+    FileServiceImpl fileService;
 
     @BeforeEach
     void clearRepository() {
@@ -238,5 +250,89 @@ class UserControllerTest extends IntegrationBase {
                         .cookie(cookie))
                 .andExpect(status().isOk())
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("유저 정보 변경")
+    void updateUserInfo() throws Exception {
+        String url = "http://localhost:8080/users/info";
+        String email = "test@test";
+        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.USER));
+        String newImgUrl = "newImg.com";
+        UserInfoRequest request = new UserInfoRequest(email, "2022-01-11", "f", "new", "hello");
+        MockMultipartFile json = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile image = new MockMultipartFile("file", "image.jpa", "image/jpeg", "<<jpeg data>>".getBytes(StandardCharsets.UTF_8));
+
+        User oldUser = User.builder()
+                .email(email)
+                .birth("2022-01-01")
+                .gender("m")
+                .nickname("test")
+                .introduction("hello world").build();
+        userRepository.save(oldUser);
+        when(fileService.uploadImage(any(MultipartFile.class))).thenReturn("byteImg");
+        when(fileService.changeFileNameToUrl(anyString())).thenReturn(newImgUrl);
+
+        MvcResult mvcResult = mockMvc.perform(multipart(url)
+                        .file(image)
+                        .file(json)
+                        .contentType("multipart/mixed")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        User user = userRepository.findByEmail(email).orElse(null);
+        assertTrue(objectMapper.convertValue(response.getResult(), Boolean.class));
+        assertThat(request).usingRecursiveComparison().isEqualTo(user);
+        assertThat(user.getProfileImage()).isEqualTo(newImgUrl);
+    }
+
+    @Test
+    @DisplayName("UserInfoRequest gender 유효성 검사")
+    void userInfoRequestValid() throws Exception {
+        String url = "http://localhost:8080/users/info";
+        String email = "test@test";
+        String jwt = jwtTokenProvider.createToken(email, Collections.singletonList(Role.USER));
+        UserInfoRequest request1 = new UserInfoRequest(null, null, "", null, null);
+        UserInfoRequest request2 = new UserInfoRequest(null, null, " ", null, null);
+        UserInfoRequest request3 = new UserInfoRequest(null, null, "mf", null, null);
+        MockMultipartFile json1 = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request1).getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile json2 = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request2).getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile json3 = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsString(request3).getBytes(StandardCharsets.UTF_8));
+        User oldUser = User.builder()
+                .email(email)
+                .birth("2022-01-01")
+                .gender("m")
+                .nickname("test")
+                .introduction("hello world").build();
+        userRepository.save(oldUser);
+
+        mockMvc.perform(multipart(url)
+                        .file(json1)
+                        .contentType("multipart/mixed")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(multipart(url)
+                        .file(json2)
+                        .contentType("multipart/mixed")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().is4xxClientError());
+
+        mockMvc.perform(multipart(url)
+                        .file(json3)
+                        .contentType("multipart/mixed")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().is4xxClientError());
     }
 }
