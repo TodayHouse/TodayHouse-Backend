@@ -26,37 +26,35 @@ public class InquiryResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime answerCreatedAt;
 
-    public InquiryResponse(Inquiry inquiry, long myId){
+    public InquiryResponse(Inquiry inquiry, Long myId) {
         boolean isValid = isValidContent(inquiry, myId);
         this.isBuy = inquiry.isBuy();
         this.isAnswered = false;
         this.category = inquiry.getCategory();
-        this.content = isValid?inquiry.getContent():"비밀글입니다.";
+        this.content = isValid ? inquiry.getContent() : "비밀글입니다.";
         this.userName = getValidUserName(inquiry.getUser(), myId);
         this.inquiryCreatedAt = inquiry.getCreatedAt();
 
-        if(inquiry.getAnswer()!=null){
+        if (inquiry.getAnswer() != null) {
             Answer answer = inquiry.getAnswer();
             this.isAnswered = true;
-            this.answer = isValid?answer.getContent():"비밀글입니다.";
+            this.answer = isValid ? answer.getContent() : "비밀글입니다.";
             this.answerName = answer.getName();
             this.answerCreatedAt = answer.getCreatedAt();
         }
     }
 
-    private boolean isValidContent(Inquiry inquiry, long myId){
-        if(inquiry.getUser().getId()==myId || !inquiry.isSecret())
-            return true;
-        return false;
+    private boolean isValidContent(Inquiry inquiry, Long myId) {
+        return inquiry.getUser().getId() == myId || !inquiry.isSecret();
     }
 
-    private String getValidUserName(User user, long myId){
+    private String getValidUserName(User user, Long myId) {
         String userName = user.getNickname();
-        if(user.getId()==myId)
+        if (user.getId() == myId)
             return userName;
         StringBuilder builder = new StringBuilder(userName);
-        for(int i=builder.length()-1;i>builder.length()/2;i--){
-            builder.setCharAt(i,'*');
+        for (int i = builder.length() - 1; i > builder.length() / 2; i--) {
+            builder.setCharAt(i, '*');
         }
         return String.valueOf(builder);
     }

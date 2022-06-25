@@ -35,7 +35,7 @@ public class Inquiry extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "answer_id")
     private Answer answer;
 
@@ -55,15 +55,15 @@ public class Inquiry extends BaseTimeEntity {
         this.answer = answer;
     }
 
-    public void setUser(User user){
+    public void setUser(User user) {
         this.user = user;
     }
 
-    public void setAnswer(Answer answer){
+    public void setAnswer(Answer answer) {
         this.answer = answer;
     }
 
-    public void setProduct(Product product){
+    public void setProduct(Product product) {
         this.product = product;
     }
 }

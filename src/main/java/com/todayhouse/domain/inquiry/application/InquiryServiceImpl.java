@@ -44,13 +44,11 @@ public class InquiryServiceImpl implements InquiryService {
     @Override
     public void deleteInquiry(Long inquiryId) {
         User user = getValidUser();
-        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(InquiryNotFoundException::new);
+        Inquiry inquiry = inquiryRepository.findByIdWithAnswer(inquiryId).orElseThrow(InquiryNotFoundException::new);
         if (inquiry.getUser() != user) {
             throw new InvalidInquiryDeleteException();
         }
         inquiryRepository.delete(inquiry);
-
-        //answer 삭제 추가 구현
     }
 
     private User getValidUser() {
