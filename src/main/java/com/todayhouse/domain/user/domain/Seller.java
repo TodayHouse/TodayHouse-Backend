@@ -36,18 +36,4 @@ public class Seller {
 
     @Column(name = "business_address")
     private String businessAddress;
-
-    @Override
-    public String toString() {
-        return "Seller{" +
-                "id=" + id +
-                ", companyName='" + companyName + '\'' +
-                ", brandName='" + brand + '\'' +
-                ", representative='" + representative + '\'' +
-                ", customerCenter='" + customerCenter + '\'' +
-                ", email='" + email + '\'' +
-                ", registrationNum='" + registrationNum + '\'' +
-                ", businessAddress='" + businessAddress + '\'' +
-                '}';
-    }
 }

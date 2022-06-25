@@ -4,6 +4,7 @@ import com.todayhouse.domain.inquiry.dao.InquiryRepository;
 import com.todayhouse.domain.inquiry.domain.Inquiry;
 import com.todayhouse.domain.inquiry.dto.request.InquirySearchRequest;
 import com.todayhouse.domain.inquiry.exception.InquiryNotFoundException;
+import com.todayhouse.domain.inquiry.exception.InvalidInquiryDeleteException;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
@@ -111,8 +112,11 @@ class InquiryServiceImplTest {
     @Test
     @DisplayName("문의 삭제")
     void deleteInquiry() {
+        User user = mock(User.class);
         Inquiry inquiry = mock(Inquiry.class);
-
+        setSecurityName("test");
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(inquiry.getUser()).thenReturn(user);
         when(inquiryRepository.findById(anyLong())).thenReturn(Optional.of(inquiry));
         doNothing().when(inquiryRepository).delete(inquiry);
 
@@ -123,9 +127,26 @@ class InquiryServiceImplTest {
     @Test
     @DisplayName("존재하지 않는 문의 삭제는 오류")
     void deleteInquiryNotFoundException() {
+        User user = mock(User.class);
+        setSecurityName("test");
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(inquiryRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
         assertThrows(InquiryNotFoundException.class, () -> inquiryService.deleteInquiry(1L));
+    }
+
+    @Test
+    @DisplayName("자신이 작성하지 않는 문의는 삭제 불가")
+    void deleteInquiryInvalid(){
+        User user1 = mock(User.class);
+        User user2 = mock(User.class);
+        Inquiry inquiry = mock(Inquiry.class);
+        setSecurityName("test");
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
+        when(inquiryRepository.findById(anyLong())).thenReturn(Optional.of(inquiry));
+        when(inquiry.getUser()).thenReturn(user2);
+
+        assertThrows(InvalidInquiryDeleteException.class, ()->inquiryService.deleteInquiry(1L));
     }
 
     private void setSecurityName(String email) {

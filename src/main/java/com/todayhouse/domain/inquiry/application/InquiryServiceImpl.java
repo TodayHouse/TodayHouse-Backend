@@ -4,6 +4,7 @@ import com.todayhouse.domain.inquiry.dao.InquiryRepository;
 import com.todayhouse.domain.inquiry.domain.Inquiry;
 import com.todayhouse.domain.inquiry.dto.request.InquirySearchRequest;
 import com.todayhouse.domain.inquiry.exception.InquiryNotFoundException;
+import com.todayhouse.domain.inquiry.exception.InvalidInquiryDeleteException;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.exception.ProductNotFoundException;
@@ -27,8 +28,7 @@ public class InquiryServiceImpl implements InquiryService {
 
     @Override
     public Inquiry saveInquiry(Inquiry inquiry, Long productId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        User user = getValidUser();
         Product product = productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
         inquiry.setUser(user);
         inquiry.setProduct(product);
@@ -43,10 +43,18 @@ public class InquiryServiceImpl implements InquiryService {
 
     @Override
     public void deleteInquiry(Long inquiryId) {
-        inquiryRepository.delete(
-                inquiryRepository.findById(inquiryId).orElseThrow(InquiryNotFoundException::new)
-        );
+        User user = getValidUser();
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(InquiryNotFoundException::new);
+        if (inquiry.getUser() != user) {
+            throw new InvalidInquiryDeleteException();
+        }
+        inquiryRepository.delete(inquiry);
 
         //answer 삭제 추가 구현
+    }
+
+    private User getValidUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
     }
 }

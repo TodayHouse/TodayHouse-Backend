@@ -71,6 +71,7 @@ public enum BaseResponseStatus {
 
     // inquiry
     INQUIRY_NOT_FOUND(false, 2700, "문의를 찾을 수 없습니다."),
+    INQUIRY_CANNOT_DELETE(false, 2701, "자신이 작성한 문의만 삭제 가능합니다."),
 
     // 3000 : Database / Server 오류
     // common

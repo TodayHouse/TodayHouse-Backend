@@ -24,8 +24,8 @@ public class Inquiry extends BaseTimeEntity {
     @Column(name = "is_buy")
     private boolean isBuy;
 
-    @Column(name = "is_private")
-    private boolean isPrivate;
+    @Column(name = "is_secret")
+    private boolean isSecret;
 
     private String category;
 
@@ -44,10 +44,10 @@ public class Inquiry extends BaseTimeEntity {
     private Product product;
 
     @Builder
-    public Inquiry(boolean isBuy, boolean isPrivate, String category, String content,
+    public Inquiry(boolean isBuy, boolean isSecret, String category, String content,
                    User user, Product product, Answer answer) {
         this.isBuy = isBuy;
-        this.isPrivate = isPrivate;
+        this.isSecret = isSecret;
         this.content = content;
         this.category = category;
         this.user = user;
