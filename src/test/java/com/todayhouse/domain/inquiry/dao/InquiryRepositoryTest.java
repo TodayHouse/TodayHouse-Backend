@@ -100,6 +100,17 @@ class InquiryRepositoryTest extends DataJpaBase {
         assertThat(content.get(0).getAnswer().getContent()).isEqualTo("answer");
     }
 
+    @Test
+    @DisplayName("작성된 문의가 없음")
+    void findInquiryZero() {
+        InquirySearchRequest request = new InquirySearchRequest(null, false);
+        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        Page<Inquiry> inquires = inquiryRepository.findAllInquiries(request, pageRequest);
+
+        assertThat(inquires.getTotalElements()).isZero();
+        assertThat(inquires.getContent().size()).isZero();
+    }
+
     private void setSecurityName(String email) {
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);

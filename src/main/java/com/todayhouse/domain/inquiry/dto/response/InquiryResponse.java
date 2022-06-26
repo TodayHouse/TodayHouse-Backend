@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InquiryResponse {
+    private Long id;
     private boolean isBuy;
     private boolean isAnswered;
     private String category;
@@ -28,6 +29,7 @@ public class InquiryResponse {
 
     public InquiryResponse(Inquiry inquiry, Long myId) {
         boolean isValid = isValidContent(inquiry, myId);
+        this.id = inquiry.getId();
         this.isBuy = inquiry.isBuy();
         this.isAnswered = false;
         this.category = inquiry.getCategory();

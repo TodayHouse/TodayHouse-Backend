@@ -4,6 +4,7 @@ import com.todayhouse.domain.inquiry.dao.AnswerRepository;
 import com.todayhouse.domain.inquiry.dao.InquiryRepository;
 import com.todayhouse.domain.inquiry.domain.Answer;
 import com.todayhouse.domain.inquiry.domain.Inquiry;
+import com.todayhouse.domain.inquiry.exception.AnswerNotFoundException;
 import com.todayhouse.domain.inquiry.exception.InvalidSellerAnswerException;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
@@ -104,6 +105,16 @@ class AnswerServiceImplTest {
         when(product.getSeller()).thenReturn(seller2);
 
         assertThrows(InvalidSellerAnswerException.class, () -> answerService.deleteAnswer(1L, 1L));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 answerId로 삭제")
+    void deleteAnswerNotFoundAnswer() {
+        String email = "test@test";
+        checkValidSeller(email);
+        when(answerRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+
+        assertThrows(AnswerNotFoundException.class, () -> answerService.deleteAnswer(1L, 1L));
     }
 
     private void setSecurityName(String email) {
