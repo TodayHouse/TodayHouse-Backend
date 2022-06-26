@@ -16,5 +16,5 @@ public interface ReviewService {
 
     boolean canWriteReview(Long productId);
 
-    void deleteReview(Long productId);
+    void deleteReview(Long reviewId);
 }

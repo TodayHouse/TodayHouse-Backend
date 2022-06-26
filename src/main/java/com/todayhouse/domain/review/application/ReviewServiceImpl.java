@@ -81,12 +81,12 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     private synchronized Review synchSaveReview(Review reviewWithUserAndProduct) {
-        checkReviewDuplication(reviewWithUserAndProduct.getUser().getId(), reviewWithUserAndProduct.getProduct().getId());
+        checkReviewDuplication(reviewWithUserAndProduct.getUser(), reviewWithUserAndProduct.getProduct().getId());
         return reviewRepository.save(reviewWithUserAndProduct);
     }
 
-    private void checkReviewDuplication(Long userId, Long productId) {
-        reviewRepository.findByUserIdAndProductId(userId, productId)
+    private void checkReviewDuplication(User user, Long productId) {
+        reviewRepository.findByUserAndProductId(user, productId)
                 .ifPresent(r -> {
                     throw new ReviewDuplicateException();
                 });
@@ -112,7 +112,7 @@ public class ReviewServiceImpl implements ReviewService {
         User user = getValidUser();
         if (!isOrderCompleteUser(user.getId(), productId))
             return false;
-        Optional<Review> review = reviewRepository.findByUserIdAndProductId(user.getId(), productId);
+        Optional<Review> review = reviewRepository.findByUserAndProductId(user, productId);
         return review.isEmpty();
     }
 
@@ -122,9 +122,9 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public void deleteReview(Long productId) {
+    public void deleteReview(Long reviewId) {
         User user = getValidUser();
-        Review review = reviewRepository.findByUserIdAndProductId(user.getId(), productId).orElseThrow(ReviewNotFoundException::new);
+        Review review = reviewRepository.findByIdAndUser(reviewId, user).orElseThrow(ReviewNotFoundException::new);
         deleteImage(review);
         reviewRepository.deleteById(review.getId());
     }

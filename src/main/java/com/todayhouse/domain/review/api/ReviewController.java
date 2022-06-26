@@ -66,9 +66,9 @@ public class ReviewController {
         return new BaseResponse<>(canWrite);
     }
 
-    @DeleteMapping("/{productId}")
-    public BaseResponse deleteReview(@PathVariable("productId") Long productId) {
-        reviewService.deleteReview(productId);
+    @DeleteMapping("/{reviewId}")
+    public BaseResponse deleteReview(@PathVariable("reviewId") Long reviewId) {
+        reviewService.deleteReview(reviewId);
         return new BaseResponse("리뷰가 삭제되었습니다.");
     }
 

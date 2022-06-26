@@ -133,7 +133,7 @@ class ReviewControllerTest extends IntegrationBase {
                 .andReturn();
 
         BaseResponse response = getResponseFromMvcResult(mvcResult);
-        Review review = reviewRepository.findByUserIdAndProductId(user1.getId(), product1.getId()).orElse(null);
+        Review review = reviewRepository.findByUserAndProductId(user1, product1.getId()).orElse(null);
         assertThat((Integer) response.getResult()).isEqualTo(review.getId().intValue());
         assertThat(review.getReviewImageUrl()).isEqualTo("img.com");
     }
@@ -334,11 +334,11 @@ class ReviewControllerTest extends IntegrationBase {
     @DisplayName("리뷰 삭제하기")
     void deleteReview() throws Exception {
         String imgUrl = "s3.img.com";
-        reviewRepository.save(Review.builder()
+        Review save = reviewRepository.save(Review.builder()
                 .user(user1).rating(5).product(product1).reviewImage(imgUrl)
                 .build());
         String jwt = tokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
-        String url = "http://localhost:8080/reviews/" + product1.getId().intValue();
+        String url = "http://localhost:8080/reviews/" + save.getId().intValue();
         doNothing().when(fileService).deleteOne(anyString());
 
         mockMvc.perform(delete(url)
@@ -346,7 +346,7 @@ class ReviewControllerTest extends IntegrationBase {
                 .andExpect(status().isOk());
 
         verify(fileService).deleteOne(imgUrl);
-        Optional<Review> review = reviewRepository.findByUserIdAndProductId(user1.getId(), product1.getId());
+        Optional<Review> review = reviewRepository.findByUserAndProductId(user1, product1.getId());
         assertTrue(review.isEmpty());
     }
 

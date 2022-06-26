@@ -101,7 +101,7 @@ class ReviewServiceImplTest {
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-        when(reviewRepository.findByUserIdAndProductId(userId, productId)).thenReturn(Optional.ofNullable(null));
+        when(reviewRepository.findByUserAndProductId(user, productId)).thenReturn(Optional.ofNullable(null));
         isCompletedOrderTrue();
         when(fileService.uploadImage(file)).thenReturn("byteImage");
         when(fileService.changeFileNameToUrl(anyString())).thenReturn(url);
@@ -174,7 +174,7 @@ class ReviewServiceImplTest {
         setSecurityName(email);
         isCompletedOrderTrue();
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(reviewRepository.findByUserIdAndProductId(userId, productId)).thenReturn(Optional.ofNullable(null));
+        when(reviewRepository.findByUserAndProductId(user, productId)).thenReturn(Optional.ofNullable(null));
 
         assertTrue(reviewService.canWriteReview(productId));
     }
@@ -195,7 +195,7 @@ class ReviewServiceImplTest {
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         isCompletedOrderTrue();
-        when(reviewRepository.findByUserIdAndProductId(userId, productId)).thenReturn(Optional.of(mock(Review.class)));
+        when(reviewRepository.findByUserAndProductId(user, productId)).thenReturn(Optional.of(mock(Review.class)));
 
         assertFalse(reviewService.canWriteReview(productId));
     }
@@ -220,10 +220,10 @@ class ReviewServiceImplTest {
         ReflectionTestUtils.setField(review, "id", reviewId);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(user.getId()).thenReturn(userId);
-        when(reviewRepository.findByUserIdAndProductId(userId, productId)).thenReturn(Optional.of(review));
+        when(reviewRepository.findByIdAndUser(reviewId, user)).thenReturn(Optional.of(review));
         doNothing().when(fileService).deleteOne(anyString());
 
-        reviewService.deleteReview(productId);
+        reviewService.deleteReview(reviewId);
 
         verify(reviewRepository).deleteById(reviewId);
     }
@@ -236,9 +236,9 @@ class ReviewServiceImplTest {
         ReflectionTestUtils.setField(review, "id", reviewId);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(user.getId()).thenReturn(userId);
-        when(reviewRepository.findByUserIdAndProductId(userId, productId)).thenReturn(Optional.of(review));
+        when(reviewRepository.findByIdAndUser(reviewId, user)).thenReturn(Optional.of(review));
 
-        reviewService.deleteReview(productId);
+        reviewService.deleteReview(reviewId);
 
         verify(reviewRepository).deleteById(reviewId);
     }

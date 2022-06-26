@@ -170,7 +170,7 @@ class ReviewRepositoryTest extends DataJpaBase {
     @Test
     @DisplayName("Review를 userId, productId 로 찾기")
     void findByUserId() {
-        Review review = reviewRepository.findByUserIdAndProductId(u1.getId(), p1.getId()).orElse(null);
+        Review review = reviewRepository.findByUserAndProductId(u1, p1.getId()).orElse(null);
 
         assertThat(review).usingRecursiveComparison().isEqualTo(r1);
     }
