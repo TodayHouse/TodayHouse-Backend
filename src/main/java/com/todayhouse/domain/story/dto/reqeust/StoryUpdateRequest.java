@@ -1,14 +1,16 @@
 package com.todayhouse.domain.story.dto.reqeust;
 
 import com.todayhouse.domain.story.domain.Story;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class StoryUpdateRequest {
     @Length(min = 1, max = 50, message = "제목은 1자 이상 50자 이하로 입력해주세요.")
     private String title;

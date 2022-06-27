@@ -1,11 +1,13 @@
 package com.todayhouse.domain.story.dto.response;
 
 import com.todayhouse.domain.user.domain.User;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@NoArgsConstructor
 public class ReplyGetResponse {
     private Long id;
     private String content;
@@ -20,7 +22,8 @@ public class ReplyGetResponse {
         this.replyUserDto = new Writer(user.getId(), user.getNickname(), user.getProfileImage());
     }
 
-    @Data
+    @Getter
+    @NoArgsConstructor
     private static class Writer {
         private Long id;
         private String nickname;
