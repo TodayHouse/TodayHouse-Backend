@@ -1,11 +1,9 @@
 package com.todayhouse.domain.story.application;
 
 import com.todayhouse.domain.image.application.ImageService;
+import com.todayhouse.domain.image.domain.Image;
 import com.todayhouse.domain.story.dao.StoryRepository;
-import com.todayhouse.domain.story.domain.FamilyType;
-import com.todayhouse.domain.story.domain.ResiType;
 import com.todayhouse.domain.story.domain.Story;
-import com.todayhouse.domain.story.domain.StyleType;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
 import com.todayhouse.domain.story.dto.reqeust.StorySearchRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryUpdateRequest;
@@ -23,19 +21,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
+@Transactional
 public class StoryServiceImpl implements StoryService {
 
     private final StoryRepository storyRepository;
@@ -64,17 +59,20 @@ public class StoryServiceImpl implements StoryService {
         return id;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Slice<StoryGetListResponse> findAllDesc(Pageable pageable) {
         return storyRepository.findAllByOrderById(pageable)
                 .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Page<StoryGetListResponse> searchStory(StorySearchRequest request, Pageable pageable) {
         return storyRepository.searchCondition(request, pageable).map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public StoryGetDetailResponse findById(Long id) {
 
@@ -86,12 +84,15 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Slice<StoryGetListResponse> findByUser(Pageable pageable) {
         User user = (User) customUserDetailService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         return storyRepository.findAllByUser(user, pageable)
                 .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
     }
 
+    @Transactional(readOnly = true)
+    @Override
     public Slice<StoryGetListResponse> findByUserNickname(String nickname, Pageable pageable) {
         User user = userService.findByNickname(nickname).orElseThrow(UserNotFoundException::new);
         return storyRepository.findAllByUser(user, pageable)
@@ -104,11 +105,13 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<String> getImageInStory(Long id) {
-        return this.getStory(id).getImages().stream().map(image -> image.getFileName()).collect(Collectors.toList());
+        return this.getStory(id).getImages().stream().map(Image::getFileName).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public byte[] getImage(String fileName) {
         return fileService.getImage(fileName);
     }
@@ -123,7 +126,7 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public void deleteStory(Long id) {
         Story story = this.getStory(id);
-        List<String> fileNames = story.getImages().stream().map(image -> image.getFileName()).collect(Collectors.toList());
+        List<String> fileNames = story.getImages().stream().map(Image::getFileName).collect(Collectors.toList());
         imageService.deleteStoryImages(fileNames);
         fileService.delete(fileNames);
         storyRepository.delete(story);
