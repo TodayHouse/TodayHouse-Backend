@@ -1,13 +1,14 @@
 package com.todayhouse.domain.story.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.story.dao.StoryRepository;
 import com.todayhouse.domain.story.domain.FamilyType;
 import com.todayhouse.domain.story.domain.ResiType;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.story.domain.StyleType;
-import com.todayhouse.domain.story.dto.reqeust.CreateReplyRequest;
-import com.todayhouse.domain.story.dto.reqeust.DeleteReplyRequest;
+import com.todayhouse.domain.story.dto.reqeust.ReplyCreateRequest;
+import com.todayhouse.domain.story.dto.reqeust.ReplyDeleteRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
@@ -35,14 +36,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@Transactional
-@Rollback(value = false)
-@AutoConfigureMockMvc
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class StoryControllerTest {
+class StoryControllerTest extends IntegrationBase {
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -61,29 +58,22 @@ class StoryControllerTest {
     String storyUrl = "http://localhost:8080/stories/";
 
     @BeforeEach
-    void setup() throws Exception {
-        String url = "http://localhost:8080/users/test";
+    void setup() {
         jwt = provider.createToken("admin@admin.com", Collections.singletonList(Role.USER));
-        Cookie cookie = new Cookie();
-    }
-
-    @AfterEach
-    void after() {
-
-        entityManager.flush();
-        entityManager.clear();
+        User user = userRepository.findByEmail("admin@admin.com").orElseThrow();
+        Story s1 = Story.builder().liked(1).title("제목").content("내용").category(Story.Category.STORY).user(user).build();
+        storyRepository.save(s1);
 
     }
 
     @Test
     @DisplayName("스토리 생성")
-    @Order(1)
     void createStory() throws Exception {
         String url = "http://localhost:8080/stories/";
         MockMultipartFile multipartFile = new MockMultipartFile("file", "foo.jpg", "image/jpeg", "테스트".getBytes(StandardCharsets.UTF_8));
 
 
-        StoryCreateRequest storyCreateRequest = StoryCreateRequest.builder().build();
+        StoryCreateRequest storyCreateRequest = StoryCreateRequest.builder().title("제목").content("내용").category(Story.Category.STORY).build();
         MockMultipartFile request = new MockMultipartFile("request", "json", "application/json", objectMapper.writeValueAsBytes(storyCreateRequest));
         mockMvc.perform(
                 multipart(url)
@@ -96,35 +86,33 @@ class StoryControllerTest {
 
     @Test
     @DisplayName("댓글 생성")
-    @Order(2)
     void createReply() throws Exception {
         Story story = storyRepository.findAll().get(0);
         String url = storyUrl + "reply";
 
-        CreateReplyRequest request = new CreateReplyRequest("댓글입니다", story.getId());
+        ReplyCreateRequest request = new ReplyCreateRequest("댓글입니다", story.getId());
         mockMvc.perform(post(url)
                         .header("Authorization", "Bearer " + jwt)
                         .content(objectMapper.writeValueAsString(request))
                         .contentType("application/json"))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("댓글 삭제")
-    @Order(3)
     void deleteReply() throws Exception {
         String url = storyUrl + "reply";
-        DeleteReplyRequest deleteReplyRequest = new DeleteReplyRequest(1L);
+        ReplyDeleteRequest replyDeleteRequest = new ReplyDeleteRequest(1L);
         mockMvc.perform(delete(url)
                 .header("Authorization", "Bearer " + jwt)
-                .content(objectMapper.writeValueAsString(deleteReplyRequest))
+                .content(objectMapper.writeValueAsString(replyDeleteRequest))
                 .contentType("application/json")
         ).andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("댓글 페이지 조회")
-    @Order(4)
     void findReplies() throws Exception {
         String url = storyUrl + "reply";
         MvcResult mvcResult = mockMvc.perform(get(url)
@@ -138,35 +126,37 @@ class StoryControllerTest {
 
     @Test
     @DisplayName("스토리 필터링 조회")
-    @Order(5)
     void searchStory() throws Exception {
         String url = storyUrl;
 
-        List<FamilyType> familyTypes = Arrays.asList(FamilyType.values());
-        List<StyleType> styleTypes = Arrays.asList(StyleType.values());
-        List<ResiType> resiTypes = Arrays.asList(ResiType.values());
+        FamilyType[] familyTypes = FamilyType.values();
+        StyleType[] styleTypes = StyleType.values();
+        ResiType[] resiTypes = ResiType.values();
         Optional<User> byId = userRepository.findById(1L);
-
-        for (ResiType resiType : resiTypes) {
-            for (StyleType styleType : styleTypes) {
-                for (FamilyType familyType : familyTypes) {
-                    for (int floorSpace = 0; floorSpace < 5; floorSpace++) {
-                        Story build = Story.builder()
-                                .styleType(styleType)
-                                .category(Story.Category.STORY)
-                                .floorSpace(floorSpace)
-                                .resiType(resiType)
-                                .familyType(familyType)
-                                .content("내용")
-                                .title("제목")
-                                .liked(0)
-                                .user(byId.get())
-                                .build();
-                        storyRepository.save(build);
-
+        Story.Category[] categories = Story.Category.values();
+        int likes = 0;
+        for (Story.Category category : categories) {
+            for (ResiType resiType : resiTypes) {
+                for (StyleType styleType : styleTypes) {
+                    for (FamilyType familyType : familyTypes) {
+                        for (int floorSpace = 0; floorSpace < 5; floorSpace++) {
+                            Story build = Story.builder()
+                                    .styleType(styleType)
+                                    .category(Story.Category.STORY)
+                                    .floorSpace(floorSpace)
+                                    .resiType(resiType)
+                                    .familyType(familyType)
+                                    .content("내용")
+                                    .title("제목")
+                                    .liked(likes++)
+                                    .user(byId.orElseThrow())
+                                    .build();
+                            storyRepository.save(build);
+                        }
                     }
                 }
             }
+
         }
 
         MvcResult mvcResult = mockMvc.perform(get(url)
@@ -174,9 +164,6 @@ class StoryControllerTest {
                 .header("Authorization", "Bearer " + jwt)
                 .contentType("application/json")
         ).andReturn();
-        MockHttpServletResponse response = mvcResult.getResponse();
-        String contentAsString = response.getContentAsString();
-        System.out.println("response = " + contentAsString);
 
     }
 
