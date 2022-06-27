@@ -1,14 +1,14 @@
 package com.todayhouse.domain.story.api;
 
 import com.todayhouse.domain.story.application.StoryReplyService;
-import com.todayhouse.domain.story.dto.reqeust.CreateReplyRequest;
-import com.todayhouse.domain.story.dto.reqeust.DeleteReplyRequest;
-import com.todayhouse.domain.story.dto.response.CreateReplyResponse;
+import com.todayhouse.domain.story.dto.reqeust.ReplyCreateRequest;
+import com.todayhouse.domain.story.dto.reqeust.ReplyDeleteRequest;
+import com.todayhouse.domain.story.dto.response.ReplyCreateResponse;
 import com.todayhouse.domain.story.dto.response.ReplyGetResponse;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseResponse;
+import com.todayhouse.global.common.PageDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,22 +20,21 @@ public class StoryReplyController {
     private final StoryReplyService replyService;
 
     @PostMapping("/reply")
-    public BaseResponse<CreateReplyResponse> replyPost(@RequestBody CreateReplyRequest request, @AuthenticationPrincipal User user) {
-        CreateReplyResponse response = replyService.replyStory(user, request);
+    public BaseResponse<ReplyCreateResponse> replyPost(@RequestBody ReplyCreateRequest request, @AuthenticationPrincipal User user) {
+        ReplyCreateResponse response = replyService.replyStory(user, request);
         return new BaseResponse<>(response);
 
     }
 
     @DeleteMapping("/reply")
-    public BaseResponse<String> deleteReply(@AuthenticationPrincipal User user, @RequestBody DeleteReplyRequest request) {
+    public BaseResponse<String> deleteReply(@AuthenticationPrincipal User user, @RequestBody ReplyDeleteRequest request) {
         replyService.deleteReply(user, request);
         return new BaseResponse<>("삭제 완료");
     }
 
     @GetMapping("/reply")
-    public BaseResponse<Page<ReplyGetResponse>> findReplies(@RequestParam Long storyId, Pageable pageable) {
-        Page<ReplyGetResponse> replies = replyService.findReplies(storyId, pageable);
-        return new BaseResponse<>(replies);
+    public BaseResponse<PageDto<ReplyGetResponse>> findReplies(@RequestParam Long storyId, Pageable pageable) {
+        return new BaseResponse<>(new PageDto<>(replyService.findReplies(storyId, pageable)));
     }
 
 }
