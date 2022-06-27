@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.UUID;
-
 public interface StoryReplyRepository extends JpaRepository<StoryReply, Long> {
     @Query(value = "select r from StoryReply r " +
             " join fetch r.story s" +
