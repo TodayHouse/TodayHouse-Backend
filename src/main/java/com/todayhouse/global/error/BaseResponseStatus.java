@@ -42,6 +42,7 @@ public enum BaseResponseStatus {
     POST_STORY_EMPTY_TITLE(false, 2200, "제목을 입력해주세요."),
     POST_STORY_EMPTY_CONTENT(false, 2201, "본문을 입력해주세요."),
     POST_STORY_EMPTY_CATEGORY(false, 2202, "카테고리를 선택해주세요."),
+    REPLY_NOT_FOUND(false, 2203, "댓글을 찾을 수 없습니다."),
 
     // jwt
     NOT_GUEST_ACCESS(false, 2300, "이미 회원가입 했습니다."),
@@ -68,6 +69,9 @@ public enum BaseResponseStatus {
     REVIEW_DUPLICATE(false, 2600, "하나의 상품에 하나의 리뷰만 작성할 수 있습니다."),
     REVIEW_NOT_FOUND(false, 2601, "리뷰를 찾을 수 없습니다."),
     ORDER_NOT_COMPLETED(false, 2602, "주문을 완료한 유저만 리뷰를 작성할 수 있습니다."),
+    INVALID_REVIEW_LIKE(false, 2604, "자신의 리뷰에는 불가능합니다."),
+    REVIEW_LIKE_DUPLICATE(false, 2604, "중복된 도움이 돼요입니다."),
+    REVIEW_LIKE_NOT_FOUND(false, 2605, "도움이 돼요를 먼저 추가해주세요."),
 
     // 3000 : Database / Server 오류
     // common
@@ -92,6 +96,7 @@ public enum BaseResponseStatus {
     INVALID_FILE_EXTENSION_EXCEPTION(false, 4002, "잘못된 형식의 파일입니다."),
     INVALID_URL_EXCEPTION(false,4003, "잘못된 url입니다."),
     // 그 밖의
+    VALID_EXCEPTION(false, 9998, ""),
     OTHERS(false, 9999, "내부 오류가 발생했습니다.");
 
     private final boolean isSuccess;

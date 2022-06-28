@@ -100,6 +100,8 @@ dependencies {
             "jakarta.persistence:jakarta.persistence-api",
             "jakarta.annotation:jakarta.annotation-api",
             "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa")
+
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
 test {

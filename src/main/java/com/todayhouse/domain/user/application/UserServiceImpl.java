@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -142,6 +143,9 @@ public class UserServiceImpl implements UserService {
     //테스트 계정
     @PostConstruct
     private void preMember() {
+        List<User> users = userRepository.findAll();
+        if (!users.isEmpty())
+            return;
         Seller seller = Seller.builder().brand("admin_brand").companyName("admin").build();
 
         User user = userRepository.save(User.builder()
@@ -160,7 +164,7 @@ public class UserServiceImpl implements UserService {
                 .password(new BCryptPasswordEncoder().encode("abc12345"))
                 .roles(Collections.singletonList(Role.USER))
                 .agreement(Agreement.agreeAll())
-                .nickname("user1")
+                .nickname("testuser1")
                 .build());
 
 

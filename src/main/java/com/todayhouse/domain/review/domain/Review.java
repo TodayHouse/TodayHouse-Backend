@@ -18,16 +18,18 @@ import javax.persistence.*;
 public class Review extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "review_id")
     private Long id;
 
-    private int liked = 0;
+    @Column(name = "liked")
+    private int like = 0;
 
     private int rating;
 
     private String content;
 
-    @Column(name = "review_image")
-    private String reviewImage;
+    @Column(name = "review_image_url")
+    private String reviewImageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -38,11 +40,31 @@ public class Review extends BaseTimeEntity {
     private Product product;
 
     @Builder
-    public Review(int rating, String content, String reviewImage, User user, Product product){
+    public Review(int rating, String content, String reviewImage, User user, Product product) {
         this.rating = rating;
         this.content = content;
-        this.reviewImage = reviewImage;
+        this.reviewImageUrl = reviewImage;
         this.user = user;
         this.product = product;
+    }
+
+    public void updateUser(User user) {
+        this.user = user;
+    }
+
+    public void updateProduct(Product product) {
+        this.product = product;
+    }
+
+    public void updateReviewImageUrl(String reviewImage) {
+        this.reviewImageUrl = reviewImage;
+    }
+
+    public void addLike() {
+        like += 1;
+    }
+
+    public void subLike() {
+        like -= 1;
     }
 }

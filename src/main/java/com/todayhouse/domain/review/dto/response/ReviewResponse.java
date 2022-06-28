@@ -11,20 +11,25 @@ import lombok.NoArgsConstructor;
 public class ReviewResponse {
     private Long id;
     private Long userId;
-    private int liked;
+    private int like;
     private int rating;
+
+    private boolean canLike;
     private String content;
     private String nickname;
+    private String productImage;
     private String profileImage;
     private ProductResponse productResponse;
 
-    public ReviewResponse(Review review) {
+    public ReviewResponse(Review review, boolean canLike) {
         this.id = review.getId();
+        this.like = review.getLike();
         this.userId = review.getUser().getId();
-        this.liked = review.getLiked();
         this.rating = review.getRating();
         this.content = review.getContent();
-        this.nickname = review.getContent();
+        this.canLike = canLike;
+        this.nickname = review.getUser().getNickname();
+        this.productImage = review.getReviewImageUrl();
         this.profileImage = review.getUser().getProfileImage();
         this.productResponse = new ProductResponse(review.getProduct());
     }
