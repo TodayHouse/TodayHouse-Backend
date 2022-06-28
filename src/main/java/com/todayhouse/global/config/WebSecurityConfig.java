@@ -40,7 +40,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     // 정적 자원에 대해서는 Security 설정을 적용하지 않음.
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .and()
+                .ignoring().antMatchers("/swagger-ui/**",
+                        "/v2/api-docs", "/v3/api-docs",
+                        "/swagger-resources",
+                        "/swagger-resources/configuration/ui",
+                        "/swagger-resources/configuration/security");
     }
 
     @Override
@@ -64,11 +70,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyRole("ADMIN")
                 .antMatchers(HttpMethod.PATCH, "/categories")
                 .hasAnyRole("ADMIN")
-                .antMatchers(HttpMethod.POST, "/follows", "/sellers", "/products/**", "/stories/**", "/options/**", "/orders/**")
+                .antMatchers(HttpMethod.POST, "/follows", "/sellers", "/products/**", "/stories/**", "/options/**", "/orders/**", "/reviews/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin post 요청만 허용
-                .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**", "/options/**")
+                .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**", "/options/**", "/reviews/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin delete 요청만 허용
-                .antMatchers(HttpMethod.PUT, "/products", "/options/**", "/orders/**")
+                .antMatchers(HttpMethod.PUT, "/products/**", "/options/**", "/orders/**")
                 .hasAnyRole("USER", "ADMIN")
                 .antMatchers(HttpMethod.PATCH, "/stories/**")
                 .hasAnyRole("USER", "ADMIN")
@@ -76,7 +82,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyRole("GUEST") // guest 요청만 허용
                 .antMatchers()
                 .authenticated()// 인증된 요청만 허용
-                .anyRequest().permitAll() // 그 외 모든 요청 허용
+
+                .antMatchers(HttpMethod.GET, "/categories/**", "/options/**", "/products/**", "/stories/**",
+                        "/follows/**", "/sellers/**", "/users/**", "/orders/**", "/reviews/**")
+                .permitAll()
+                .antMatchers(HttpMethod.POST, "/users/login")
+                .anonymous()
+                .antMatchers("/emails/**")
+                .permitAll()// 모든 요청 허용
+
+                .anyRequest().denyAll()//그외 모든 요청 거부
+
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class)

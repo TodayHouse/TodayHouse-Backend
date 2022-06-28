@@ -8,6 +8,7 @@ import com.todayhouse.domain.order.dto.request.OrderSaveRequest;
 import com.todayhouse.domain.order.dto.response.OrderResponse;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.common.PageDto;
+import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/orders")
 public class OrderController {
+    private final FileService fileService;
     private final OrderService orderService;
     private final DeliveryService deliveryService;
 
@@ -40,26 +42,28 @@ public class OrderController {
     @GetMapping
     public BaseResponse<Page<OrderResponse>> findUserOrdersPaging(Pageable pageable) {
         Page<Orders> orders = orderService.findOrders(pageable);
-        PageDto<OrderResponse> response = new PageDto<>(orders.map(order -> new OrderResponse(order)));
+        PageDto<OrderResponse> response = new PageDto<>(orders.map(order ->
+                new OrderResponse(order, fileService.changeFileNameToUrl(order.getProduct().getImage()))));
         return new BaseResponse(response);
     }
 
-    @GetMapping("/{id}")
-    public BaseResponse<OrderResponse> findOrderDetail(@PathVariable Long id) {
-        Delivery delivery = deliveryService.findDeliveryByOrderIdWithOrder(id);
-        OrderResponse response = new OrderResponse(delivery);
+    @GetMapping("/{orderId}")
+    public BaseResponse<OrderResponse> findOrderDetail(@PathVariable Long orderId) {
+        Delivery delivery = deliveryService.findDeliveryByOrderIdWithOrder(orderId);
+        String imageUrl = fileService.changeFileNameToUrl(delivery.getOrder().getProduct().getImage());
+        OrderResponse response = new OrderResponse(delivery, imageUrl);
         return new BaseResponse(response);
     }
 
-    @PutMapping("/cancel/{id}")
-    public BaseResponse cancelOrder(@PathVariable Long id) {
-        orderService.cancelOrder(id);
+    @PutMapping("/cancel/{orderId}")
+    public BaseResponse cancelOrder(@PathVariable Long orderId) {
+        orderService.cancelOrder(orderId);
         return new BaseResponse("취소되었습니다.");
     }
 
-    @PutMapping("/complete/{id}")
-    public BaseResponse completeOrder(@PathVariable Long id) {
-        orderService.completeOrder(id);
+    @PutMapping("/complete/{orderId}")
+    public BaseResponse completeOrder(@PathVariable Long orderId) {
+        orderService.completeOrder(orderId);
         return new BaseResponse("완료되었습니다.");
     }
 }

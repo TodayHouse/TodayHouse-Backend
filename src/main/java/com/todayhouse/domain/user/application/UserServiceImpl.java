@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
                 .password(new BCryptPasswordEncoder().encode("abc12345"))
                 .roles(Collections.singletonList(Role.USER))
                 .agreement(Agreement.agreeAll())
-                .nickname("user1")
+                .nickname("testuser1")
                 .build());
 
 

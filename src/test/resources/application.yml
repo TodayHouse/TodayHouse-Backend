@@ -1,0 +1,18 @@
+spring:
+  profiles:
+    include: jwt, email, aws, oauth
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/todayhouse_test
+    username: todayhouse
+    password: 1234
+  jpa:
+    hibernate:
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    show-sql: true
+    properties:
+      hibernate:
+        alect: org.hibernate.dialect.MySQL5InnoDBDialect
+        format_sql: true
+    database: mysql

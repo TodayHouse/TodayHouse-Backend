@@ -25,32 +25,28 @@ public class OrderResponse {
     private List<String> selectionOptionInfo;
     private DeliveryResponse deliveryResponse;
 
-    public OrderResponse(Orders orders) {
-        setOrder(orders);
-    }
-
-    public OrderResponse(Delivery delivery) {
-        setOrder(delivery.getOrder());
-        this.deliveryResponse = new DeliveryResponse(delivery);
-    }
-
-    private void setOrder(Orders orders) {
+    public OrderResponse(Orders orders, String imageUrl) {
         this.id = orders.getId();
         this.memo = orders.getMemo();
         this.status = orders.getStatus();
-        this.deliveryFee = orders.getDeliveryFee();
         this.createdAt = orders.getCreatedAt();
         this.updatedAt = orders.getUpdatedAt();
-        this.productInfo = createProductInfo(orders);
+        this.deliveryFee = orders.getProduct().getDeliveryFee();
+        this.productInfo = createProductInfo(orders, imageUrl);
         if (orders.getSelectionOption() != null)
             this.selectionOptionInfo = createSelectionOptionInfo(orders.getSelectionOption(), orders.getSelectionQuantity());
     }
 
-    private List<String> createProductInfo(Orders orders) {
+    public OrderResponse(Delivery delivery, String imageUrl) {
+        this(delivery.getOrder(), imageUrl);
+        this.deliveryResponse = new DeliveryResponse(delivery);
+    }
+
+    private List<String> createProductInfo(Orders orders, String imageUrl) {
         Product product = orders.getProduct();
         String optionName = orders.getParentOption().getContent();
         if (orders.getChildOption() != null) optionName += " / " + orders.getChildOption().getContent();
-        return List.of(product.getImage(), product.getTitle(), product.getBrand(), optionName, Integer.toString(orders.getTotalPrice()), Integer.toString(orders.getProductQuantity()));
+        return List.of(imageUrl, product.getTitle(), product.getBrand(), optionName, Integer.toString(orders.getTotalPrice()), Integer.toString(orders.getProductQuantity()));
     }
 
     private List<String> createSelectionOptionInfo(SelectionOption selectionOption, int selectionQuantity) {

@@ -12,9 +12,8 @@ import com.todayhouse.domain.user.dto.SimpleUser;
 import com.todayhouse.domain.user.dto.request.FollowRequest;
 import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,7 +28,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)//@BeforeAll 사용
 class FollowControllerTest extends IntegrationBase {
 
     @Autowired
@@ -50,7 +48,7 @@ class FollowControllerTest extends IntegrationBase {
     @Autowired
     ObjectMapper objectMapper;
 
-    @BeforeAll
+    @BeforeEach
     void preSet() {
         User user1 = User.builder().email("user1@test").build();
         User user2 = User.builder().email("user2@test").build();
