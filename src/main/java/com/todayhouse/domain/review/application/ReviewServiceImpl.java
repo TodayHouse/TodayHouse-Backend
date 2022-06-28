@@ -9,7 +9,6 @@ import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.review.dao.ReviewRepository;
 import com.todayhouse.domain.review.domain.Review;
 import com.todayhouse.domain.review.dto.ReviewRating;
-import com.todayhouse.domain.review.dto.request.ReviewSaveRequest;
 import com.todayhouse.domain.review.dto.request.ReviewSearchRequest;
 import com.todayhouse.domain.review.dto.response.ReviewRatingResponse;
 import com.todayhouse.domain.review.exception.OrderNotCompletedException;
@@ -25,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -49,16 +49,19 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Long saveReview(MultipartFile multipartFile, ReviewSaveRequest request) {
+    public Long saveReview(MultipartFile multipartFile, Review review, Long productId) {
         User user = getValidUser();
-        Product product = getValidProduct(request.getProductId());
+        Product product = getValidProduct(productId);
 
         if (!isOrderCompleteUser(user.getId(), product.getId()))
             throw new OrderNotCompletedException();
 
         String imageUrl = saveFileAndGetUrl(multipartFile);
 
-        Review review = request.toEntity(imageUrl, user, product);
+        review.updateUser(user);
+        review.updateProduct(product);
+        review.updateReviewImageUrl(imageUrl);
+
         return synchSaveReview(review).getId();
     }
 
@@ -78,12 +81,12 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     private synchronized Review synchSaveReview(Review reviewWithUserAndProduct) {
-        checkReviewDuplication(reviewWithUserAndProduct.getUser().getId(), reviewWithUserAndProduct.getProduct().getId());
+        checkReviewDuplication(reviewWithUserAndProduct.getUser(), reviewWithUserAndProduct.getProduct().getId());
         return reviewRepository.save(reviewWithUserAndProduct);
     }
 
-    private void checkReviewDuplication(Long userId, Long productId) {
-        reviewRepository.findByUserIdAndProductId(userId, productId)
+    private void checkReviewDuplication(User user, Long productId) {
+        reviewRepository.findByUserAndProductId(user, productId)
                 .ifPresent(r -> {
                     throw new ReviewDuplicateException();
                 });
@@ -109,23 +112,28 @@ public class ReviewServiceImpl implements ReviewService {
         User user = getValidUser();
         if (!isOrderCompleteUser(user.getId(), productId))
             return false;
-        Optional<Review> review = reviewRepository.findByUserIdAndProductId(user.getId(), productId);
-        if (review.isPresent())
-            return false;
-        return true;
+        Optional<Review> review = reviewRepository.findByUserAndProductId(user, productId);
+        return review.isEmpty();
     }
 
     private boolean isOrderCompleteUser(Long userId, Long productId) {
         List<Orders> orders = orderRepository.findByUserIdAndProductIdAndStatus(userId, productId, Status.COMPLETED);
-        if (orders.size() == 0)
-            return false;
-        return true;
+        return orders.size() != 0;
     }
 
     @Override
-    public void deleteReview(Long productId) {
+    public void deleteReview(Long reviewId) {
         User user = getValidUser();
-        Review review = reviewRepository.findByUserIdAndProductId(user.getId(), productId).orElseThrow(ReviewNotFoundException::new);
+        Review review = reviewRepository.findByIdAndUser(reviewId, user).orElseThrow(ReviewNotFoundException::new);
+        deleteImage(review);
         reviewRepository.deleteById(review.getId());
+    }
+
+    private void deleteImage(Review review) {
+        String reviewUrl = review.getReviewImageUrl();
+        if (ObjectUtils.isEmpty(reviewUrl))
+            return;
+        String fileName = reviewUrl.substring(reviewUrl.lastIndexOf('/') + 1);
+        fileService.deleteOne(fileName);
     }
 }

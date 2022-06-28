@@ -37,4 +37,11 @@ public class BaseResponse<T> { // 모든 return은 BaseResponse 포맷으로 전
         this.message = status.getMessage();
         this.code = status.getCode();
     }
+
+    // GlobalExControllerAdvice에서 오류 설정
+    public BaseResponse(BaseResponseStatus status, String message) {
+        this.isSuccess = status.isSuccess();
+        this.message = message;
+        this.code = status.getCode();
+    }
 }
