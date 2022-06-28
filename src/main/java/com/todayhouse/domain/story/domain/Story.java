@@ -7,8 +7,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +34,10 @@ public class Story extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
+    @CreatedDate
+    private LocalDateTime createdDate;
+
+
 //    기본 게시글 기능 정상 동작 확인 후 상품 클릭 시 링크 연결 기능 추가
 //    @Column(name = "product_link")
 //    private String productLink;
@@ -50,13 +56,31 @@ public class Story extends BaseTimeEntity {
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<StoryImage> images = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    private ResiType resiType;
+
+    private Integer floorSpace;
+
+    @Enumerated(EnumType.STRING)
+    private FamilyType familyType;
+
+    @Enumerated(EnumType.STRING)
+    private StyleType styleType;
+
+    @OneToMany(mappedBy = "story", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<StoryReply> storyReplies = new ArrayList<>();
+
     @Builder
-    public Story(String title, String content, Integer liked, Category category, User user) {
+    public Story(String title, String content, Integer liked, Category category, User user, ResiType resiType, Integer floorSpace, FamilyType familyType, StyleType styleType) {
         this.title = title;
         this.content = content;
         this.liked = liked;
         this.category = category;
         this.user = user;
+        this.resiType = resiType;
+        this.floorSpace = floorSpace;
+        this.familyType = familyType;
+        this.styleType = styleType;
     }
 
     public void update(String title, String content, Category category) {

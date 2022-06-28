@@ -1,9 +1,11 @@
 package com.todayhouse.domain.story.application;
 
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
+import com.todayhouse.domain.story.dto.reqeust.StorySearchRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryUpdateRequest;
 import com.todayhouse.domain.story.dto.response.StoryGetDetailResponse;
 import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +19,8 @@ public interface StoryService {
     Long saveImage(MultipartFile multipartFile, Long id);
 
     Slice<StoryGetListResponse> findAllDesc(Pageable pageable);
+
+    Page<StoryGetListResponse> searchStory(StorySearchRequest request, Pageable pageable);
 
     StoryGetDetailResponse findById(Long id);
 

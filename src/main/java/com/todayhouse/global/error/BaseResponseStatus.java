@@ -42,6 +42,7 @@ public enum BaseResponseStatus {
     POST_STORY_EMPTY_TITLE(false, 2200, "제목을 입력해주세요."),
     POST_STORY_EMPTY_CONTENT(false, 2201, "본문을 입력해주세요."),
     POST_STORY_EMPTY_CATEGORY(false, 2202, "카테고리를 선택해주세요."),
+    REPLY_NOT_FOUND(false, 2203, "댓글을 찾을 수 없습니다."),
 
     // jwt
     NOT_GUEST_ACCESS(false, 2300, "이미 회원가입 했습니다."),
