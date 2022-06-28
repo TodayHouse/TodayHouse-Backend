@@ -12,13 +12,13 @@ import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.domain.SelectionOption;
 import com.todayhouse.domain.user.dao.SellerRepository;
+import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -28,9 +28,8 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class OrdersRepositoryTest extends DataJpaBase {
-
     @Autowired
-    TestEntityManager em;
+    UserRepository userRepository;
 
     @Autowired
     OrderRepository orderRepository;
@@ -79,7 +78,7 @@ class OrdersRepositoryTest extends DataJpaBase {
     @DisplayName("totalPrice 내림차순 주문 조회")
     void findByUserIdWithProduct() {
         User user = User.builder().build();
-        em.persist(user);
+        userRepository.save(user);
 
         Orders orders1 = Orders.builder().user(user).product(product1)
                 .parentOption(op1).productQuantity(1)
@@ -89,11 +88,9 @@ class OrdersRepositoryTest extends DataJpaBase {
         Orders orders3 = Orders.builder().user(user).product(product1)
                 .parentOption(op1).productQuantity(10).build(); //10000
 
-        em.persist(orders1);
-        em.persist(orders2);
-        em.persist(orders3);
-        em.clear();
-        em.flush();
+        orderRepository.save(orders1);
+        orderRepository.save(orders2);
+        orderRepository.save(orders3);
 
         PageRequest request = PageRequest.of(0, 10, Sort.by("totalPrice").descending());
 
@@ -109,9 +106,7 @@ class OrdersRepositoryTest extends DataJpaBase {
     @DisplayName("OrderId로 product, option과 fetch join한 order 찾기")
     void findByIdWithProductAndOptions() {
         Orders orders = Orders.builder().product(product1).parentOption(op1).selectionOption(s1).build();
-        em.persist(orders);
-        em.flush();
-        em.clear();
+        orderRepository.save(orders);
 
         Orders find = orderRepository.findByIdWithProductAndOptions(orders.getId()).orElse(null);
         assertThat(find.getProduct().getId()).isEqualTo(product1.getId());
@@ -123,15 +118,13 @@ class OrdersRepositoryTest extends DataJpaBase {
     @DisplayName("order를 userId, productId, status로 찾기")
     void findByUserIdAndProductIdAndStatus() {
         User user = User.builder().email("test").build();
-        em.persist(user);
+        userRepository.save(user);
         Orders order1 = Orders.builder().product(product1).parentOption(op1).user(user).build();
         Orders order2 = Orders.builder().product(product1).parentOption(op1).user(user).build();
         order1.updateStatus(Status.COMPLETED);
         order2.updateStatus(Status.COMPLETED);
-        em.persist(order1);
-        em.persist(order2);
-        em.flush();
-        em.clear();
+        orderRepository.save(order1);
+        orderRepository.save(order2);
 
         List<Orders> orders = orderRepository.findByUserIdAndProductIdAndStatus(user.getId(), product1.getId(), Status.COMPLETED);
 
@@ -141,7 +134,7 @@ class OrdersRepositoryTest extends DataJpaBase {
 
     @Test
     @DisplayName("존재하지 않는 userId로 조회")
-    void findAllByUserIdWithProductAndOptions(){
+    void findAllByUserIdWithProductAndOptions() {
         PageRequest request = PageRequest.of(0, 10);
 
         Page<Orders> page = orderRepository.findAllByUserIdWithProductAndOptions(10000L, request);

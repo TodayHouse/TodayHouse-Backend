@@ -5,49 +5,40 @@ import com.todayhouse.domain.email.domain.EmailVerificationToken;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class EmailVerificationTokenRepositoryTest extends DataJpaBase {
-    @Autowired
-    TestEntityManager testEntityManager;
 
     @Autowired
     EmailVerificationTokenRepository tokenRepository;
 
-    EmailVerificationToken verificationToken =
-            EmailVerificationToken.createEmailToken("test@test.com", "123456");
+    EmailVerificationToken verificationToken = EmailVerificationToken.createEmailToken("test@test.com", "123456");
 
     @Test
     @DisplayName("tokenEntity 저장 후 email로 찾기")
     void findByEmail() {
         tokenRepository.save(verificationToken);
 
-        assertThat(tokenRepository.findByEmail(verificationToken.getEmail()))
-                .isEqualTo(Optional.ofNullable(verificationToken));
+        assertThat(tokenRepository.findByEmail(verificationToken.getEmail())).isEqualTo(Optional.ofNullable(verificationToken));
     }
 
     @Test
     @DisplayName("유효한 tokenEntity 찾기")
     void findByEmailAndTokenAndExpiredAtAfterAndExpired() {
-        testEntityManager.persist(verificationToken);
+        tokenRepository.save(verificationToken);
 
-        assertThat(tokenRepository.findByEmailAndTokenAndExpiredAtAfterAndExpired(
-                verificationToken.getEmail(), verificationToken.getToken(), LocalDateTime.now(), false
-        )).isEqualTo(Optional.ofNullable(verificationToken));
+        assertThat(tokenRepository.findByEmailAndTokenAndExpiredAtAfterAndExpired(verificationToken.getEmail(), verificationToken.getToken(), LocalDateTime.now(), false)).isEqualTo(Optional.ofNullable(verificationToken));
     }
 
     @Test
     @DisplayName("인증한 tokenEntity 찾기")
     void findByEmailAndExpired() {
-        EmailVerificationToken entity = testEntityManager.persist(verificationToken);
+        EmailVerificationToken entity = tokenRepository.save(verificationToken);
         entity.expireToken();
-        testEntityManager.flush();
-        testEntityManager.clear();
 
         assertThat(tokenRepository.findByEmailAndExpired(verificationToken.getEmail(), true));
     }
@@ -57,8 +48,7 @@ class EmailVerificationTokenRepositoryTest extends DataJpaBase {
         String email = "today.house.clone@gmail.com";
         String token = "123776";
         String newToken = "0987621";
-        String id = tokenRepository.findByEmail(email).map(unused -> unused.updateToken(token))
-                .orElseGet(() -> tokenRepository.save(EmailVerificationToken.createEmailToken(email, token)).getId());
+        String id = tokenRepository.findByEmail(email).map(unused -> unused.updateToken(token)).orElseGet(() -> tokenRepository.save(EmailVerificationToken.createEmailToken(email, token)).getId());
 
         Optional<EmailVerificationToken> result = tokenRepository.findById(id);
 
@@ -68,8 +58,7 @@ class EmailVerificationTokenRepositoryTest extends DataJpaBase {
         //변경
         Optional<Object> prev = result.map(t -> t.getToken());
 
-        id = tokenRepository.findByEmail(email).map(unused -> unused.updateToken(newToken))
-                .orElseGet(() -> tokenRepository.save(EmailVerificationToken.createEmailToken(email, newToken)).getId());
+        id = tokenRepository.findByEmail(email).map(unused -> unused.updateToken(newToken)).orElseGet(() -> tokenRepository.save(EmailVerificationToken.createEmailToken(email, newToken)).getId());
         Optional<EmailVerificationToken> update = tokenRepository.findById(id);
 
         //검증

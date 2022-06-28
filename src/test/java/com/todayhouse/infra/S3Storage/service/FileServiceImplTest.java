@@ -99,7 +99,7 @@ class FileServiceImplTest {
     @DisplayName("url을 파일 이름으로 변경")
     void changeToFileName() {
         String file = "aa.jpg";
-        String url = "https://todayhouse/"+file;
+        String url = "https://todayhouse/" + file;
 
         String result = fileService.changeUrlToFileName(url);
         assertThat(result).isEqualTo(file);
@@ -107,14 +107,14 @@ class FileServiceImplTest {
 
     @Test
     @DisplayName("잘못된 url을 파일 이름으로 변경")
-    void changeToFileNameException(){
+    void changeToFileNameException() {
         String file = "aa.jpg";
-        String url1 = "https://"+file;
-        String url2 = "https:///"+file;
+        String url1 = "https://" + file;
+        String url2 = "https:///" + file;
         String url3 = "https://a/";
 
-        assertThrows(InvalidUrlException.class, ()->fileService.changeUrlToFileName(url1));
-        assertThrows(InvalidUrlException.class, ()->fileService.changeUrlToFileName(url2));
-        assertThrows(InvalidUrlException.class, ()->fileService.changeUrlToFileName(url3));
+        assertThrows(InvalidUrlException.class, () -> fileService.changeUrlToFileName(url1));
+        assertThrows(InvalidUrlException.class, () -> fileService.changeUrlToFileName(url2));
+        assertThrows(InvalidUrlException.class, () -> fileService.changeUrlToFileName(url3));
     }
 }

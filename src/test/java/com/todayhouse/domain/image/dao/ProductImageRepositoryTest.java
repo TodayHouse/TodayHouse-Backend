@@ -2,13 +2,14 @@ package com.todayhouse.domain.image.dao;
 
 import com.todayhouse.DataJpaBase;
 import com.todayhouse.domain.image.domain.ProductImage;
+import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,28 +17,28 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ProductImageRepositoryTest extends DataJpaBase {
-
-    @Autowired
-    TestEntityManager em;
-
     @Autowired
     ProductImageRepository productImageRepository;
+
+    @Autowired
+    SellerRepository sellerRepository;
+
+    @Autowired
+    ProductRepository productRepository;
 
     Product product;
     ProductImage img1, img2;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         Seller seller = Seller.builder().brand("testBrand").build();
         product = Product.builder().image("img.jpg").title("test").seller(seller).build();
         img1 = ProductImage.builder().fileName("img1.jpg").product(product).build();
         img2 = ProductImage.builder().fileName("img2.jpg").product(product).build();
-        em.persist(seller);
-        em.persist(product);
-        em.persist(img1);
-        em.persist(img2);
-        em.flush();
-        em.clear();
+        sellerRepository.save(seller);
+        productRepository.save(product);
+        productImageRepository.save(img1);
+        productImageRepository.save(img2);
     }
 
     @Test
@@ -70,8 +71,8 @@ class ProductImageRepositoryTest extends DataJpaBase {
         List<ProductImage> images = productImageRepository.findByProductId(product.getId());
 
         assertThat(images.size()).isEqualTo(2);
-        assertThat(images.stream().anyMatch(i->i.getFileName().equals("img1.jpg")));
-        assertThat(images.stream().anyMatch(i->i.getFileName().equals("img2.jpg")));
+        assertThat(images.stream().anyMatch(i -> i.getFileName().equals("img1.jpg")));
+        assertThat(images.stream().anyMatch(i -> i.getFileName().equals("img2.jpg")));
     }
 
     @Test
@@ -79,8 +80,8 @@ class ProductImageRepositoryTest extends DataJpaBase {
     void findByProductIdWithOptions() {
         List<ProductImage> images = productImageRepository.findByProductId(product.getId());
 
-        assertThat(images.stream().anyMatch(i->i.getFileName().equals("img1.jpg")));
-        assertThat(images.stream().anyMatch(i->i.getFileName().equals("img2.jpg")));
+        assertThat(images.stream().anyMatch(i -> i.getFileName().equals("img1.jpg")));
+        assertThat(images.stream().anyMatch(i -> i.getFileName().equals("img2.jpg")));
     }
 
 

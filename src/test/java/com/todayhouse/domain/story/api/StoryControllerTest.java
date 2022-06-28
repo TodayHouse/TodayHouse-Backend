@@ -11,28 +11,23 @@ import com.todayhouse.domain.story.dto.reqeust.ReplyCreateRequest;
 import com.todayhouse.domain.story.dto.reqeust.ReplyDeleteRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
 import com.todayhouse.domain.user.dao.UserRepository;
+import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
+import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.Cookie;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -44,8 +39,7 @@ class StoryControllerTest extends IntegrationBase {
     UserRepository userRepository;
     @Autowired
     StoryRepository storyRepository;
-    @PersistenceContext
-    EntityManager entityManager;
+
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -56,11 +50,21 @@ class StoryControllerTest extends IntegrationBase {
 
     String jwt = null;
     String storyUrl = "http://localhost:8080/stories/";
+    User user;
 
     @BeforeEach
     void setup() {
-        jwt = provider.createToken("admin@admin.com", Collections.singletonList(Role.USER));
-        User user = userRepository.findByEmail("admin@admin.com").orElseThrow();
+        Seller seller = Seller.builder().brand("test_brand").companyName("test").build();
+
+        user = userRepository.save(User.builder()
+                .authProvider(AuthProvider.LOCAL)
+                .email("admin@test.com")
+                .roles(Collections.singletonList(Role.ADMIN))
+                .nickname("admin")
+                .seller(seller)
+                .build());
+
+        jwt = provider.createToken("admin@test.com", Collections.singletonList(Role.USER));
         Story s1 = Story.builder().liked(1).title("제목").content("내용").category(Story.Category.STORY).user(user).build();
         storyRepository.save(s1);
 
@@ -132,7 +136,7 @@ class StoryControllerTest extends IntegrationBase {
         FamilyType[] familyTypes = FamilyType.values();
         StyleType[] styleTypes = StyleType.values();
         ResiType[] resiTypes = ResiType.values();
-        Optional<User> byId = userRepository.findById(1L);
+        Optional<User> byId = userRepository.findById(user.getId());
         Story.Category[] categories = Story.Category.values();
         int likes = 0;
         for (Story.Category category : categories) {

@@ -19,8 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Collections;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -52,9 +50,6 @@ class SellerControllerTest extends IntegrationBase {
     @Autowired
     UserRepository userRepository;
 
-    @PersistenceContext
-    EntityManager em;
-
     @Test
     void seller_저장_후_seller_찾기() throws Exception {
         String url = "http://localhost:8080/sellers";
@@ -75,8 +70,6 @@ class SellerControllerTest extends IntegrationBase {
 
         User user = userRepository.findByEmail(userEmail).orElse(null);
         Long sellerId = user.getSeller().getId();
-        em.flush();
-        em.clear();
 
         MvcResult mvcResult = mockMvc.perform(get(url + "/" + sellerId))
                 .andExpect(status().isOk())

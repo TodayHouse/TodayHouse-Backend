@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,8 +22,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ReviewRepositoryTest extends DataJpaBase {
-    @Autowired
-    TestEntityManager em;
 
     @Autowired
     UserRepository userRepository;
@@ -41,12 +38,13 @@ class ReviewRepositoryTest extends DataJpaBase {
 
     @BeforeEach
     void setUp() {
-        u1 = User.builder().nickname("u1").build();
-        u2 = User.builder().nickname("u2").build();
-        p1 = Product.builder().title("p1").build();
-        p2 = Product.builder().title("p1").build();
-        p3 = Product.builder().title("p1").build();
-        p4 = Product.builder().title("p1").build();
+        u1 = userRepository.save(User.builder().nickname("u1").build());
+        u2 = userRepository.save(User.builder().nickname("u2").build());
+
+        p1 = productRepository.save(Product.builder().title("p1").build());
+        p2 = productRepository.save(Product.builder().title("p1").build());
+        p3 = productRepository.save(Product.builder().title("p1").build());
+        p4 = productRepository.save(Product.builder().title("p1").build());
 
         r1 = Review.builder()
                 .reviewImage("r1Img").rating(1)
@@ -64,18 +62,11 @@ class ReviewRepositoryTest extends DataJpaBase {
                 .rating(4)
                 .user(u1).product(p4).build();
 
-        em.persist(u1);
-        em.persist(u2);
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
-        em.persist(p4);
-
-        em.persist(r1);
-        em.persist(r2);
-        em.persist(r3);
-        em.persist(r4);
-        em.persist(r5);
+        reviewRepository.save(r1);
+        reviewRepository.save(r2);
+        reviewRepository.save(r3);
+        reviewRepository.save(r4);
+        reviewRepository.save(r5);
     }
 
     @Test
@@ -149,12 +140,12 @@ class ReviewRepositoryTest extends DataJpaBase {
         Review r8 = Review.builder()
                 .user(u5).product(p1).rating(4).build();
 
-        em.persist(u3);
-        em.persist(u4);
-        em.persist(u5);
-        em.persist(r6);
-        em.persist(r7);
-        em.persist(r8);
+        userRepository.save(u3);
+        userRepository.save(u4);
+        userRepository.save(u5);
+        reviewRepository.save(r6);
+        reviewRepository.save(r7);
+        reviewRepository.save(r8);
 
         List<Integer> rating = List.of(1, 2, 3, 4);
         List<Long> count = List.of(1L, 1L, 1L, 2L);
