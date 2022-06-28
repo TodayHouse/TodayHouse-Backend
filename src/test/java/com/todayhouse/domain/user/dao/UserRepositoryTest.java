@@ -105,9 +105,6 @@ class UserRepositoryTest extends DataJpaBase {
         ));
     }
 
-    @Autowired
-    SellerRepository sellerRepository;
-
     @Test
     @DisplayName("user와 seller를 join해서 찾기")
     void findBySellerIdWithSeller() {
@@ -115,8 +112,6 @@ class UserRepositoryTest extends DataJpaBase {
         user.createSeller(request);
         User save = userRepository.save(user);
         Long sellerId = save.getSeller().getId();
-        em.flush();
-        em.clear();
 
         User user = userRepository.findBySellerIdWithSeller(sellerId).orElse(null);
         assertThat(user.getSeller().getBrand()).isEqualTo("test");
