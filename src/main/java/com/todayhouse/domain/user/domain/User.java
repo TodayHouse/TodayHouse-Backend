@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.domain;
 
+import com.todayhouse.domain.story.domain.StoryReply;
 import com.todayhouse.domain.user.dto.request.SellerRequest;
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import lombok.AllArgsConstructor;
@@ -66,6 +67,9 @@ public class User implements UserDetails {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "seller_id")
     private Seller seller;
+
+    @OneToMany(mappedBy = "user", orphanRemoval = true,fetch = FetchType.LAZY)
+    private List<StoryReply> storyReplies = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

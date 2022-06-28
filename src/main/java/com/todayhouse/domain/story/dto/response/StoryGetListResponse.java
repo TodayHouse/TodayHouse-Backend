@@ -1,9 +1,11 @@
 package com.todayhouse.domain.story.dto.response;
 
 import com.todayhouse.domain.story.domain.Story;
+import lombok.Data;
 import lombok.Getter;
 
 @Getter
+@Data
 public class StoryGetListResponse {
     private final Long id;
     private final String title;

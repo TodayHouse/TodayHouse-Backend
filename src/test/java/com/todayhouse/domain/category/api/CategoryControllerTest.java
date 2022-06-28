@@ -44,7 +44,7 @@ class CategoryControllerTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() {
-        categoryRepository.deleteAllInBatch();
+        categoryRepository.deleteAll();
         p1 = Category.builder().name("p1").build();
         c1 = Category.builder().name("c1").parent(p1).build();
         c2 = Category.builder().name("c2").parent(p1).build();
