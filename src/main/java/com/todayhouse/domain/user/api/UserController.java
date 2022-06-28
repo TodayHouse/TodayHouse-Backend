@@ -3,6 +3,7 @@ package com.todayhouse.domain.user.api;
 import com.todayhouse.domain.user.application.UserService;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.request.PasswordUpdateRequest;
+import com.todayhouse.domain.user.dto.request.UserInfoRequest;
 import com.todayhouse.domain.user.dto.request.UserLoginRequest;
 import com.todayhouse.domain.user.dto.request.UserSignupRequest;
 import com.todayhouse.domain.user.dto.response.UserFindResponse;
@@ -13,6 +14,7 @@ import com.todayhouse.global.config.cookie.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,6 +71,19 @@ public class UserController {
         userService.updatePassword(request);
         CookieUtils.deleteCookie(servletRequest, servletResponse, "auth_user");
         return new BaseResponse();
+    }
+
+    @PostMapping("/info")
+    public BaseResponse<Boolean> updateUserInfo(@RequestPart(value = "file", required = false) MultipartFile multipartFile,
+                                                @RequestPart(value = "request") @Valid UserInfoRequest request) {
+        User userRequest = User.builder()
+                .email(request.getEmail())
+                .birth(request.getBirth())
+                .gender(request.getGender())
+                .nickname(request.getNickname())
+                .introduction(request.getIntroduction()).build();
+        userService.updateUserInfo(multipartFile, userRequest);
+        return new BaseResponse(true);
     }
 
     //api test용

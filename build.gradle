@@ -1,3 +1,10 @@
+//querydsl 추가
+buildscript {
+    dependencies {
+        classpath("gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:1.0.10")
+    }
+}
+
 plugins {
     id 'org.springframework.boot' version '2.6.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
@@ -8,6 +15,8 @@ plugins {
 group = 'com'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+
+apply plugin: "com.ewerk.gradle.plugins.querydsl"
 
 configurations {
     compileOnly {
@@ -96,10 +105,7 @@ dependencies {
 
     // querydsl
     implementation 'com.querydsl:querydsl-jpa'
-    annotationProcessor(
-            "jakarta.persistence:jakarta.persistence-api",
-            "jakarta.annotation:jakarta.annotation-api",
-            "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa")
+    implementation 'com.querydsl:querydsl-apt'
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
@@ -117,10 +123,26 @@ task copySubmodule(type: Copy) {
     into './src/main/resources'
 }
 
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+    library = "com.querydsl:querydsl-apt"
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+
 sourceSets {
     main {
         java {
-            srcDirs = ["$projectDir/src/main/java", "$projectDir/build/generated"]
+            srcDirs = ['src/main/java', querydslDir]
         }
     }
+}
+
+compileQuerydsl{
+    options.annotationProcessorPath = configurations.querydsl
+}
+
+configurations {
+    querydsl.extendsFrom compileClasspath
 }

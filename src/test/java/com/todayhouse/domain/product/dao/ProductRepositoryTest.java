@@ -1,6 +1,7 @@
 package com.todayhouse.domain.product.dao;
 
 import com.todayhouse.DataJpaBase;
+import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
@@ -14,13 +15,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -35,10 +34,10 @@ class ProductRepositoryTest extends DataJpaBase {
     ProductRepository productRepository;
 
     @Autowired
-    ProductImageRepository productImageRepository;
+    CategoryRepository categoryRepository;
 
     @Autowired
-    TestEntityManager em;
+    ProductImageRepository productImageRepository;
 
     Product product1, product2, product3;
     Category c1, c2, c3;
@@ -50,10 +49,10 @@ class ProductRepositoryTest extends DataJpaBase {
         c1 = Category.builder().name("c1").build();
         c2 = Category.builder().parent(c1).name("c2").build();
         c3 = Category.builder().parent(c2).name("c3").build();
-        em.persist(c1);
+        categoryRepository.save(c1);
 
         seller = Seller.builder().email("seller@email.com").brand("house").build();
-        em.persist(seller);
+        sellerRepository.save(seller);
         product1 = Product.builder().category(c1).price(1000).title("p1").seller(seller).build();
         ParentOption op1 = ParentOption.builder().product(product1).content("op1").price(1000).stock(10).build();
         ParentOption op2 = ParentOption.builder().product(product1).content("op2").price(1000).stock(10).build();
@@ -71,12 +70,9 @@ class ProductRepositoryTest extends DataJpaBase {
         product3 = Product.builder().category(c3).price(3000).title("p3").seller(seller).build();
         ParentOption op5 = ParentOption.builder().product(product3).content("op5").price(5555).stock(0).build();
 
-        em.persist(product1);
-        em.persist(product2);
-        em.persist(product3);
-
-        em.flush();
-        em.clear();
+        productRepository.save(product1);
+        productRepository.save(product2);
+        productRepository.save(product3);
     }
 
     @Test

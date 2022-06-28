@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.product.dao.ChildOptionRepository;
 import com.todayhouse.domain.product.dao.ParentOptionRepository;
+import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.ChildOption;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
@@ -14,6 +15,7 @@ import com.todayhouse.domain.product.dto.request.ParentOptionSaveRequest;
 import com.todayhouse.domain.product.dto.request.ParentOptionUpdateRequest;
 import com.todayhouse.domain.product.dto.response.ChildOptionResponse;
 import com.todayhouse.domain.product.dto.response.ParentOptionResponse;
+import com.todayhouse.domain.user.dao.SellerRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.global.common.BaseResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +27,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Set;
 
@@ -36,9 +36,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class OptionControllerTest extends IntegrationBase {
-
     @Autowired
     OptionController optionController;
+
+    @Autowired
+    SellerRepository sellerRepository;
+
+    @Autowired
+    ProductRepository productRepository;
 
     @Autowired
     ParentOptionRepository parentOptionRepository;
@@ -52,9 +57,6 @@ public class OptionControllerTest extends IntegrationBase {
     @Autowired
     ObjectMapper objectMapper;
 
-    @PersistenceContext
-    EntityManager em;
-
     Product product;
     ParentOption parentOption;
     ChildOption childOption;
@@ -62,16 +64,13 @@ public class OptionControllerTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         Seller seller = Seller.builder().brand("brand").build();
-        em.persist(seller);
+        sellerRepository.save(seller);
 
         product = Product.builder().seller(seller).parentOption("p1").childOption("c1").selectionOption("s1").build();
         parentOption = ParentOption.builder().product(product).content("ppp").build();
         childOption = ChildOption.builder().parent(parentOption).content("ccc").price(10000).stock(1).build();
 
-        em.persist(product);
-
-        em.flush();
-        em.clear();
+        productRepository.save(product);
     }
 
     @Test

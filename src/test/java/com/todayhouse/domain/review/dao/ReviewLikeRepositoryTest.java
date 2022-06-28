@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.util.List;
 
@@ -17,9 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 class ReviewLikeRepositoryTest extends DataJpaBase {
-    @Autowired
-    TestEntityManager em;
-
     @Autowired
     UserRepository userRepository;
 
@@ -44,8 +40,6 @@ class ReviewLikeRepositoryTest extends DataJpaBase {
     void countByReviewId() {
         reviewLikeRepository.save(new ReviewLike(user1, review1));
         reviewLikeRepository.save(new ReviewLike(user2, review1));
-        em.flush();
-        em.clear();
 
         long count = reviewLikeRepository.countByReview(review1);
 
@@ -56,8 +50,6 @@ class ReviewLikeRepositoryTest extends DataJpaBase {
     @DisplayName("user id와 review id로 reviewLike 조회")
     void findByUserIdAndReviewId() {
         ReviewLike reviewLike = reviewLikeRepository.save(new ReviewLike(user1, review1));
-        em.flush();
-        em.clear();
 
         ReviewLike find = reviewLikeRepository.findByUserAndReview(user1, review1).orElse(null);
 

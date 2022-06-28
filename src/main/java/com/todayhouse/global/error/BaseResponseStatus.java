@@ -94,7 +94,7 @@ public enum BaseResponseStatus {
     IMAGE_FILE_IO_EXCEPTION(false, 4000, "이미지파일을 다루는 과정에서 오류가 발생하였습니다."),
     AMAZON_CLIENT_EXCEPTION(false, 4001, "아마존 서버에 업로드하는 과정에서 오류가 발생했습니다."),
     INVALID_FILE_EXTENSION_EXCEPTION(false, 4002, "잘못된 형식의 파일입니다."),
-
+    INVALID_URL_EXCEPTION(false,4003, "잘못된 url입니다."),
     // 그 밖의
     VALID_EXCEPTION(false, 9998, ""),
     OTHERS(false, 9999, "내부 오류가 발생했습니다.");

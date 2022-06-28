@@ -75,6 +75,7 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
     void cleanUp() {
         reviewRepository.deleteAllInBatch();
         productRepository.deleteAllInBatch();
+        userRepository.deleteAll();
     }
 
     @Test
