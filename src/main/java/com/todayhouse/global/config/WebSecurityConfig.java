@@ -40,7 +40,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     // 정적 자원에 대해서는 Security 설정을 적용하지 않음.
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .and()
+                .ignoring().antMatchers("/swagger-ui/**",
+                        "/v2/api-docs", "/v3/api-docs",
+                        "/swagger-resources",
+                        "/swagger-resources/configuration/ui",
+                        "/swagger-resources/configuration/security");
     }
 
     @Override
@@ -60,12 +66,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests() // 요청에 대한 사용권한 체크
                 .antMatchers(HttpMethod.POST, "/categories")
                 .hasAnyRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/categories/*")
+                .antMatchers(HttpMethod.DELETE, "/categories/**")
                 .hasAnyRole("ADMIN")
                 .antMatchers(HttpMethod.PATCH, "/categories")
                 .hasAnyRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/follows", "/sellers", "/products/**", "/stories/**",
-                        "/options/**", "/orders/**", "/reviews/**", "/inquires/**")
+                        "/options/**", "/orders/**", "/reviews/**", "/users/info", "/inquires/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin post 요청만 허용
                 .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**",
                         "/options/**", "/reviews/**", "/inquires/**")

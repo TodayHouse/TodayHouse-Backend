@@ -37,7 +37,8 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-    private final UserRepository userRepository;
+    private final
+    UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final DeliveryRepository deliveryRepository;
@@ -81,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public Page<Orders> findOrders(Pageable pageable) {
         User user = getValidUser();
-        return orderRepository.findByUserIdWithProductAndOptions(user.getId(), pageable);
+        return orderRepository.findAllByUserIdWithProductAndOptions(user.getId(), pageable);
     }
 
     @Override

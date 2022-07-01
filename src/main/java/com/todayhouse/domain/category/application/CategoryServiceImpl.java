@@ -66,6 +66,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @PostConstruct
     public void perCategory() {
+        List<Category> categories = categoryRepository.findAll();
+        if (!categories.isEmpty())
+            return;
+
         Category 가구 = Category.builder().name("가구").build();
         Category 가전 = Category.builder().name("가전").build();
         Category 생필품 = Category.builder().name("생필품").build();

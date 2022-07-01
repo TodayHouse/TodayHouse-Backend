@@ -18,4 +18,6 @@ public interface FileService {
     void deleteOne(String fileName);
 
     String changeFileNameToUrl(String fileName);
+
+    String changeUrlToFileName(String url);
 }

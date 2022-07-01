@@ -5,6 +5,6 @@ import com.todayhouse.global.error.BaseResponseStatus;
 
 public class UserNicknameExistException extends BaseException {
     public UserNicknameExistException() {
-        super(BaseResponseStatus.POST_USER_EXISTS_EMAIL);
+        super(BaseResponseStatus.POST_USER_EXISTS_NICKNAME);
     }
 }

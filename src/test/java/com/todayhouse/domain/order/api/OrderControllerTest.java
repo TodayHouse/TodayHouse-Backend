@@ -39,6 +39,7 @@ import javax.persistence.PersistenceContext;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -79,7 +80,7 @@ class OrderControllerTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         seller = Seller.builder().brand("test").build();
-        p = Product.builder().title("title").image("img").seller(seller).build();
+        p = Product.builder().title("title").image("img").deliveryFee(9900).seller(seller).build();
         op = ParentOption.builder().product(p).content("op").stock(1).price(1000).build();
 
         em.persist(seller);
@@ -91,9 +92,15 @@ class OrderControllerTest extends IntegrationBase {
     @Test
     @DisplayName("주문 저장")
     void saveOrder() throws Exception {
+        User user = userRepository.save(User.builder()
+                .nickname("test")
+                .email("test@test")
+                .roles(List.of(Role.USER))
+                .build());
         DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder()
                 .sender("from").receiver("to")
                 .address1("a1").address2("a2")
+                .senderEmail("aa@gmail.com")
                 .receiverPhoneNumber("r")
                 .senderPhoneNumber("s")
                 .zipCode("12345").build();
@@ -101,7 +108,7 @@ class OrderControllerTest extends IntegrationBase {
                 .parentOptionId(op.getId()).productQuantity(1)
                 .memo("testmemo")
                 .deliverySaveRequest(deliveryRequest).build();
-        String jwt = tokenProvider.createToken("a@a.com", List.of(Role.USER));
+        String jwt = tokenProvider.createToken("test@test", List.of(Role.USER));
         String url = "http://localhost:8080/orders";
 
         MvcResult mvcResult = mockMvc.perform(post(url)
@@ -116,8 +123,9 @@ class OrderControllerTest extends IntegrationBase {
         List<Long> ids = objectMapper.convertValue(response.getResult(), new TypeReference<>() {
         });
         Delivery delivery = deliveryRepository.findByOrderIdWithOrder(ids.get(0)).orElse(null);
-        assertThat(delivery.getReceiver().equals(deliveryRequest.getReceiver()) &&
-                delivery.getSender().equals(deliveryRequest.getSender())).isTrue();
+        assertThat(delivery.getSender()).isEqualTo(deliveryRequest.getSender());
+        assertThat(delivery.getReceiver()).isEqualTo(deliveryRequest.getReceiver());
+        assertThat(delivery.getSenderEmail()).isEqualTo(deliveryRequest.getSenderEmail());
         assertThat(delivery.getOrder().getProduct().getId()).isEqualTo(p.getId());
     }
 
@@ -127,6 +135,7 @@ class OrderControllerTest extends IntegrationBase {
         DeliverySaveRequest deliveryRequest = DeliverySaveRequest.builder()
                 .sender("from").receiver("to")
                 .address1("a1").address2("a2")
+                .senderEmail("aa@gmail.com")
                 .receiverPhoneNumber("r")
                 .senderPhoneNumber("s").build();
         OrderSaveRequest orderRequest = OrderSaveRequest.builder().productId(p.getId())
@@ -144,9 +153,13 @@ class OrderControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("Order를 주문일 날짜 내림차순으로 페이징하여 조회")
+    @DisplayName("Order를 productQuantity 내림차순으로 페이징하여 조회")
     void findUserOrdersPaging() throws Exception {
-        User user = userRepository.findByEmail("a@a.com").orElse(null);
+        User user = userRepository.save(User.builder()
+                .nickname("test")
+                .email("test@test")
+                .roles(List.of(Role.USER))
+                .build());
         Orders o1 = Orders.builder()
                 .parentOption(op).product(p).user(user).productQuantity(1).build();
         Orders o2 = Orders.builder()
@@ -159,9 +172,11 @@ class OrderControllerTest extends IntegrationBase {
         em.persist(o2);
         em.persist(o3);
         em.persist(o4);
-        String jwt = tokenProvider.createToken("a@a.com", List.of(Role.USER));
-        String url = "http://localhost:8080/orders?page=0&size=3&sort=createdAt,DESC";
+        String jwt = tokenProvider.createToken("test@test", List.of(Role.USER));
+        String url = "http://localhost:8080/orders?page=0&size=3&sort=productQuantity,DESC";
         when(fileService.changeFileNameToUrl(anyString())).thenReturn("test.jpg");
+        em.flush();
+        em.clear();
 
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .header("Authorization", "Bearer " + jwt))
@@ -172,6 +187,8 @@ class OrderControllerTest extends IntegrationBase {
         BaseResponse response = getResponseFromMvcResult(mvcResult);
         PageDto<OrderResponse> page = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
         });
+        assertThat(page.getTotalElements()).isEqualTo(4);
+        assertFalse(page.isLast());
         List<OrderResponse> list = objectMapper.readValue(objectMapper.writeValueAsString(page.getContent()), new TypeReference<>() {
         });
         assertThat(list.size()).isEqualTo(3);
@@ -189,7 +206,11 @@ class OrderControllerTest extends IntegrationBase {
         em.persist(chop);
         em.persist(selop);
 
-        User user = userRepository.findByEmail("a@a.com").orElse(null);
+        User user = userRepository.save(User.builder()
+                .nickname("test")
+                .email("test@test")
+                .roles(List.of(Role.USER))
+                .build());
         Orders order = Orders.builder()
                 .product(p).parentOption(op).childOption(chop).selectionOption(selop)
                 .user(user).productQuantity(1).build();
@@ -210,6 +231,7 @@ class OrderControllerTest extends IntegrationBase {
         DeliveryResponse deliveryResponse = objectMapper.convertValue(orderResponse.getDeliveryResponse(), DeliveryResponse.class);
 
         assertThat(orderResponse.getId()).isEqualTo(save.getOrder().getId());
+        assertThat(orderResponse.getDeliveryFee()).isEqualTo(p.getDeliveryFee());
         assertThat(orderResponse.getProductInfo().get(0)).isEqualTo("test.jpg");
         assertThat(orderResponse.getProductInfo().get(2)).isEqualTo(p.getBrand());
         assertThat(orderResponse.getProductInfo().get(3)).isEqualTo(op.getContent() + " / " + chop.getContent());
@@ -221,11 +243,15 @@ class OrderControllerTest extends IntegrationBase {
     @Test
     @DisplayName("주문 취소")
     void cancelOrder() throws Exception {
-        User user = userRepository.findByEmail("a@a.com").orElse(null);
+        User user = userRepository.save(User.builder()
+                .nickname("test")
+                .email("test@test")
+                .roles(List.of(Role.USER))
+                .build());
         Orders order = Orders.builder()
                 .parentOption(op).product(p).user(user).productQuantity(1).build();
         Orders save = orderRepository.save(order);
-        String jwt = tokenProvider.createToken("a@a.com", List.of(Role.USER));
+        String jwt = tokenProvider.createToken("test@test", List.of(Role.USER));
         String url = "http://localhost:8080/orders/cancel/" + save.getId();
 
         mockMvc.perform(put(url)
@@ -239,11 +265,15 @@ class OrderControllerTest extends IntegrationBase {
     @Test
     @DisplayName("구매 완료")
     void completeOrder() throws Exception {
-        User user = userRepository.findByEmail("a@a.com").orElse(null);
+        User user = userRepository.save(User.builder()
+                .nickname("test")
+                .email("test@test")
+                .roles(List.of(Role.USER))
+                .build());
         Orders order = Orders.builder()
                 .parentOption(op).product(p).user(user).productQuantity(1).build();
         Orders save = orderRepository.save(order);
-        String jwt = tokenProvider.createToken("a@a.com", List.of(Role.USER));
+        String jwt = tokenProvider.createToken("test@test", List.of(Role.USER));
         String url = "http://localhost:8080/orders/complete/" + save.getId();
 
         mockMvc.perform(put(url)

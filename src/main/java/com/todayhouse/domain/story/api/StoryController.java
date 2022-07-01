@@ -2,11 +2,13 @@ package com.todayhouse.domain.story.api;
 
 import com.todayhouse.domain.story.application.StoryService;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
+import com.todayhouse.domain.story.dto.reqeust.StorySearchRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryUpdateRequest;
 import com.todayhouse.domain.story.dto.response.StoryGetDetailResponse;
 import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -42,8 +44,10 @@ public class StoryController {
     }
 
     @GetMapping
-    public BaseResponse<Slice<StoryGetListResponse>> findAllDesc(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        return new BaseResponse<>(storyService.findAllDesc(pageable));
+    public BaseResponse<Page<StoryGetListResponse>> findAllDesc(Pageable pageable, StorySearchRequest request) {
+
+
+        return new BaseResponse<>(storyService.searchStory(request, pageable));
     }
 
     @GetMapping("/{id}")

@@ -4,6 +4,7 @@ import com.todayhouse.domain.order.domain.Address;
 import com.todayhouse.domain.order.domain.Delivery;
 import lombok.*;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 @Getter
@@ -15,6 +16,8 @@ public class DeliverySaveRequest {
     private String sender;
     @NotBlank(message = "receiver를 입력해주세요.")
     private String receiver;
+    @Email(message = "이메일을 입력해주세요.")
+    private String senderEmail;
     @NotBlank(message = "senderPhoneNumber를 입력해주세요.")
     private String senderPhoneNumber;
     @NotBlank(message = "receiverPhoneNumber를 입력해주세요.")
@@ -34,6 +37,7 @@ public class DeliverySaveRequest {
         return Delivery.builder()
                 .sender(sender)
                 .receiver(receiver)
+                .senderEmail(senderEmail)
                 .senderPhoneNumber(senderPhoneNumber)
                 .receiverPhoneNumber(receiverPhoneNumber)
                 .address(address).build();

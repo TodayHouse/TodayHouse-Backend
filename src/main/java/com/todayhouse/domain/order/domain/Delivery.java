@@ -17,6 +17,9 @@ public class Delivery {
     String sender;
     String receiver;
 
+    @Column(name = "sender_email")
+    String senderEmail;
+
     @Column(name = "sender_phone_number")
     String senderPhoneNumber;
 

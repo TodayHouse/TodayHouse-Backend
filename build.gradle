@@ -1,3 +1,4 @@
+//querydsl 추가
 buildscript {
     dependencies {
         classpath("gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:1.0.10")
@@ -104,6 +105,9 @@ dependencies {
 
     // querydsl
     implementation 'com.querydsl:querydsl-jpa'
+    implementation 'com.querydsl:querydsl-apt'
+
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
 test {

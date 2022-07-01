@@ -13,6 +13,7 @@ import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +43,11 @@ class AnswerServiceImplTest {
     ProductRepository productRepository;
     @Mock
     InquiryRepository inquiryRepository;
+
+    @AfterEach
+    void clear(){
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     @DisplayName("답변 저장")

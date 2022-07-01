@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 public class DeliveryResponse {
     private String sender;
     private String receiver;
+    private String senderEmail;
     private String senderPhoneNumber;
     private String receiverPhoneNumber;
     private Address address;
@@ -19,6 +20,7 @@ public class DeliveryResponse {
         this.sender = delivery.getSender();
         this.receiver = delivery.getReceiver();
         this.address = delivery.getAddress();
+        this.senderEmail = delivery.getSenderEmail();
         this.senderPhoneNumber = delivery.getSenderPhoneNumber();
         this.receiverPhoneNumber = delivery.getReceiverPhoneNumber();
     }
