@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
     private final FileService fileService;
@@ -49,20 +48,14 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Long saveReview(MultipartFile multipartFile, Review review, Long productId) {
+    public synchronized Long saveReview(MultipartFile multipartFile, Review review, Long productId) {
         User user = getValidUser();
         Product product = getValidProduct(productId);
 
         if (!isOrderCompleteUser(user.getId(), product.getId()))
             throw new OrderNotCompletedException();
 
-        String imageUrl = saveFileAndGetUrl(multipartFile);
-
-        review.updateUser(user);
-        review.updateProduct(product);
-        review.updateReviewImageUrl(imageUrl);
-
-        return synchSaveReview(review).getId();
+        return updateAndSaveReview(review, multipartFile, user, product).getId();
     }
 
     private User getValidUser() {
@@ -80,9 +73,16 @@ public class ReviewServiceImpl implements ReviewService {
         return productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
     }
 
-    private synchronized Review synchSaveReview(Review reviewWithUserAndProduct) {
-        checkReviewDuplication(reviewWithUserAndProduct.getUser(), reviewWithUserAndProduct.getProduct().getId());
-        return reviewRepository.save(reviewWithUserAndProduct);
+    @Transactional
+    public Review updateAndSaveReview(Review review, MultipartFile multipartFile, User user, Product product) {
+        String imageUrl = saveFileAndGetUrl(multipartFile);
+
+        review.updateUser(user);
+        review.updateProduct(product);
+        review.updateReviewImageUrl(imageUrl);
+
+        checkReviewDuplication(user, product.getId());
+        return reviewRepository.save(review);
     }
 
     private void checkReviewDuplication(User user, Long productId) {
@@ -122,6 +122,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional
     public void deleteReview(Long reviewId) {
         User user = getValidUser();
         Review review = reviewRepository.findByIdAndUser(reviewId, user).orElseThrow(ReviewNotFoundException::new);

@@ -27,6 +27,7 @@ import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.common.PageDto;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import com.todayhouse.infra.S3Storage.service.FileService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -105,6 +106,12 @@ class ReviewControllerTest extends IntegrationBase {
         order1 = Orders.builder().product(product1).user(user1).parentOption(option1).productQuantity(1).build();
         order1.updateStatus(Status.COMPLETED);
         order1 = orderRepository.save(order1);
+    }
+
+    @AfterEach
+    void clean(){
+        reviewRepository.deleteAll();
+        orderRepository.deleteAll();
     }
 
     @Test
@@ -225,7 +232,7 @@ class ReviewControllerTest extends IntegrationBase {
         Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(rating2).build());
         Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").rating(rating3).build());
         List<Long> ids = List.of(review4.getId(), review3.getId());
-        String url = "http://localhost:8080/reviews?size=2&page=0&sort=rating,DESC&sort=createdAt,DESC&";
+        String url = "http://localhost:8080/reviews?size=2&page=0&sort=rating,DESC&sort=createdAt,DESC";
 
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .param("ratings", "1,2")
