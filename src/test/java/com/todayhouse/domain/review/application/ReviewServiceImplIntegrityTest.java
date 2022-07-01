@@ -22,7 +22,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -34,11 +33,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ReviewServiceImplIntegrityTest extends IntegrationBase {
-    private static final List<Long> ids = new ArrayList<>();
-
     @MockBean
     OrderRepository orderRepository;
 
@@ -54,20 +50,13 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
     @Autowired
     ReviewRepository reviewRepository;
 
+    static Product product = null;
 
     @BeforeAll
     void setUp() {
         Product p1 = Product.builder().title("p1").build();
-        Product p2 = Product.builder().title("p2").build();
-        Product p3 = Product.builder().title("p3").build();
-        Product p4 = Product.builder().title("p4").build();
-        Product p5 = Product.builder().title("p5").build();
         User u1 = User.builder().nickname("u1").email("test").build();
-        ids.add(productRepository.save(p1).getId());
-        ids.add(productRepository.save(p2).getId());
-        ids.add(productRepository.save(p3).getId());
-        ids.add(productRepository.save(p4).getId());
-        ids.add(productRepository.save(p5).getId());
+        product = productRepository.save(p1);
         userRepository.save(u1);
     }
 
@@ -81,37 +70,34 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
     @Test
     @DisplayName("리뷰 동시 저장 시 중복되어 저장")
     void reviewSaveConcurrencyTest() throws InterruptedException {
-        ExecutorService service = Executors.newFixedThreadPool(10);
+        ExecutorService service = Executors.newFixedThreadPool(5);
+        final int numberOfThreads = 5;
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
         for (int j = 0; j < 5; j++) {
-            int finalJ = j;
-            int numberOfThreads = 2;
-            CountDownLatch latch = new CountDownLatch(numberOfThreads);
-            for (int i = 0; i < 2; i++) {
-                service.execute(() -> {
-                    try {
-                        setSecurityName("test");
-                        Review review = Review.builder().rating(5).content("good").build();
-                        when(orderRepository.findByUserIdAndProductIdAndStatus(anyLong(), anyLong(), eq(Status.COMPLETED))).thenReturn(List.of(mock(Orders.class)));
-                        //테스트 메소드
-                        reviewService.saveReview(null, review, ids.get(finalJ));
+            service.execute(() -> {
+                try {
+                    setSecurityName("test");
+                    Review review = Review.builder().rating(5).content("good").build();
+                    when(orderRepository.findByUserIdAndProductIdAndStatus(anyLong(), anyLong(), eq(Status.COMPLETED))).thenReturn(List.of(mock(Orders.class)));
+                    //테스트 메소드
+                    reviewService.saveReview(null, review, product.getId());
 
-                        SecurityContextHolder.clearContext();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    latch.countDown();
-                });
-            }
-            latch.await();
-
-            ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, ids.get(finalJ), null, null);
-            Page<Review> reviews = reviewService.findReviews(reviewSearchRequest, PageRequest.of(1, 100));
-            long count = reviews.getTotalElements();
-
-            System.out.println("리뷰 수 : " + count); // 리뷰 동시 저장 시 2
-            assertThat(count).isEqualTo(1L);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                SecurityContextHolder.clearContext();
+                latch.countDown();
+            });
         }
+        latch.await();
+
+        ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, product.getId(), null, null);
+        Page<Review> reviews = reviewService.findReviews(reviewSearchRequest, PageRequest.of(0, 100000));
+        long count = reviews.getTotalElements();
+
+        System.out.println("리뷰 수 : " + count);
+        assertThat(count).isEqualTo(1L);
     }
 
     private void setSecurityName(String email) {
