@@ -5,6 +5,7 @@ import com.todayhouse.domain.inquiry.domain.Answer;
 import com.todayhouse.domain.inquiry.domain.Inquiry;
 import com.todayhouse.domain.inquiry.dto.request.InquirySearchRequest;
 import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +43,7 @@ class InquiryRepositoryTest extends DataJpaBase {
         user1 = em.persist(User.builder().email("test1@test.com").nickname("test1").build());
         user2 = em.persist(User.builder().email("test2@test.com").nickname("test2").build());
         user3 = em.persist(User.builder().email("test3@test.com").nickname("test3").build());
-        admin = em.persist(User.builder().email("admin@test.com").nickname("admin").build());
+        admin = em.persist(User.builder().email("admin@test.com").nickname("admintest").roles(List.of(Role.ADMIN)).build());
         product1 = em.persist(Product.builder().build());
         product2 = em.persist(Product.builder().build());
     }
