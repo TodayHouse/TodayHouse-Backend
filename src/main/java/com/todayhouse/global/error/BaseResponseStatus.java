@@ -73,6 +73,9 @@ public enum BaseResponseStatus {
     REVIEW_LIKE_DUPLICATE(false, 2604, "중복된 도움이 돼요입니다."),
     REVIEW_LIKE_NOT_FOUND(false, 2605, "도움이 돼요를 먼저 추가해주세요."),
 
+    // scrap, like
+    SCRAP_NOT_FOUND(false, 2700, "해당 스크랩을 찾을 수 없습니다."),
+
     // 3000 : Database / Server 오류
     // common
     DATABASE_ERROR(false, 3000, "데이터베이스 연결에 실패하였습니다."),
