@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
     private final FileService fileService;
@@ -123,6 +122,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional
     public void deleteReview(Long reviewId) {
         User user = getValidUser();
         Review review = reviewRepository.findByIdAndUser(reviewId, user).orElseThrow(ReviewNotFoundException::new);
