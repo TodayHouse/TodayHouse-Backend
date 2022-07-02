@@ -13,6 +13,6 @@ hooks:
   # AfterInstall앞은 2칸이다.
   AfterInstall:
     # location은 프로젝트 기준으로 위치를 작성해준다!
-    - location: scripts/start.sh
+    - location: start.sh
       # runas를 입력해주지 않으면 간혹 permission error가 날 수도
       runas: root
