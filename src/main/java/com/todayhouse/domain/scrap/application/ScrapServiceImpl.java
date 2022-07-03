@@ -11,6 +11,8 @@ import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +64,14 @@ public class ScrapServiceImpl implements ScrapService {
     public Long countMyScrap() {
         User user = getValidUser();
         return scrapRepository.countByUser(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Story> findScrapedStories(Pageable pageable) {
+        User user = getValidUser();
+        Page<Scrap> scraps = scrapRepository.findScrapWithStoryByUser(pageable, user);
+        return scraps.map(Scrap::getStory);
     }
 
     private User getValidUser() {

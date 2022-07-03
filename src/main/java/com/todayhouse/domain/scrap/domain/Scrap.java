@@ -2,6 +2,7 @@ package com.todayhouse.domain.scrap.domain;
 
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.global.common.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Scrap {
+public class Scrap extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "scrap_id")

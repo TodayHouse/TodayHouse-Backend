@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface ScrapRepository extends JpaRepository<Scrap, Long> {
+public interface ScrapRepository extends JpaRepository<Scrap, Long>, CustomScrapRepository {
     Optional<Scrap> findByUserAndStory(User user, Story story);
 
     Long countByStory(Story story);

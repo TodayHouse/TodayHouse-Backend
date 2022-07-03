@@ -1,15 +1,18 @@
 package com.todayhouse.domain.scrap.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.scrap.dao.ScrapRepository;
 import com.todayhouse.domain.scrap.domain.Scrap;
 import com.todayhouse.domain.story.dao.StoryRepository;
 import com.todayhouse.domain.story.domain.Story;
+import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseResponse;
+import com.todayhouse.global.common.PageDto;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -145,5 +148,34 @@ class ScrapControllerTest extends IntegrationBase {
         Long count = objectMapper.convertValue(response.getResult(), Long.class);
 
         assertThat(count).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("스크랩한 스토리 날짜 내림차순 조회")
+    void findScrapedStories() throws Exception {
+        Story story2 = storyRepository.save(Story.builder()
+                .category(Story.Category.STORY).content("content2").title("title2").liked(0).user(user1)
+                .build());
+        scrapRepository.save(Scrap.builder().user(user1).story(story1).build());
+        scrapRepository.save(Scrap.builder().user(user1).story(story2).build());
+
+        String url = "http://localhost:8080/scraps/my?sort=createdAt,DESC";
+        String jwt = jwtTokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
+
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse response = getResponseFromMvcResult(mvcResult);
+        PageDto<StoryGetListResponse> pageDto = objectMapper.readValue(objectMapper.writeValueAsString(response.getResult()), new TypeReference<>() {
+        });
+        List<StoryGetListResponse> stories = objectMapper.readValue(objectMapper.writeValueAsString(pageDto.getContent()), new TypeReference<>() {
+        });
+
+        assertThat(pageDto.getTotalElements()).isEqualTo(2);
+        assertThat(stories.get(0).getTitle()).isEqualTo("title2");
+        assertThat(stories.get(1).getTitle()).isEqualTo("title");
     }
 }

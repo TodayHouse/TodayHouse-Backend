@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,10 +33,10 @@ class ScrapRepositoryTest extends DataJpaBase {
         user2 = userRepository.save(User.builder().build());
 
         story1 = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content").title("title").liked(0).user(user1)
+                .category(Story.Category.STORY).content("content").title("title1").liked(0).user(user1)
                 .build());
         story2 = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content").title("title").liked(0).user(user2)
+                .category(Story.Category.STORY).content("content").title("title2").liked(0).user(user2)
                 .build());
 
         scrap1 = scrapRepository.save(Scrap.builder().user(user1).story(story1).build());
@@ -82,5 +84,26 @@ class ScrapRepositoryTest extends DataJpaBase {
         assertThat(count1).isEqualTo(2);
         assertThat(count2).isEqualTo(1);
         assertThat(count3).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("스크랩한 스토리만 페이징")
+    void findScrapWithStoryByUser() {
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Page<Scrap> scraps = scrapRepository.findScrapWithStoryByUser(pageRequest, user1);
+
+        assertThat(scraps.getContent().size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("스크랩한 스토리만 페이징 결과 0")
+    void findScrapWithStoryByUserZero() {
+        User user3 = userRepository.save(User.builder().build());
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Page<Scrap> scraps = scrapRepository.findScrapWithStoryByUser(pageRequest, user3);
+
+        assertThat(scraps.getContent().size()).isEqualTo(0);
     }
 }

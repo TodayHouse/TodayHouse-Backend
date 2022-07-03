@@ -17,11 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -163,6 +166,25 @@ class ScrapServiceImplTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(null));
 
         assertThrows(UserNotFoundException.class, () -> scrapService.countMyScrap());
+    }
+
+    @Test
+    @DisplayName("스크랩 찾기")
+    void findScrapedStories() {
+        String email = "test";
+        User mockUser = mock(User.class);
+        Pageable pageable = mock(Pageable.class);
+        Page<Scrap> mockPage = mock(Page.class);//new PageImpl<>(List.of(mock(Scrap.class)));
+        Page<Story> result = mock(Page.class);
+
+        setSecurityName(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(mockUser));
+        when(scrapRepository.findScrapWithStoryByUser(pageable, mockUser)).thenReturn(mockPage);
+        when(mockPage.map(any(Function.class))).thenReturn(result);
+
+        Page<Story> stories = scrapService.findScrapedStories(pageable);
+
+        assertThat(stories).isEqualTo(result);
     }
 
     private void setSecurityName(String email) {
