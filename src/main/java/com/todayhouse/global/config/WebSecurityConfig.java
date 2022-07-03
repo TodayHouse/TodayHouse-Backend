@@ -71,9 +71,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.PATCH, "/categories")
                 .hasAnyRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/follows", "/sellers", "/products/**", "/stories/**",
-                        "/options/**", "/orders/**", "/reviews/**", "/users/info")
+                        "/options/**", "/orders/**", "/reviews/**", "/users/info", "/scraps/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin post 요청만 허용
-                .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**", "/options/**", "/reviews/**")
+                .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**",
+                        "/options/**", "/reviews/**", "/scraps/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin delete 요청만 허용
                 .antMatchers(HttpMethod.PUT, "/products/**", "/options/**", "/orders/**")
                 .hasAnyRole("USER", "ADMIN")
@@ -85,7 +86,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated()// 인증된 요청만 허용
 
                 .antMatchers(HttpMethod.GET, "/categories/**", "/options/**", "/products/**", "/stories/**",
-                        "/follows/**", "/sellers/**", "/users/**", "/orders/**", "/reviews/**")
+                        "/follows/**", "/sellers/**", "/users/**", "/orders/**", "/reviews/**", "/scraps/**")
                 .permitAll()
                 .antMatchers(HttpMethod.POST, "/users/login")
                 .anonymous()
