@@ -75,6 +75,7 @@ public enum BaseResponseStatus {
 
     // scrap, like
     SCRAP_NOT_FOUND(false, 2700, "해당 스크랩을 찾을 수 없습니다."),
+    SCRAP_EXIST(false, 2701, "이미 스크랩한 상품입니다."),
 
     // 3000 : Database / Server 오류
     // common
