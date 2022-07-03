@@ -13,27 +13,27 @@ import org.springframework.web.bind.annotation.*;
 public class ScrapController {
     private final ScrapService scrapService;
 
-    @PostMapping("/{productId}")
-    public BaseResponse<Long> saveScrap(@PathVariable Long productId) {
-        Scrap scrap = scrapService.saveScrap(productId);
+    @PostMapping("/{storyId}")
+    public BaseResponse<Long> saveScrap(@PathVariable Long storyId) {
+        Scrap scrap = scrapService.saveScrap(storyId);
         return new BaseResponse(scrap.getId());
     }
 
-    @GetMapping("/{productId}/exist")
-    public BaseResponse<Boolean> isScraped(@PathVariable Long productId) {
-        Boolean scraped = scrapService.isScraped(productId);
+    @GetMapping("/{storyId}/exist")
+    public BaseResponse<Boolean> isScraped(@PathVariable Long storyId) {
+        Boolean scraped = scrapService.isScraped(storyId);
         return new BaseResponse(scraped);
     }
 
-    @DeleteMapping("/{productId}")
-    public BaseResponse<String> deleteScrap(@PathVariable Long productId) {
-        scrapService.deleteScrap(productId);
+    @DeleteMapping("/{storyId}")
+    public BaseResponse<String> deleteScrap(@PathVariable Long storyId) {
+        scrapService.deleteScrap(storyId);
         return new BaseResponse("삭제되었습니다.");
     }
 
-    @GetMapping("/{productId}/count")
-    public BaseResponse<Long> countProductScrap(@PathVariable Long productId) {
-        Long count = scrapService.countScrapByProductId(productId);
+    @GetMapping("/{storyId}/count")
+    public BaseResponse<Long> countStoryScrap(@PathVariable Long storyId) {
+        Long count = scrapService.countScrapByStoryId(storyId);
         return new BaseResponse(count);
     }
 

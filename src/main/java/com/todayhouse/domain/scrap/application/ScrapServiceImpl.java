@@ -1,12 +1,12 @@
 package com.todayhouse.domain.scrap.application;
 
-import com.todayhouse.domain.product.dao.ProductRepository;
-import com.todayhouse.domain.product.domain.Product;
-import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.scrap.dao.ScrapRepository;
 import com.todayhouse.domain.scrap.domain.Scrap;
 import com.todayhouse.domain.scrap.exception.ScrapExistException;
 import com.todayhouse.domain.scrap.exception.ScrapNotFoundException;
+import com.todayhouse.domain.story.dao.StoryRepository;
+import com.todayhouse.domain.story.domain.Story;
+import com.todayhouse.domain.story.exception.StoryNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
@@ -21,30 +21,30 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScrapServiceImpl implements ScrapService {
     private final UserRepository userRepository;
     private final ScrapRepository scrapRepository;
-    private final ProductRepository productRepository;
+    private final StoryRepository storyRepository;
 
     @Override
-    public Scrap saveScrap(Long productId) {
+    public Scrap saveScrap(Long storyId) {
         User user = getValidUser();
-        Product product = productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
-        scrapRepository.findByUserAndProduct(user, product).ifPresent(s -> {
+        Story story = storyRepository.findById(storyId).orElseThrow(StoryNotFoundException::new);
+        scrapRepository.findByUserAndStory(user, story).ifPresent(s -> {
             throw new ScrapExistException();
         });
 
-        Scrap scrap = Scrap.builder().user(user).product(product).build();
+        Scrap scrap = Scrap.builder().user(user).story(story).build();
         return scrapRepository.save(scrap);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean isScraped(Long productId) {
-        Scrap scrap = findScrapNullable(productId);
+    public Boolean isScraped(Long storyId) {
+        Scrap scrap = findScrapNullable(storyId);
         return scrap != null;
     }
 
     @Override
-    public void deleteScrap(Long productId) {
-        Scrap scrap = findScrapNullable(productId);
+    public void deleteScrap(Long storyId) {
+        Scrap scrap = findScrapNullable(storyId);
         if (scrap == null)
             throw new ScrapNotFoundException();
         scrapRepository.delete(scrap);
@@ -52,9 +52,9 @@ public class ScrapServiceImpl implements ScrapService {
 
     @Override
     @Transactional(readOnly = true)
-    public Long countScrapByProductId(Long productId) {
-        Product product = productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
-        return scrapRepository.countByProduct(product);
+    public Long countScrapByStoryId(Long storyId) {
+        Story story = storyRepository.findById(storyId).orElseThrow(StoryNotFoundException::new);
+        return scrapRepository.countByStory(story);
     }
 
     @Override
@@ -69,9 +69,9 @@ public class ScrapServiceImpl implements ScrapService {
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
     }
 
-    private Scrap findScrapNullable(Long productId) {
+    private Scrap findScrapNullable(Long storyId) {
         User user = getValidUser();
-        Product product = productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
-        return scrapRepository.findByUserAndProduct(user, product).orElse(null);
+        Story story = storyRepository.findById(storyId).orElseThrow(StoryNotFoundException::new);
+        return scrapRepository.findByUserAndStory(user, story).orElse(null);
     }
 }

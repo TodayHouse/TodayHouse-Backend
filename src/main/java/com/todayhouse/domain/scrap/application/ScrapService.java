@@ -3,13 +3,13 @@ package com.todayhouse.domain.scrap.application;
 import com.todayhouse.domain.scrap.domain.Scrap;
 
 public interface ScrapService {
-    Scrap saveScrap(Long productId);
+    Scrap saveScrap(Long storyId);
 
-    Boolean isScraped(Long productId);
+    Boolean isScraped(Long storyId);
 
-    void deleteScrap(Long productId);
+    void deleteScrap(Long storyId);
 
-    Long countScrapByProductId(Long productId);
+    Long countScrapByStoryId(Long storyId);
 
     Long countMyScrap();
 }

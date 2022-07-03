@@ -1,6 +1,6 @@
 package com.todayhouse.domain.scrap.domain;
 
-import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.user.domain.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -25,13 +25,12 @@ public class Scrap {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    @NotNull
-    private Product product;
+    @JoinColumn(name = "story_id")
+    private Story story;
 
     @Builder
-    public Scrap(User user, Product product) {
+    public Scrap(User user, Story story) {
         this.user = user;
-        this.product = product;
+        this.story = story;
     }
 }

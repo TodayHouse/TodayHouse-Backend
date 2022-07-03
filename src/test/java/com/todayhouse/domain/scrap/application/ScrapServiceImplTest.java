@@ -1,17 +1,16 @@
 package com.todayhouse.domain.scrap.application;
 
-import com.todayhouse.domain.product.dao.ProductRepository;
-import com.todayhouse.domain.product.domain.Product;
-import com.todayhouse.domain.product.exception.ProductNotFoundException;
 import com.todayhouse.domain.scrap.dao.ScrapRepository;
 import com.todayhouse.domain.scrap.domain.Scrap;
 import com.todayhouse.domain.scrap.exception.ScrapExistException;
 import com.todayhouse.domain.scrap.exception.ScrapNotFoundException;
+import com.todayhouse.domain.story.dao.StoryRepository;
+import com.todayhouse.domain.story.domain.Story;
+import com.todayhouse.domain.story.exception.StoryNotFoundException;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +39,7 @@ class ScrapServiceImplTest {
     @Mock
     ScrapRepository scrapRepository;
     @Mock
-    ProductRepository productRepository;
+    StoryRepository storyRepository;
 
     @AfterEach
     void perSet() {
@@ -54,8 +53,8 @@ class ScrapServiceImplTest {
         Scrap mockScrap = mock(Scrap.class);
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(mock(User.class)));
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(mock(Product.class)));
-        when(scrapRepository.findByUserAndProduct(any(User.class), any(Product.class)))
+        when(storyRepository.findById(anyLong())).thenReturn(Optional.of(mock(Story.class)));
+        when(scrapRepository.findByUserAndStory(any(User.class), any(Story.class)))
                 .thenReturn(Optional.ofNullable(null));
         when(scrapRepository.save(any(Scrap.class))).thenReturn(mockScrap);
 
@@ -66,13 +65,13 @@ class ScrapServiceImplTest {
 
     @Test
     @DisplayName("입력받은 아이디의 상품을 찾을 수 없음")
-    void scrapSaveNotFoundProduct() {
+    void scrapSaveNotFoundStory() {
         String email = "test";
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(mock(User.class)));
-        when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+        when(storyRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(ProductNotFoundException.class, () -> scrapService.saveScrap(1L));
+        assertThrows(StoryNotFoundException.class, () -> scrapService.saveScrap(1L));
     }
 
     @Test
@@ -81,8 +80,8 @@ class ScrapServiceImplTest {
         String email = "test";
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(mock(User.class)));
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(mock(Product.class)));
-        when(scrapRepository.findByUserAndProduct(any(User.class), any(Product.class)))
+        when(storyRepository.findById(anyLong())).thenReturn(Optional.of(mock(Story.class)));
+        when(scrapRepository.findByUserAndStory(any(User.class), any(Story.class)))
                 .thenReturn(Optional.ofNullable(mock(Scrap.class)));
 
         assertThrows(ScrapExistException.class, () -> scrapService.saveScrap(1L));
@@ -125,22 +124,22 @@ class ScrapServiceImplTest {
     }
 
     @Test
-    @DisplayName("product id로 스크랩 개수 세기")
-    void countScrapByProductId() {
-        Product mockProduct = mock(Product.class);
+    @DisplayName("story id로 스크랩 개수 세기")
+    void countScrapByStoryId() {
+        Story mockStory = mock(Story.class);
         Long count = 10L;
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(mockProduct));
-        when(scrapRepository.countByProduct(mockProduct)).thenReturn(count);
+        when(storyRepository.findById(anyLong())).thenReturn(Optional.of(mockStory));
+        when(scrapRepository.countByStory(mockStory)).thenReturn(count);
 
-        assertThat(scrapService.countScrapByProductId(1L)).isEqualTo(count);
+        assertThat(scrapService.countScrapByStoryId(1L)).isEqualTo(count);
     }
 
     @Test
-    @DisplayName("존재하지 않는 product id로 스크랩 개수 세기")
-    void countScrapByProductIdNotFoundProduct() {
-        when(productRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+    @DisplayName("존재하지 않는 story id로 스크랩 개수 세기")
+    void countScrapByStoryIdNotFoundStory() {
+        when(storyRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        assertThrows(ProductNotFoundException.class, () -> scrapService.countScrapByProductId(1L));
+        assertThrows(StoryNotFoundException.class, () -> scrapService.countScrapByStoryId(1L));
     }
 
     @Test
@@ -178,8 +177,8 @@ class ScrapServiceImplTest {
         String email = "test";
         setSecurityName(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(mock(User.class)));
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(mock(Product.class)));
-        when(scrapRepository.findByUserAndProduct(any(User.class), any(Product.class)))
+        when(storyRepository.findById(anyLong())).thenReturn(Optional.of(mock(Story.class)));
+        when(scrapRepository.findByUserAndStory(any(User.class), any(Story.class)))
                 .thenReturn(Optional.ofNullable(scrap));
     }
 }

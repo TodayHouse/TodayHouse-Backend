@@ -2,10 +2,10 @@ package com.todayhouse.domain.scrap.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
-import com.todayhouse.domain.product.dao.ProductRepository;
-import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.scrap.dao.ScrapRepository;
 import com.todayhouse.domain.scrap.domain.Scrap;
+import com.todayhouse.domain.story.dao.StoryRepository;
+import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.User;
@@ -34,7 +34,7 @@ class ScrapControllerTest extends IntegrationBase {
     @Autowired
     ScrapRepository scrapRepository;
     @Autowired
-    ProductRepository productRepository;
+    StoryRepository storyRepository;
     @Autowired
     JwtTokenProvider jwtTokenProvider;
     @Autowired
@@ -43,18 +43,20 @@ class ScrapControllerTest extends IntegrationBase {
     MockMvc mockMvc;
 
     User user1;
-    Product product1;
+    Story story1;
 
     @BeforeEach
     void preSet() {
-        product1 = productRepository.save(Product.builder().build());
         user1 = userRepository.save(User.builder().build());
+        story1 = storyRepository.save(Story.builder()
+                .category(Story.Category.STORY).content("content").title("title").liked(0).user(user1)
+                .build());
     }
 
     @Test
     @DisplayName("스크랩 저장")
     void saveScrap() throws Exception {
-        String url = "http://localhost:8080/scraps/" + product1.getId();
+        String url = "http://localhost:8080/scraps/" + story1.getId();
         String jwt = jwtTokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
 
         MvcResult mvcResult = mockMvc.perform(post(url)
@@ -65,7 +67,7 @@ class ScrapControllerTest extends IntegrationBase {
 
         BaseResponse response = getResponseFromMvcResult(mvcResult);
         Long saveId = objectMapper.convertValue(response.getResult(), Long.class);
-        Scrap scrap = scrapRepository.findByUserAndProduct(user1, product1).orElse(null);
+        Scrap scrap = scrapRepository.findByUserAndStory(user1, story1).orElse(null);
 
         assertThat(saveId).isEqualTo(scrap.getId());
     }
@@ -73,8 +75,8 @@ class ScrapControllerTest extends IntegrationBase {
     @Test
     @DisplayName("스크랩 되었는지 확인")
     void isScraped() throws Exception {
-        scrapRepository.save(Scrap.builder().product(product1).user(user1).build());
-        String url = "http://localhost:8080/scraps/" + product1.getId() + "/exist";
+        scrapRepository.save(Scrap.builder().story(story1).user(user1).build());
+        String url = "http://localhost:8080/scraps/" + story1.getId() + "/exist";
         String jwt = jwtTokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
 
         MvcResult mvcResult = mockMvc.perform(get(url)
@@ -92,8 +94,8 @@ class ScrapControllerTest extends IntegrationBase {
     @Test
     @DisplayName("스크랩 삭제")
     void deleteScrap() throws Exception {
-        Scrap saveScrap = scrapRepository.save(Scrap.builder().product(product1).user(user1).build());
-        String url = "http://localhost:8080/scraps/" + product1.getId();
+        Scrap saveScrap = scrapRepository.save(Scrap.builder().story(story1).user(user1).build());
+        String url = "http://localhost:8080/scraps/" + story1.getId();
         String jwt = jwtTokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
 
         mockMvc.perform(delete(url)
@@ -107,11 +109,11 @@ class ScrapControllerTest extends IntegrationBase {
 
     @Test
     @DisplayName("해당 상품의 총 스크랩 개수")
-    void countProductScrap() throws Exception {
-        scrapRepository.save(Scrap.builder().user(user1).product(product1).build());
-        scrapRepository.save(Scrap.builder().user(user1).product(product1).build());
+    void countStoryScrap() throws Exception {
+        scrapRepository.save(Scrap.builder().user(user1).story(story1).build());
+        scrapRepository.save(Scrap.builder().user(user1).story(story1).build());
 
-        String url = "http://localhost:8080/scraps/" + product1.getId() + "/count";
+        String url = "http://localhost:8080/scraps/" + story1.getId() + "/count";
 
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
@@ -127,8 +129,8 @@ class ScrapControllerTest extends IntegrationBase {
     @Test
     @DisplayName("자신이 스크랩한 사진의 개수")
     void countMyScrap() throws Exception {
-        scrapRepository.save(Scrap.builder().user(user1).product(product1).build());
-        scrapRepository.save(Scrap.builder().user(user1).product(product1).build());
+        scrapRepository.save(Scrap.builder().user(user1).story(story1).build());
+        scrapRepository.save(Scrap.builder().user(user1).story(story1).build());
 
         String url = "http://localhost:8080/scraps/my/count";
         String jwt = jwtTokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
