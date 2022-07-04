@@ -55,7 +55,7 @@ public class ScrapController {
         Page<Story> stories = scrapService.findScrapedStories(pageable);
         PageDto<StoryGetListResponse> response = new PageDto<>(stories
                 .map(story ->
-                        new StoryGetListResponse(story, imageService.findThumbnailUrl(story))
+                        new StoryGetListResponse(story, imageService.findThumbnailUrl(story), true)
                 )
         );
         return new BaseResponse<>(response);
