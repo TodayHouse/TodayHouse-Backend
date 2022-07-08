@@ -25,6 +25,7 @@ public class ReviewRepositoryImpl extends QuerydslRepositorySupport
         super(Review.class);
     }
 
+    // 제품, 유저 id, 이미지 유무 별로 페이징
     @Override
     public Page<Review> findAllReviews(ReviewSearchRequest request, Pageable pageable) {
         Set<Integer> ratings = splitToIntegerSet(request.getRatings());

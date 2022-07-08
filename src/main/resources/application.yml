@@ -1,6 +1,6 @@
 ﻿spring:
   profiles:
-    include: jwt, email, aws, oauth , mysql
+    include: jwt, email, aws, oauth, mysql
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -31,6 +31,8 @@ server:
   servlet:
     session:
       tracking-modes: cookie
+    encoding:
+      force-response: true
 logging:
   level:
     com:
