@@ -53,11 +53,11 @@ class ProductRepositoryTest extends DataJpaBase {
 
         seller = Seller.builder().email("seller@email.com").brand("house").build();
         sellerRepository.save(seller);
-        product1 = Product.builder().category(c1).price(1000).title("p1").seller(seller).build();
+        product1 = Product.builder().category(c1).price(1000).title("p1").seller(seller).productDetail("abcd").build();
         ParentOption op1 = ParentOption.builder().product(product1).content("op1").price(1000).stock(10).build();
         ParentOption op2 = ParentOption.builder().product(product1).content("op2").price(1000).stock(10).build();
 
-        product2 = Product.builder().category(c2).price(2000).title("p2").seller(seller).build();
+        product2 = Product.builder().category(c2).price(2000).title("p2").seller(seller).productDetail("bcde").build();
         ParentOption op3 = ParentOption.builder().product(product2).content("op3").build();
         ParentOption op4 = ParentOption.builder().product(product2).content("op4").build();
         ChildOption ch1 = ChildOption.builder().parent(op3).content("ch1").stock(10).price(1000).build();
@@ -67,7 +67,7 @@ class ProductRepositoryTest extends DataJpaBase {
         ProductImage file1 = ProductImage.builder().fileName("file1").product(product2).build();
         ProductImage file2 = ProductImage.builder().fileName("file2").product(product2).build();
 
-        product3 = Product.builder().category(c3).price(3000).title("p3").seller(seller).build();
+        product3 = Product.builder().category(c3).price(3000).title("p3").seller(seller).productDetail("cdef").build();
         ParentOption op5 = ParentOption.builder().product(product3).content("op5").price(5555).stock(0).build();
 
         productRepository.save(product1);
@@ -152,27 +152,31 @@ class ProductRepositoryTest extends DataJpaBase {
         assertThat(list.get(2).getId()).isEqualTo(product3.getId());
     }
 
-//    @Test
-//    @DisplayName("test")
-//    void test(){
-//        List<Product> list = new ArrayList<>();
-//        for(int i=0;i<100000;i++){
-//            Product p = Product.builder().category(c1).price(1000).title("p1").seller(seller).build();
-//            list.add(p);
-//        }
-//        productRepository.saveAll(list);
-//        em.flush();
-//        em.clear();
-//
-//        long beforeTime = System.currentTimeMillis();
-//
-//        ProductSearchRequest request = ProductSearchRequest.builder()
-//                .deliveryFee(false).specialPrice(false).build();
-//        PageRequest of = PageRequest.of(3000, 30, Sort.by("id"));
-//        productRepository.findAllWithSeller(request,of);
-//
-//        long afterTime = System.currentTimeMillis(); // 코드 실행 후에 시간 받아오기
-//        long secDiffTime = (afterTime - beforeTime); //두 시간에 차 계산
-//        System.out.println("시간차이(ms) : "+secDiffTime);
-//    }
+    @Test
+    @DisplayName("브랜드 이름으로 검색")
+    void findAllWithSellerSearchBrand(){
+        String search = "hou";
+        ProductSearchRequest request = ProductSearchRequest.builder().search(search).build();
+        PageRequest pageRequest = PageRequest.of(0, 30, Sort.by("id"));
+
+        Page<Product> page = productRepository.findAllWithSeller(request, pageRequest);
+
+        assertThat(page.getContent().size()).isEqualTo(3);
+        assertThat(page.getContent().get(0)).isEqualTo(product1);
+        assertThat(page.getContent().get(1)).isEqualTo(product2);
+        assertThat(page.getContent().get(2)).isEqualTo(product3);
+    }
+
+    @Test
+    @DisplayName("상품 제목으로 검색")
+    void findAllWithSellerSearchTitle() {
+        String search = "p1";
+        ProductSearchRequest request = ProductSearchRequest.builder().search(search).build();
+        PageRequest pageRequest = PageRequest.of(0, 30, Sort.by("id"));
+
+        Page<Product> page = productRepository.findAllWithSeller(request, pageRequest);
+
+        assertThat(page.getContent().size()).isEqualTo(1);
+        assertThat(page.getContent().get(0)).isEqualTo(product1);
+    }
 }

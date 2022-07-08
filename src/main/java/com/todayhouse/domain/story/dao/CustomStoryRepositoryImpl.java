@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
@@ -40,10 +41,12 @@ public class CustomStoryRepositoryImpl extends QuerydslRepositorySupport
         List<Story> content = getStories(ids, pageable);
 
         int size = queryFactory.selectFrom(story).where(
-                familyTypeEq(request.getFamilyType()),
-                ResiTypeEq(request.getResiType()),
-                floorSpaceBetween(request.getFloorSpaceMin(), request.getFloorSpaceMax()),
-                styleTypeEq(request.getStyleType())).fetch().size();
+                eqFamilyType(request.getFamilyType()),
+                eqResiType(request.getResiType()),
+                betweenFloorSpace(request.getFloorSpaceMin(), request.getFloorSpaceMax()),
+                eqStyleType(request.getStyleType()),
+                eqCategory(request.getCategory()),
+                containSearch(request.getSearch())).fetch().size();
 
         return new PageImpl<>(content, pageable, size);
     }
@@ -52,11 +55,12 @@ public class CustomStoryRepositoryImpl extends QuerydslRepositorySupport
         JPAQuery<Long> idQuery = queryFactory.select(story.id)
                 .from(story)
                 .where(
-                        familyTypeEq(request.getFamilyType()),
-                        ResiTypeEq(request.getResiType()),
-                        floorSpaceBetween(request.getFloorSpaceMin(), request.getFloorSpaceMax()),
-                        styleTypeEq(request.getStyleType()),
-                        categoryEq(request.getCategory())
+                        eqFamilyType(request.getFamilyType()),
+                        eqResiType(request.getResiType()),
+                        betweenFloorSpace(request.getFloorSpaceMin(), request.getFloorSpaceMax()),
+                        eqStyleType(request.getStyleType()),
+                        eqCategory(request.getCategory()),
+                        containSearch(request.getSearch())
                 );
 
         return getQuerydsl().applyPagination(pageable, idQuery).fetch();
@@ -69,33 +73,43 @@ public class CustomStoryRepositoryImpl extends QuerydslRepositorySupport
         return getQuerydsl().applySorting(pageable.getSort(), query).fetch();
     }
 
-    private BooleanExpression categoryEq(Story.Category category) {
+    private BooleanExpression eqCategory(Story.Category category) {
         if (category == null)
             return null;
         return story.category.eq(category);
     }
 
-    private BooleanExpression styleTypeEq(StyleType styleType) {
+    private BooleanExpression eqStyleType(StyleType styleType) {
         if (styleType == null)
             return null;
         return story.styleType.eq(styleType);
     }
 
-    private BooleanExpression ResiTypeEq(ResiType resiType) {
+    private BooleanExpression eqResiType(ResiType resiType) {
         if (resiType == null)
             return null;
         return story.resiType.eq(resiType);
     }
 
-    private BooleanExpression familyTypeEq(FamilyType familyType) {
+    private BooleanExpression eqFamilyType(FamilyType familyType) {
         if (familyType == null)
             return null;
         return story.familyType.eq(familyType);
     }
 
-    private BooleanExpression floorSpaceBetween(Integer floorSpaceMin, Integer floorSpaceMax) {
+    private BooleanExpression betweenFloorSpace(Integer floorSpaceMin, Integer floorSpaceMax) {
         if (floorSpaceMin == null || floorSpaceMax == null)
             return null;
         return story.floorSpace.between(floorSpaceMin, floorSpaceMax);
+    }
+
+    private BooleanExpression containSearch(String search) {
+        if (ObjectUtils.isEmpty(search))
+            return null;
+        return story.user.nickname.contains(search).or(
+                story.content.contains(search).or(
+                        story.title.contains(search)
+                )
+        );
     }
 }

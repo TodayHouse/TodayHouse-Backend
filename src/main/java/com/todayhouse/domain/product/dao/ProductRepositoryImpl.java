@@ -5,6 +5,7 @@ import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.todayhouse.domain.category.dao.CategoryRepository;
+import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.product.domain.ParentOption;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductSearchRequest;
@@ -21,6 +22,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Subgraph;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -52,9 +54,10 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
                         loePrice(productSearch.getPriceTo()),
                         onlyDeliveryFee(productSearch.getDeliveryFee()),
                         inCategoryName(productSearch.getCategoryName()),
-                        onlySpecialPrice(productSearch.getSpecialPrice()));
-
-        return PageableExecutionUtils.getPage(products, pageable, () -> countQuery.fetchCount());
+                        onlySpecialPrice(productSearch.getSpecialPrice()),
+                        containSearch(productSearch.getSearch())
+                );
+        return PageableExecutionUtils.getPage(products, pageable, countQuery::fetchCount);
     }
 
     private List<Product> getPagingProducts(ProductSearchRequest productSearch, Pageable pageable) {
@@ -66,8 +69,10 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
                         loePrice(productSearch.getPriceTo()),
                         onlyDeliveryFee(productSearch.getDeliveryFee()),
                         inCategoryName(productSearch.getCategoryName()),
-                        onlySpecialPrice(productSearch.getSpecialPrice()));
-        List<Long> ids = getQuerydsl().applyPagination(pageable, idQuery).fetch();
+                        onlySpecialPrice(productSearch.getSpecialPrice()),
+                        containSearch(productSearch.getSearch())
+                );
+        List<Long> ids = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, idQuery).fetch();
 
         if (CollectionUtils.isEmpty(ids)) {
             return new ArrayList<>();
@@ -114,13 +119,13 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
     }
 
     private BooleanExpression onlyDeliveryFee(Boolean deliveryFee) {
-        if (deliveryFee == null || deliveryFee.booleanValue() == false)
+        if (deliveryFee == null || !deliveryFee)
             return null;
         return product.deliveryFee.gt(0);
     }
 
     private BooleanExpression onlySpecialPrice(Boolean specialPrice) {
-        if (specialPrice == null || specialPrice.booleanValue() == false)
+        if (specialPrice == null || !specialPrice)
             return null;
         return product.specialPrice.isTrue();
     }
@@ -129,7 +134,17 @@ public class ProductRepositoryImpl extends QuerydslRepositorySupport
         if (ObjectUtils.isEmpty(categoryName))
             return null;
         List<Long> ids = categoryRepository.findOneByNameWithAllChildren(categoryName).stream()
-                .map(category -> category.getId()).collect(Collectors.toList());
+                .map(Category::getId).collect(Collectors.toList());
         return product.category.id.in(ids);
+    }
+
+    private BooleanExpression containSearch(String search) {
+        if (ObjectUtils.isEmpty(search))
+            return null;
+        return product.category.name.contains(search).or(
+                product.brand.contains(search).or(
+                        product.title.contains(search)
+                )
+        );
     }
 }
