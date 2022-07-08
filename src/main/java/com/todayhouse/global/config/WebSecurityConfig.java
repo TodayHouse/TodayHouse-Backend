@@ -25,6 +25,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @EnableConfigurationProperties
 @RequiredArgsConstructor
@@ -71,9 +72,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.PATCH, "/categories")
                 .hasAnyRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/follows", "/sellers", "/products/**", "/stories/**",
-                        "/options/**", "/orders/**", "/reviews/**", "/users/info")
+                        "/options/**", "/orders/**", "/reviews/**", "/users/info", "/inquires/**", "/scraps/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin post 요청만 허용
-                .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**", "/options/**", "/reviews/**")
+                .antMatchers(HttpMethod.DELETE, "/follows", "/products/**", "/stories/**",
+                        "/options/**", "/reviews/**", "/inquires/**", "/scraps/**")
                 .hasAnyRole("USER", "ADMIN") // user, admin delete 요청만 허용
                 .antMatchers(HttpMethod.PUT, "/products/**", "/options/**", "/orders/**")
                 .hasAnyRole("USER", "ADMIN")
@@ -85,7 +87,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated()// 인증된 요청만 허용
 
                 .antMatchers(HttpMethod.GET, "/categories/**", "/options/**", "/products/**", "/stories/**",
-                        "/follows/**", "/sellers/**", "/users/**", "/orders/**", "/reviews/**")
+                        "/follows/**", "/sellers/**", "/users/**", "/orders/**", "/reviews/**",
+                        "/inquires/**", "/scraps/**")
                 .permitAll()
                 .antMatchers(HttpMethod.POST, "/users/login")
                 .anonymous()
@@ -122,7 +125,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);

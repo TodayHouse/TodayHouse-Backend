@@ -1,6 +1,7 @@
 package com.todayhouse.domain.story.dao;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.todayhouse.domain.story.domain.FamilyType;
 import com.todayhouse.domain.story.domain.ResiType;
@@ -10,6 +11,7 @@ import com.todayhouse.domain.story.dto.reqeust.StorySearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -19,43 +21,56 @@ import java.util.List;
 
 import static com.todayhouse.domain.story.domain.QStory.story;
 
-public class CustomStoryRepositoryImpl implements CustomStoryRepository {
+public class CustomStoryRepositoryImpl extends QuerydslRepositorySupport
+        implements CustomStoryRepository {
     private final JPAQueryFactory queryFactory;
 
     public CustomStoryRepositoryImpl(EntityManager entityManager) {
+        super(Story.class);
         queryFactory = new JPAQueryFactory(entityManager);
     }
 
     @Override
     public Page<Story> searchCondition(StorySearchRequest request, Pageable pageable) {
-        List<Long> ids = queryFactory.select(story.id).from(story).where(
+        List<Long> ids = getStoryIds(request, pageable);
+
+        if (CollectionUtils.isEmpty(ids)) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+
+        List<Story> content = getStories(ids, pageable);
+
+        int size = queryFactory.selectFrom(story).where(
+                eqFamilyType(request.getFamilyType()),
+                eqResiType(request.getResiType()),
+                betweenFloorSpace(request.getFloorSpaceMin(), request.getFloorSpaceMax()),
+                eqStyleType(request.getStyleType()),
+                eqCategory(request.getCategory()),
+                containSearch(request.getSearch())).fetch().size();
+
+        return new PageImpl<>(content, pageable, size);
+    }
+
+    private List<Long> getStoryIds(StorySearchRequest request, Pageable pageable) {
+        JPAQuery<Long> idQuery = queryFactory.select(story.id)
+                .from(story)
+                .where(
                         eqFamilyType(request.getFamilyType()),
                         eqResiType(request.getResiType()),
                         betweenFloorSpace(request.getFloorSpaceMin(), request.getFloorSpaceMax()),
                         eqStyleType(request.getStyleType()),
                         eqCategory(request.getCategory()),
                         containSearch(request.getSearch())
-                )
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-        if (CollectionUtils.isEmpty(ids)) {
-            return new PageImpl<>(new ArrayList<>(), pageable, 0);
-        }
-        List<Story> content = queryFactory.selectFrom(story)
-                .leftJoin(story.user).fetchJoin()
-                .where(story.id.in(ids))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+                );
 
-        int size = queryFactory.selectFrom(story).where(
-                eqFamilyType(request.getFamilyType()),
-                eqResiType(request.getResiType()),
-                betweenFloorSpace(request.getFloorSpaceMin(), request.getFloorSpaceMax()),
-                eqStyleType(request.getStyleType())).fetch().size();
-        return new PageImpl<>(content, pageable, size);
+        return getQuerydsl().applyPagination(pageable, idQuery).fetch();
+    }
 
+    private List<Story> getStories(List<Long> ids, Pageable pageable) {
+        JPAQuery<Story> query = queryFactory.selectFrom(story).
+                where(story.id.in(ids));
+
+        return getQuerydsl().applySorting(pageable.getSort(), query).fetch();
     }
 
     private BooleanExpression eqCategory(Story.Category category) {
