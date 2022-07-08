@@ -79,6 +79,10 @@ public enum BaseResponseStatus {
     INVALID_SELLER_ANSWER(false, 2702, "판매자만 답변을 조작할 수 있습니다."),
     ANSWER_NOT_FOUND(false, 2703, "답변을 찾을 수 없습니다."),
 
+    // scrap, like
+    SCRAP_NOT_FOUND(false, 2800, "해당 스크랩을 찾을 수 없습니다."),
+    SCRAP_EXIST(false, 2801, "이미 스크랩한 상품입니다."),
+
     // 3000 : Database / Server 오류
     // common
     DATABASE_ERROR(false, 3000, "데이터베이스 연결에 실패하였습니다."),

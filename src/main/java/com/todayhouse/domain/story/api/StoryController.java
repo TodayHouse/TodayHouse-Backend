@@ -45,8 +45,6 @@ public class StoryController {
 
     @GetMapping
     public BaseResponse<Page<StoryGetListResponse>> findAllDesc(Pageable pageable, StorySearchRequest request) {
-
-
         return new BaseResponse<>(storyService.searchStory(request, pageable));
     }
 

@@ -1,7 +1,10 @@
 package com.todayhouse.domain.story.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayhouse.IntegrationBase;
+import com.todayhouse.domain.scrap.dao.ScrapRepository;
+import com.todayhouse.domain.scrap.domain.Scrap;
 import com.todayhouse.domain.story.dao.StoryRepository;
 import com.todayhouse.domain.story.domain.FamilyType;
 import com.todayhouse.domain.story.domain.ResiType;
@@ -10,16 +13,20 @@ import com.todayhouse.domain.story.domain.StyleType;
 import com.todayhouse.domain.story.dto.reqeust.ReplyCreateRequest;
 import com.todayhouse.domain.story.dto.reqeust.ReplyDeleteRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
+import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.AuthProvider;
 import com.todayhouse.domain.user.domain.Role;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.domain.user.domain.User;
+import com.todayhouse.global.common.BaseResponse;
+import com.todayhouse.global.common.PageDto;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
@@ -28,10 +35,17 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class StoryControllerTest extends IntegrationBase {
@@ -39,6 +53,8 @@ class StoryControllerTest extends IntegrationBase {
     UserRepository userRepository;
     @Autowired
     StoryRepository storyRepository;
+    @Autowired
+    ScrapRepository scrapRepository;
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -60,14 +76,13 @@ class StoryControllerTest extends IntegrationBase {
                 .authProvider(AuthProvider.LOCAL)
                 .email("admin@test.com")
                 .roles(Collections.singletonList(Role.ADMIN))
-                .nickname("admin")
+                .nickname("admin1")
                 .seller(seller)
                 .build());
 
         jwt = provider.createToken("admin@test.com", Collections.singletonList(Role.USER));
         Story s1 = Story.builder().liked(1).title("제목").content("내용").category(Story.Category.STORY).user(user).build();
         storyRepository.save(s1);
-
     }
 
     @Test
@@ -171,4 +186,23 @@ class StoryControllerTest extends IntegrationBase {
 
     }
 
+    @Test
+    @DisplayName("스토리 조회 시 스크랩 유무 포함")
+    void findAllDescWithScrap() throws Exception {
+        Story s2 = Story.builder().liked(1).title("제목2").content("내용").category(Story.Category.STORY).user(user).build();
+        s2 = storyRepository.save(s2);
+        scrapRepository.save(Scrap.builder().user(user).story(s2).build());
+
+        MvcResult mvcResult = mockMvc.perform(get("http://localhost:8080/stories?sort=id,DESC")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType("application/json"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.content",hasSize(2)))
+                .andExpect(jsonPath("$.result.content[0].isScraped", equalTo(true)))
+                .andExpect(jsonPath("$.result.content[0].title", equalTo("제목2")))
+                .andExpect(jsonPath("$.result.content[1].isScraped", equalTo(false)))
+                .andExpect(jsonPath("$.result.content[1].title", equalTo("제목")))
+                .andDo(print())
+                .andReturn();
+    }
 }
