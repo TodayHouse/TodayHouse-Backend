@@ -27,6 +27,7 @@ public class CookieUtils {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(maxAge);
+        cookie.setSecure(true);
         response.addCookie(cookie);
     }
 
@@ -34,6 +35,7 @@ public class CookieUtils {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setMaxAge(maxAge);
+        cookie.setSecure(true);
         response.addCookie(cookie);
     }
 
