@@ -1,8 +1,8 @@
 #!/bin/bash
 BUILD_JAR=$(ls /home/ec2-user/build/*.jar)
+
 JAR_NAME=$(basename $BUILD_JAR)
 
-echo $BUILD_JAR
 echo "> build file copy" >> /home/ec2-user/deploy.log
 DEPLOY_PATH=/home/ec2-user/
 cp $BUILD_JAR $DEPLOY_PATH
