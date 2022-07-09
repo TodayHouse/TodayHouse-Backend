@@ -28,6 +28,7 @@ public class CookieUtils {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
+        response.setHeader("Set-Cookie", response.getHeader("Set-Cookie")+"; SameSite=");
     }
 
     public static void addNormalCookie(HttpServletResponse response, String name, String value, int maxAge) {
@@ -35,6 +36,7 @@ public class CookieUtils {
         cookie.setPath("/");
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
+        response.setHeader("Set-Cookie", response.getHeader("Set-Cookie")+"; SameSite=");
     }
 
     public static void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {
