@@ -73,6 +73,16 @@ public enum BaseResponseStatus {
     REVIEW_LIKE_DUPLICATE(false, 2604, "중복된 도움이 돼요입니다."),
     REVIEW_LIKE_NOT_FOUND(false, 2605, "도움이 돼요를 먼저 추가해주세요."),
 
+    // inquiry
+    INQUIRY_NOT_FOUND(false, 2700, "문의를 찾을 수 없습니다."),
+    INQUIRY_CANNOT_DELETE(false, 2701, "자신이 작성한 문의만 삭제 가능합니다."),
+    INVALID_SELLER_ANSWER(false, 2702, "판매자만 답변을 조작할 수 있습니다."),
+    ANSWER_NOT_FOUND(false, 2703, "답변을 찾을 수 없습니다."),
+
+    // scrap, like
+    SCRAP_NOT_FOUND(false, 2800, "해당 스크랩을 찾을 수 없습니다."),
+    SCRAP_EXIST(false, 2801, "이미 스크랩한 상품입니다."),
+
     // 3000 : Database / Server 오류
     // common
     DATABASE_ERROR(false, 3000, "데이터베이스 연결에 실패하였습니다."),

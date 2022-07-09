@@ -17,6 +17,7 @@ import com.todayhouse.global.common.BaseResponse;
 import com.todayhouse.global.config.cookie.CookieUtils;
 import com.todayhouse.global.config.jwt.JwtTokenProvider;
 import com.todayhouse.infra.S3Storage.service.FileServiceImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,7 +72,6 @@ class UserControllerTest extends IntegrationBase {
 
     @BeforeEach
     void clearRepository() {
-        userRepository.deleteAll();
         userRepository.save(User.builder()
                 .authProvider(AuthProvider.LOCAL)
                 .email("test@test.com")

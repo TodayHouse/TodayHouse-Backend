@@ -11,7 +11,7 @@ import com.todayhouse.domain.story.dto.response.StoryGetDetailResponse;
 import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
 import com.todayhouse.domain.story.exception.StoryNotFoundException;
 import com.todayhouse.domain.user.application.CustomUserDetailService;
-import com.todayhouse.domain.user.application.UserService;
+import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import com.todayhouse.infra.S3Storage.service.FileService;
@@ -25,7 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,10 +35,10 @@ import java.util.stream.Collectors;
 @Transactional
 public class StoryServiceImpl implements StoryService {
 
-    private final StoryRepository storyRepository;
     private final FileService fileService;
     private final ImageService imageService;
-    private final UserService userService;
+    private final UserRepository userRepository;
+    private final StoryRepository storyRepository;
     private final CustomUserDetailService customUserDetailService;
 
     @Override
@@ -59,23 +61,18 @@ public class StoryServiceImpl implements StoryService {
         return id;
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public Slice<StoryGetListResponse> findAllDesc(Pageable pageable) {
-        return storyRepository.findAllByOrderById(pageable)
-                .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
-    }
-
     @Transactional(readOnly = true)
-    @Override
     public Page<StoryGetListResponse> searchStory(StorySearchRequest request, Pageable pageable) {
-        return storyRepository.searchCondition(request, pageable).map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
+        Page<Story> stories = storyRepository.searchCondition(request, pageable);
+        User user = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+        Map<Story, Boolean> scrapedStoriesMap = getScrapedStoriesMap(stories.getContent(), user);
+        return stories.map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story), scrapedStoriesMap.getOrDefault(story, false)));
     }
 
     @Transactional(readOnly = true)
     @Override
     public StoryGetDetailResponse findById(Long id) {
-
         return new StoryGetDetailResponse(this.getStory(id), this.getStory(id).getImages().stream().map(image -> fileService.changeFileNameToUrl(image.getFileName())).collect(Collectors.toList()));
     }
 
@@ -87,16 +84,18 @@ public class StoryServiceImpl implements StoryService {
     @Transactional(readOnly = true)
     public Slice<StoryGetListResponse> findByUser(Pageable pageable) {
         User user = (User) customUserDetailService.loadUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-        return storyRepository.findAllByUser(user, pageable)
-                .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
+        Slice<Story> stories = storyRepository.findAllByUser(user, pageable);
+        Map<Story, Boolean> scrapedStoriesMap = getScrapedStoriesMap(stories.getContent(), user);
+        return stories.map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story), scrapedStoriesMap.getOrDefault(story, false)));
     }
 
-    @Transactional(readOnly = true)
     @Override
+    @Transactional(readOnly = true)
     public Slice<StoryGetListResponse> findByUserNickname(String nickname, Pageable pageable) {
-        User user = userService.findByNickname(nickname).orElseThrow(UserNotFoundException::new);
-        return storyRepository.findAllByUser(user, pageable)
-                .map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story)));
+        User user = userRepository.findByNickname(nickname).orElseThrow(UserNotFoundException::new);
+        Slice<Story> stories = storyRepository.findAllByUser(user, pageable);
+        Map<Story, Boolean> scrapedStoriesMap = getScrapedStoriesMap(stories.getContent(), user);
+        return stories.map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story), scrapedStoriesMap.getOrDefault(story, false)));
     }
 
     @Override
@@ -136,5 +135,16 @@ public class StoryServiceImpl implements StoryService {
     public void deleteImages(List<String> file) {
         imageService.deleteStoryImages(file);
         fileService.delete(file);
+    }
+
+    private Map<Story, Boolean> getScrapedStoriesMap(List<Story> stories, User user) {
+        List<Story> scrapedStories = storyRepository.findScrapedByStoriesAndUser(stories, user);
+        return makeStoryListToBooleanMap(scrapedStories);
+    }
+
+    private Map<Story, Boolean> makeStoryListToBooleanMap(List<Story> stories) {
+        Map<Story, Boolean> map = new HashMap<>();
+        stories.forEach(story -> map.put(story, true));
+        return map;
     }
 }

@@ -1,5 +1,6 @@
 #!/bin/bash
 BUILD_JAR= /home/ec2-user/build/todayhouse-0.0.1-SNAPSHOT.jar
+
 JAR_NAME=$(basename $BUILD_JAR)
 echo "> build : $JAR_NAME" >> /home/ec2-user/deploy.log
 

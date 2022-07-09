@@ -68,7 +68,7 @@ public class ReviewServiceImplIntegrityTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("리뷰 동시 저장 시 중복되어 저장")
+    @DisplayName("리뷰 동시 저장 시 중복 저장되지 않음")
     void reviewSaveConcurrencyTest() throws InterruptedException {
         ExecutorService service = Executors.newFixedThreadPool(5);
         final int numberOfThreads = 5;

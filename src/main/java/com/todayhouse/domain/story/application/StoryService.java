@@ -18,8 +18,6 @@ public interface StoryService {
 
     Long saveImage(MultipartFile multipartFile, Long id);
 
-    Slice<StoryGetListResponse> findAllDesc(Pageable pageable);
-
     Page<StoryGetListResponse> searchStory(StorySearchRequest request, Pageable pageable);
 
     StoryGetDetailResponse findById(Long id);
