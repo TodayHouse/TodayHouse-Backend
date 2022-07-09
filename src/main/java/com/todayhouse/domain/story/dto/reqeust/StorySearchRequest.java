@@ -4,17 +4,17 @@ import com.todayhouse.domain.story.domain.FamilyType;
 import com.todayhouse.domain.story.domain.ResiType;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.story.domain.StyleType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@NoArgsConstructor
 public class StorySearchRequest {
-    private FamilyType familyType;
-    private StyleType styleType;
+    private String search;
     private ResiType resiType;
+    private StyleType styleType;
+    private FamilyType familyType;
     private Integer floorSpaceMin;
     private Integer floorSpaceMax;
     private Story.Category category;
