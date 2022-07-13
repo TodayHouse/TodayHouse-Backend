@@ -1,6 +1,5 @@
 package com.todayhouse.domain.story.application;
 
-import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.story.dao.StoryRepository;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.story.dto.reqeust.StorySearchRequest;
@@ -15,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,7 +37,7 @@ class StoryServiceImplTest {
     UserRepository userRepository;
 
     @AfterEach
-    void clear(){
+    void clear() {
         SecurityContextHolder.clearContext();
     }
 

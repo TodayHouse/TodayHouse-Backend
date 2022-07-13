@@ -1,7 +1,9 @@
 package com.todayhouse.domain.story.application;
 
 import com.todayhouse.domain.image.application.ImageService;
+import com.todayhouse.domain.image.dao.StoryImageRepository;
 import com.todayhouse.domain.image.domain.Image;
+import com.todayhouse.domain.image.domain.StoryImage;
 import com.todayhouse.domain.story.dao.StoryRepository;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
@@ -39,6 +41,7 @@ public class StoryServiceImpl implements StoryService {
     private final ImageService imageService;
     private final UserRepository userRepository;
     private final StoryRepository storyRepository;
+    private final StoryImageRepository storyImageRepository;
     private final CustomUserDetailService customUserDetailService;
 
     @Override
@@ -70,10 +73,13 @@ public class StoryServiceImpl implements StoryService {
         return stories.map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story), scrapedStoriesMap.getOrDefault(story, false)));
     }
 
-    @Transactional(readOnly = true)
     @Override
     public StoryGetDetailResponse findById(Long id) {
-        return new StoryGetDetailResponse(this.getStory(id), this.getStory(id).getImages().stream().map(image -> fileService.changeFileNameToUrl(image.getFileName())).collect(Collectors.toList()));
+        Story story = getStory(id);
+        List<String> urls = storyImageRepository.findByStory(story).stream()
+                .map(image -> fileService.changeFileNameToUrl(image.getFileName())).collect(Collectors.toList());
+        story.increaseView();
+        return new StoryGetDetailResponse(story, urls);
     }
 
     private Story getStory(Long id) {
@@ -106,7 +112,9 @@ public class StoryServiceImpl implements StoryService {
     @Override
     @Transactional(readOnly = true)
     public List<String> getImageInStory(Long id) {
-        return this.getStory(id).getImages().stream().map(Image::getFileName).collect(Collectors.toList());
+        Story story = getStory(id);
+        List<StoryImage> storyImages = storyImageRepository.findByStory(story);
+        return storyImages.stream().map(Image::getFileName).collect(Collectors.toList());
     }
 
     @Override
@@ -125,16 +133,15 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public void deleteStory(Long id) {
         Story story = this.getStory(id);
-        List<String> fileNames = story.getImages().stream().map(Image::getFileName).collect(Collectors.toList());
-        imageService.deleteStoryImages(fileNames);
-        fileService.delete(fileNames);
+        List<String> fileNames = storyImageRepository.findByStory(story).stream().map(Image::getFileName).collect(Collectors.toList());
+        deleteImages(fileNames);
         storyRepository.delete(story);
     }
 
     @Override
-    public void deleteImages(List<String> file) {
-        imageService.deleteStoryImages(file);
-        fileService.delete(file);
+    public void deleteImages(List<String> fileNames) {
+        imageService.deleteStoryImages(fileNames);
+        fileService.delete(fileNames);
     }
 
     private Map<Story, Boolean> getScrapedStoriesMap(List<Story> stories, User user) {

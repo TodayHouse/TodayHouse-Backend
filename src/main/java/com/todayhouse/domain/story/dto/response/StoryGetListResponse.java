@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StoryGetListResponse {
     private Long id;
+    private Integer views;
     private String title;
     private String writer;
     private String thumbnailUrl;
@@ -18,6 +19,7 @@ public class StoryGetListResponse {
 
     public StoryGetListResponse(Story story, String thumbnailUrl, Boolean isScraped) {
         this.id = story.getId();
+        this.views = story.getViews();
         this.title = story.getTitle();
         this.writer = story.getUser().getNickname();
         this.thumbnailUrl = thumbnailUrl;
