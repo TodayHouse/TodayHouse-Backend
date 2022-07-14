@@ -1,6 +1,7 @@
 package com.todayhouse.domain.story.dao;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.todayhouse.domain.story.domain.FamilyType;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -38,22 +40,26 @@ public class CustomStoryRepositoryImpl extends QuerydslRepositorySupport
             return new PageImpl<>(new ArrayList<>(), pageable, 0);
         }
 
-        List<Story> content = getStories(ids, pageable);
+        List<Story> stories = getStories(ids, pageable);
 
-        int size = queryFactory.selectFrom(story).where(
-                eqFamilyType(request.getFamilyType()),
-                eqResiType(request.getResiType()),
-                betweenFloorSpace(request.getFloorSpaceMin(), request.getFloorSpaceMax()),
-                eqStyleType(request.getStyleType()),
-                eqCategory(request.getCategory()),
-                containSearch(request.getSearch())).fetch().size();
+        JPQLQuery<Story> countQuery = from(story)
+                .innerJoin(story.user).fetchJoin()
+                .where(
+                        eqFamilyType(request.getFamilyType()),
+                        eqResiType(request.getResiType()),
+                        betweenFloorSpace(request.getFloorSpaceMin(), request.getFloorSpaceMax()),
+                        eqStyleType(request.getStyleType()),
+                        eqCategory(request.getCategory()),
+                        containSearch(request.getSearch())
+                );
 
-        return new PageImpl<>(content, pageable, size);
+        return PageableExecutionUtils.getPage(stories, pageable, countQuery::fetchCount);
     }
 
     private List<Long> getStoryIds(StorySearchRequest request, Pageable pageable) {
         JPAQuery<Long> idQuery = queryFactory.select(story.id)
                 .from(story)
+                .innerJoin(story.user)
                 .where(
                         eqFamilyType(request.getFamilyType()),
                         eqResiType(request.getResiType()),
