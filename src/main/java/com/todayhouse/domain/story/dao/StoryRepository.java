@@ -12,8 +12,6 @@ import java.util.List;
 
 public interface StoryRepository extends JpaRepository<Story, Long>, CustomStoryRepository {
 
-    Slice<Story> findAllByOrderById(Pageable pageable);
-
     Slice<Story> findAllByUser(User user, Pageable pageable);
 
     @Query("select distinct st from Scrap sc inner join sc.story st where sc.story in :stories and sc.user =:user")

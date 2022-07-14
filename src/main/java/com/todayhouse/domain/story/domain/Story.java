@@ -7,10 +7,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +32,6 @@ public class Story extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
-    @CreatedDate
-    private LocalDateTime createdDate;
-
-
 //    기본 게시글 기능 정상 동작 확인 후 상품 클릭 시 링크 연결 기능 추가
 //    @Column(name = "product_link")
 //    private String productLink;
@@ -45,9 +39,22 @@ public class Story extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer liked;
 
+    private Integer views = 0;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Category category;
+
+    private Integer floorSpace;
+
+    @Enumerated(EnumType.STRING)
+    private ResiType resiType;
+
+    @Enumerated(EnumType.STRING)
+    private FamilyType familyType;
+
+    @Enumerated(EnumType.STRING)
+    private StyleType styleType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -55,17 +62,6 @@ public class Story extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<StoryImage> images = new ArrayList<>();
-
-    @Enumerated(EnumType.STRING)
-    private ResiType resiType;
-
-    private Integer floorSpace;
-
-    @Enumerated(EnumType.STRING)
-    private FamilyType familyType;
-
-    @Enumerated(EnumType.STRING)
-    private StyleType styleType;
 
     @OneToMany(mappedBy = "story", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<StoryReply> storyReplies = new ArrayList<>();
@@ -87,5 +83,9 @@ public class Story extends BaseTimeEntity {
         this.title = title;
         this.content = content;
         this.category = category;
+    }
+
+    public void increaseView() {
+        this.views += 1;
     }
 }
