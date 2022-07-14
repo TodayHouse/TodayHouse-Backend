@@ -75,7 +75,7 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public StoryGetDetailResponse findById(Long id) {
-        Story story = getStory(id);
+        Story story = getStoryWithUser(id);
         List<String> urls = storyImageRepository.findByStory(story).stream()
                 .map(image -> fileService.changeFileNameToUrl(image.getFileName())).collect(Collectors.toList());
         story.increaseView();
@@ -84,6 +84,10 @@ public class StoryServiceImpl implements StoryService {
 
     private Story getStory(Long id) {
         return storyRepository.findById(id).orElseThrow(StoryNotFoundException::new);
+    }
+
+    private Story getStoryWithUser(Long storyId) {
+        return storyRepository.findByIdWithUser(storyId).orElseThrow(StoryNotFoundException::new);
     }
 
     @Override
@@ -132,7 +136,7 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public void deleteStory(Long id) {
-        Story story = this.getStory(id);
+        Story story = getStory(id);
         List<String> fileNames = storyImageRepository.findByStory(story).stream().map(Image::getFileName).collect(Collectors.toList());
         deleteImages(fileNames);
         storyRepository.delete(story);

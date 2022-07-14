@@ -14,8 +14,9 @@ public class StoryGetDetailResponse {
 
     private Long id;
     private String title;
-    private String content;
     private String writer;
+    private String content;
+    private String profileUrl;
     private Integer liked;
     private Integer views;
     private List<String> imageUrls;
@@ -28,6 +29,7 @@ public class StoryGetDetailResponse {
         this.title = story.getTitle();
         this.content = story.getContent();
         this.writer = story.getUser().getNickname();
+        this.profileUrl = story.getUser().getProfileImage();
         this.liked = story.getLiked();
         this.views = story.getViews();
         this.imageUrls = imageUrls;
