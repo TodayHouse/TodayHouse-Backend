@@ -213,6 +213,7 @@ class ReviewControllerTest extends IntegrationBase {
         assertThat(pageDto.getTotalElements()).isEqualTo(3);
         for (int i = 0; i < reviews.size(); i++) {
             assertThat(reviews.get(i).getId()).isEqualTo(ids.get(i));
+            assertThat(reviews.get(i).getReviewImage()).isEqualTo("img");
         }
     }
 
