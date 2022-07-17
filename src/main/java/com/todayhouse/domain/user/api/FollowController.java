@@ -24,8 +24,8 @@ public class FollowController {
     }
 
     @DeleteMapping
-    public BaseResponse deleteFollow(@Valid @RequestBody FollowRequest request) {
-        followService.deleteFollow(request.getFromId(), request.getToId());
+    public BaseResponse deleteFollow(@RequestParam Long fromId, @RequestParam Long toId) {
+        followService.deleteFollow(fromId, toId);
         return new BaseResponse();
     }
 
