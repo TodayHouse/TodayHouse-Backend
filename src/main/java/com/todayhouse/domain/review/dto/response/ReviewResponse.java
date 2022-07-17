@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReviewResponse {
@@ -17,8 +19,10 @@ public class ReviewResponse {
     private boolean canLike;
     private String content;
     private String nickname;
+    private String reviewImage;
     private String productImage;
     private String profileImage;
+    private LocalDateTime createdAt;
     private ProductResponse productResponse;
 
     public ReviewResponse(Review review, boolean canLike) {
@@ -29,6 +33,8 @@ public class ReviewResponse {
         this.content = review.getContent();
         this.canLike = canLike;
         this.nickname = review.getUser().getNickname();
+        this.createdAt = review.getCreatedAt();
+        this.reviewImage = review.getReviewImageUrl();
         this.productImage = review.getReviewImageUrl();
         this.profileImage = review.getUser().getProfileImage();
         this.productResponse = new ProductResponse(review.getProduct());
