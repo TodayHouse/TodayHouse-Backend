@@ -2,6 +2,8 @@ package com.todayhouse.domain.order.dao;
 
 import com.todayhouse.domain.order.domain.Orders;
 import com.todayhouse.domain.order.domain.Status;
+import com.todayhouse.domain.product.domain.Product;
+import com.todayhouse.domain.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +21,8 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, CustomOrde
             "left join fetch o.childOption " +
             "left join fetch o.selectionOption where o.id=:orderId")
     Optional<Orders> findByIdWithProductAndOptions(@Param("orderId") Long orderId);
+
+    Optional<Orders> findFirstByUserAndProductOrderByIdDesc(User user, Product product);
 
     List<Orders> findByUserIdAndProductIdAndStatus(Long userId, Long productId, Status status);
 }

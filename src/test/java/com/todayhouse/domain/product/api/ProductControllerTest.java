@@ -10,6 +10,9 @@ import com.todayhouse.domain.category.dao.CategoryRepository;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.dao.ProductImageRepository;
 import com.todayhouse.domain.image.domain.ProductImage;
+import com.todayhouse.domain.order.dao.OrderRepository;
+import com.todayhouse.domain.order.domain.Orders;
+import com.todayhouse.domain.product.dao.ParentOptionRepository;
 import com.todayhouse.domain.product.dao.ProductRepository;
 import com.todayhouse.domain.product.domain.ChildOption;
 import com.todayhouse.domain.product.domain.ParentOption;
@@ -59,6 +62,9 @@ class ProductControllerTest extends IntegrationBase {
     UserRepository userRepository;
 
     @Autowired
+    OrderRepository orderRepository;
+
+    @Autowired
     SellerRepository sellerRepository;
 
     @Autowired
@@ -66,7 +72,10 @@ class ProductControllerTest extends IntegrationBase {
 
     @Autowired
     CategoryRepository categoryRepository;
-
+    
+    @Autowired
+    ParentOptionRepository parentOptionRepository;
+    
     @Autowired
     ProductImageRepository productImageRepository;
 
@@ -85,6 +94,7 @@ class ProductControllerTest extends IntegrationBase {
     @MockBean
     FileServiceImpl fileService;
 
+    User user;
     Seller seller1;
     Product product1;
     Category p1, c1;
@@ -92,8 +102,8 @@ class ProductControllerTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         seller1 = Seller.builder().email("seller1@email.com").brand("user1").build();
-        User user1 = User.builder().email("user1@email.com").seller(seller1).build();
-        userRepository.save(user1);
+        user = User.builder().email("user1@email.com").seller(seller1).build();
+        user = userRepository.save(user);
 
         p1 = Category.builder().name("p1").build();
         c1 = Category.builder().name("c1").parent(p1).build();
@@ -259,6 +269,43 @@ class ProductControllerTest extends IntegrationBase {
         BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
         ProductResponse result = objectMapper.convertValue(baseResponse.getResult(), ProductResponse.class);
         assertThat(result.getTitle()).isEqualTo("p1");
+        assertThat(result.getOrderId()).isNull();
+        assertThat(result.getImageUrls().get(0)).isEqualTo(imageUrl);
+        assertThat(result.getImageUrls().size()).isEqualTo(2);
+        assertThat(result.getCategoryPath().get(0)).isEqualTo(p1.getName());
+        assertThat(result.getCategoryPath().get(1)).isEqualTo(c1.getName());
+    }
+
+    @Test
+    @DisplayName("주문한 유저가 product id로 찾았다")
+    void findProductWithOrderId() throws Exception {
+        String jwt = jwtTokenProvider.createToken("user1@email.com", Collections.singletonList(Role.USER));
+        String imageUrl = "saveUrl";
+        ProductImage img1 = ProductImage.builder().product(product1).fileName("test1.jpg").build();
+        ProductImage img2 = ProductImage.builder().product(product1).fileName("test2.jpg").build();
+        productImageRepository.save(img1);
+        productImageRepository.save(img2);
+        product1.updateImage(imageUrl);
+        productRepository.save(product1);
+        ParentOption op = parentOptionRepository.save(ParentOption.builder().product(product1).build());
+        Orders orders = orderRepository.save(Orders.builder().parentOption(op).user(user).product(product1).parentOption(op).build());
+        em.flush();
+        em.clear();
+
+        when(fileService.changeFileNameToUrl(anyString())).thenReturn(imageUrl);
+
+        String url = "http://localhost:8080/products/" + product1.getId();
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        BaseResponse baseResponse = getResponseFromMvcResult(mvcResult);
+        ProductResponse result = objectMapper.convertValue(baseResponse.getResult(), ProductResponse.class);
+        assertThat(result.getTitle()).isEqualTo("p1");
+        assertThat(result.getOrderId()).isEqualTo(orders.getId());
         assertThat(result.getImageUrls().get(0)).isEqualTo(imageUrl);
         assertThat(result.getImageUrls().size()).isEqualTo(2);
         assertThat(result.getCategoryPath().get(0)).isEqualTo(p1.getName());
