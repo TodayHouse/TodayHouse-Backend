@@ -5,11 +5,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.todayhouse.IntegrationBase;
 import com.todayhouse.domain.scrap.dao.ScrapRepository;
 import com.todayhouse.domain.scrap.domain.Scrap;
+import com.todayhouse.domain.story.dao.StoryReplyRepository;
 import com.todayhouse.domain.story.dao.StoryRepository;
-import com.todayhouse.domain.story.domain.FamilyType;
-import com.todayhouse.domain.story.domain.ResiType;
-import com.todayhouse.domain.story.domain.Story;
-import com.todayhouse.domain.story.domain.StyleType;
+import com.todayhouse.domain.story.domain.*;
 import com.todayhouse.domain.story.dto.reqeust.ReplyCreateRequest;
 import com.todayhouse.domain.story.dto.reqeust.ReplyDeleteRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
@@ -51,6 +49,9 @@ class StoryControllerTest extends IntegrationBase {
     @Autowired
     ScrapRepository scrapRepository;
 
+    @Autowired
+    StoryReplyRepository replyRepository;
+
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -63,6 +64,9 @@ class StoryControllerTest extends IntegrationBase {
     String storyUrl = "http://localhost:8080/stories/";
     User user;
     Story s1;
+    StoryReply r1;
+    StoryReply r2;
+    StoryReply r3;
 
     @BeforeEach
     void setup() {
@@ -79,6 +83,12 @@ class StoryControllerTest extends IntegrationBase {
         jwt = provider.createToken("admin@test.com", Collections.singletonList(Role.USER));
         s1 = Story.builder().liked(1).title("제목").content("내용").category(Story.Category.STORY).user(user).build();
         s1 = storyRepository.save(s1);
+        r1 = StoryReply.builder().story(s1).user(user).content("r1").build();
+        r2 = StoryReply.builder().story(s1).user(user).content("r2").build();
+        r3 = StoryReply.builder().story(s1).user(user).content("r3").build();
+        replyRepository.save(r1);
+        replyRepository.save(r2);
+        replyRepository.save(r3);
     }
 
     @Test
@@ -117,11 +127,10 @@ class StoryControllerTest extends IntegrationBase {
     @Test
     @DisplayName("댓글 삭제")
     void deleteReply() throws Exception {
-        String url = storyUrl + "reply";
-        ReplyDeleteRequest replyDeleteRequest = new ReplyDeleteRequest(1L);
+        StoryReply storyReply = replyRepository.findAll().get(2);
+        String url = storyUrl + "reply/" + storyReply.getId();
         mockMvc.perform(delete(url)
                 .header("Authorization", "Bearer " + jwt)
-                .content(objectMapper.writeValueAsString(replyDeleteRequest))
                 .contentType("application/json")
         ).andExpect(status().isOk());
     }
@@ -129,10 +138,21 @@ class StoryControllerTest extends IntegrationBase {
     @Test
     @DisplayName("댓글 페이지 조회")
     void findReplies() throws Exception {
-        String url = storyUrl + "reply";
+        String url = storyUrl + "reply/1";
         MvcResult mvcResult = mockMvc.perform(get(url)
-                .param("storyId", "1")
                 .contentType("application/json")
+                .header("Authorization", "Bearer " + jwt)).andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        String contentAsString = response.getContentAsString();
+        System.out.println("contentAsString = " + contentAsString);
+    }
+
+    @Test
+    @DisplayName("스토리 id 조회")
+    void findById() throws Exception {
+        String url = storyUrl + "1";
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                .contentType("applicaation/json")
                 .header("Authorization", "Bearer " + jwt)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         String contentAsString = response.getContentAsString();

@@ -13,6 +13,7 @@ public class ReplyGetResponse {
     private String content;
     private LocalDateTime createdDate;
     private Writer replyUserDto;
+    private boolean isMine;
 
     public ReplyGetResponse(Long id, String content, LocalDateTime createdDate, User user) {
 
@@ -34,5 +35,9 @@ public class ReplyGetResponse {
             this.nickname = nickname;
             this.profileImage = profileImage;
         }
+    }
+
+    public void IsMine(Long userId) {
+        this.isMine = userId.equals(this.replyUserDto.id);
     }
 }
