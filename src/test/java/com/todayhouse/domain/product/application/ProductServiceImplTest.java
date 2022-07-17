@@ -147,7 +147,7 @@ class ProductServiceImplTest {
     void findAll() {
         Seller seller = Seller.builder().brand("test").build();
         ProductSearchRequest search = ProductSearchRequest.builder().build();
-        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("id").descending());
         Product product1 = Product.builder().image("img").seller(seller).build();
         Product product2 = Product.builder().image("img").seller(seller).build();
         List<Product> productList = List.of(product1, product2);

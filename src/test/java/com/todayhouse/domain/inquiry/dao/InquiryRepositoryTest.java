@@ -64,7 +64,7 @@ class InquiryRepositoryTest extends DataJpaBase {
         List<Long> ids = List.of(inquiry3.getId(), inquiry2.getId());
 
         InquirySearchRequest request = new InquirySearchRequest(product1.getId(), false);
-        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("id").descending());
 
         Page<Inquiry> pages = inquiryRepository.findAllInquiries(request, pageRequest);
         List<Inquiry> content = pages.getContent();
@@ -87,8 +87,12 @@ class InquiryRepositoryTest extends DataJpaBase {
         List<Long> ids = List.of(inquiry2.getId(), inquiry1.getId());
         setSecurityName(user1.getEmail());
 
+        List<Inquiry> all = inquiryRepository.findAll();
+        all.forEach(inquiry -> {
+            System.out.println(inquiry.getId() + "  " + inquiry.getCreatedAt());
+        });
         InquirySearchRequest request = new InquirySearchRequest(null, true);
-        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("id").descending());
 
         Page<Inquiry> pages = inquiryRepository.findAllInquiries(request, pageRequest);
         List<Inquiry> content = pages.getContent();
@@ -105,7 +109,7 @@ class InquiryRepositoryTest extends DataJpaBase {
     @DisplayName("작성된 문의가 없음")
     void findInquiryZero() {
         InquirySearchRequest request = new InquirySearchRequest(null, false);
-        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("id").descending());
         Page<Inquiry> inquires = inquiryRepository.findAllInquiries(request, pageRequest);
 
         assertThat(inquires.getTotalElements()).isZero();

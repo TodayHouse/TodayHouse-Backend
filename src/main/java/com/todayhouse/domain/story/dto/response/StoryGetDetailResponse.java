@@ -26,11 +26,6 @@ public class StoryGetDetailResponse {
     private ResiType resiType;
     private FamilyType familyType;
     private StyleType styleType;
-
-    private Long userId;
-
-    private String userNickname;
-
     private Writer writer;
 
     public StoryGetDetailResponse(Story story, List<String> imageUrls) {
@@ -47,8 +42,6 @@ public class StoryGetDetailResponse {
         this.resiType = story.getResiType();
         this.familyType = story.getFamilyType();
         this.styleType = story.getStyleType();
-        this.userNickname = story.getUser().getNickname();
-        this.userId = story.getUser().getId();
         this.writer = new Writer(story.getUser().getId(), story.getUser().getNickname(), story.getUser().getProfileImage());
 
     }
