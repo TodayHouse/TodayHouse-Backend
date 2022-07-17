@@ -25,6 +25,7 @@ import javax.swing.text.html.Option;
 import java.util.Optional;
 
 import static com.todayhouse.global.error.BaseResponseStatus.REPLY_NOT_FOUND;
+import static com.todayhouse.global.error.BaseResponseStatus.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -37,12 +38,10 @@ public class StoryReplyServiceImpl implements StoryReplyService {
 
     @Override
     public void deleteReply(User user, Long replyId) {
-        Optional<StoryReply> byId = replyRepository.findById(replyId);
-        StoryReply storyReply = byId.orElseThrow(() -> new ReplyNotFoundException(REPLY_NOT_FOUND));
+        StoryReply storyReply = replyRepository.findById(replyId).orElseThrow(() -> new ReplyNotFoundException(REPLY_NOT_FOUND));
 
-        Optional<User> user1 = userRepository.findByEmail(user.getEmail());
-        User user2 = user1.orElseThrow();
-        if (!user2.getId().equals(storyReply.getUser().getId())) {
+        User user1 = userRepository.findByEmail(user.getEmail()).orElseThrow();
+        if (!user1.getId().equals(storyReply.getUser().getId())) {
             throw new RuntimeException();
         }
         replyRepository.delete(storyReply);
@@ -55,14 +54,10 @@ public class StoryReplyServiceImpl implements StoryReplyService {
         Page<StoryReply> storyReplies = replyRepository.findByStoryId(storyId, pageable);
 
         Page<ReplyGetResponse> map = storyReplies.map(r -> new ReplyGetResponse(r.getId(), r.getContent(), r.getCreatedAt(), r.getUser()));
-        Long userId;
-
-        if (user == null) {
-            userId = null;
-        } else {
-            Optional<User> byEmail = userRepository.findByEmail(user.getEmail());
-            User user1 = byEmail.orElseThrow();
-            userId = user1.getId();
+        Long userId = null;
+        if (user != null) {
+            User findUser = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+            userId = findUser.getId();
         }
         Long finalUserId = userId;
         map.forEach(replyGetResponse -> replyGetResponse.IsMine(finalUserId));
