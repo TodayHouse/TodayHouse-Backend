@@ -26,12 +26,13 @@ public class StoryReplyController {
 
     }
 
+
     @DeleteMapping("/reply/{id}")
     public BaseResponse<String> deleteReply(@AuthenticationPrincipal User user, @PathVariable Long id) {
-
         replyService.deleteReply(user, id);
         return new BaseResponse<>("삭제 완료");
     }
+
 
     @GetMapping("/reply/{storyId}")
     public BaseResponse<PageDto<ReplyGetResponse>> findReplies(@PathVariable Long storyId, Pageable pageable, @AuthenticationPrincipal User user) {

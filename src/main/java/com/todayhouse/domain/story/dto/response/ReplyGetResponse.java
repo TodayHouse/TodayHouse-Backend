@@ -13,7 +13,7 @@ public class ReplyGetResponse {
     private String content;
     private LocalDateTime createdDate;
     private Writer replyUserDto;
-    private boolean isMine;
+    private Boolean isMine;
 
     public ReplyGetResponse(Long id, String content, LocalDateTime createdDate, User user) {
 
