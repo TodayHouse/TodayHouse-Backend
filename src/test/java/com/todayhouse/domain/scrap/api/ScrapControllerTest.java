@@ -151,7 +151,7 @@ class ScrapControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("스크랩한 스토리 날짜 내림차순 조회")
+    @DisplayName("스크랩한 스토리 날짜 id 조회")
     void findScrapedStories() throws Exception {
         Story story2 = storyRepository.save(Story.builder()
                 .category(Story.Category.STORY).content("content2").title("title2").liked(0).user(user1)
@@ -159,7 +159,7 @@ class ScrapControllerTest extends IntegrationBase {
         scrapRepository.save(Scrap.builder().user(user1).story(story1).build());
         scrapRepository.save(Scrap.builder().user(user1).story(story2).build());
 
-        String url = "http://localhost:8080/scraps/my?sort=createdAt,DESC";
+        String url = "http://localhost:8080/scraps/my?sort=id,DESC";
         String jwt = jwtTokenProvider.createToken(user1.getEmail(), List.of(Role.USER));
 
         MvcResult mvcResult = mockMvc.perform(get(url)

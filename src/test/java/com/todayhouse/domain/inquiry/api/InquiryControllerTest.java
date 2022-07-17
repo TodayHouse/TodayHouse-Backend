@@ -114,7 +114,7 @@ class InquiryControllerTest extends IntegrationBase {
         List<String> names = List.of("tes**", "tes**", "test1");
         List<String> contents = List.of("content3", "비밀글입니다.", "content1");
         String jwt = jwtTokenProvider.createToken("test1@test", List.of(Role.USER));
-        String url = "http://localhost:8080/inquires?size=3&page=0&sort=createdAt,DESC";
+        String url = "http://localhost:8080/inquires?size=3&page=0&sort=id,DESC";
 
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -151,7 +151,7 @@ class InquiryControllerTest extends IntegrationBase {
         List<String> names = List.of("tes**", "tes**", "tes**");
         List<String> contents = List.of("content3", "비밀글입니다.", "비밀글입니다.");
         List<Optional<String>> answers = List.of(Optional.of("content3"), Optional.of("비밀글입니다."), Optional.ofNullable(null));
-        String url = "http://localhost:8080/inquires?size=3&page=0&sort=createdAt,DESC";
+        String url = "http://localhost:8080/inquires?size=3&page=0&sort=id,DESC";
 
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())

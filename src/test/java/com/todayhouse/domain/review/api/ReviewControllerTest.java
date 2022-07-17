@@ -184,7 +184,7 @@ class ReviewControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DisplayName("image있는 Review 페이징하여 최신순으로 조회")
+    @DisplayName("image있는 Review 페이징하여 id순으로 조회")
     void findReviewsWithImage() throws Exception {
         int rating = 5;
         User user2 = userRepository.save(User.builder().email("user2@test").build());
@@ -196,7 +196,7 @@ class ReviewControllerTest extends IntegrationBase {
         Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(rating).build());
         Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").rating(rating).build());
         List<Long> ids = List.of(review5.getId(), review3.getId());
-        String url = "http://localhost:8080/reviews?size=2&page=0&sort=createdAt,DESC&onlyImage=true";
+        String url = "http://localhost:8080/reviews?size=2&page=0&sort=id,DESC&onlyImage=true";
 
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(status().isOk())
@@ -232,7 +232,7 @@ class ReviewControllerTest extends IntegrationBase {
         Review review4 = reviewRepository.save(Review.builder().user(user4).product(product1).rating(rating2).build());
         Review review5 = reviewRepository.save(Review.builder().user(user5).product(product1).reviewImage("img").rating(rating3).build());
         List<Long> ids = List.of(review4.getId(), review3.getId());
-        String url = "http://localhost:8080/reviews?size=2&page=0&sort=rating,DESC&sort=createdAt,DESC";
+        String url = "http://localhost:8080/reviews?size=2&page=0&sort=rating,DESC&sort=id,DESC";
 
         MvcResult mvcResult = mockMvc.perform(get(url)
                         .param("ratings", "1,2")

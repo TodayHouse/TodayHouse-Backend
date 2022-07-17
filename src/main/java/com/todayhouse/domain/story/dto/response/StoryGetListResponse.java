@@ -14,6 +14,7 @@ public class StoryGetListResponse {
     private Integer views;
     private String title;
     private String writer;
+    private String profileUrl;
     private String thumbnailUrl;
     private Boolean isScraped;
 
@@ -22,6 +23,7 @@ public class StoryGetListResponse {
         this.views = story.getViews();
         this.title = story.getTitle();
         this.writer = story.getUser().getNickname();
+        this.profileUrl = story.getUser().getProfileImage();
         this.thumbnailUrl = thumbnailUrl;
         this.isScraped = isScraped;
     }
