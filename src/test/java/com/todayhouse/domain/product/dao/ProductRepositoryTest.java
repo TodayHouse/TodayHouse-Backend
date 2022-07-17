@@ -77,7 +77,7 @@ class ProductRepositoryTest extends DataJpaBase {
 
     @Test
     void 가격_2000_이상_product_페이징() {
-        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by("id").descending());
         ProductSearchRequest productSearch = ProductSearchRequest.builder().priceFrom(2000).build();
         Page<Product> page = productRepository.findAllWithSeller(productSearch, pageRequest);
 
@@ -86,7 +86,7 @@ class ProductRepositoryTest extends DataJpaBase {
         List<Product> products = page.getContent();
         LocalDateTime time = LocalDateTime.now();
         for (Product p : products) {
-            assertTrue(time.isAfter(p.getCreatedAt()));
+            assertTrue(time.isAfter(p.getCreatedAt()) || time.isEqual(p.getCreatedAt()));
             time = p.getCreatedAt();
         }
     }
@@ -115,7 +115,7 @@ class ProductRepositoryTest extends DataJpaBase {
         ProductSearchRequest request = ProductSearchRequest.builder()
                 .categoryName(c1.getName()).priceFrom(2000).priceTo(3000).brand("house")
                 .build();
-        PageRequest of = PageRequest.of(0, 30, Sort.by("createdAt").descending());
+        PageRequest of = PageRequest.of(0, 30, Sort.by("id").descending());
         Page<Product> page = productRepository.findAllWithSeller(request, of);
         List<Product> list = page.getContent();
 
@@ -130,7 +130,7 @@ class ProductRepositoryTest extends DataJpaBase {
     void findAllWithSeller() {
         ProductSearchRequest request = ProductSearchRequest.builder()
                 .categoryName("fail").build();
-        PageRequest of = PageRequest.of(0, 30, Sort.by("createdAt").descending());
+        PageRequest of = PageRequest.of(0, 30, Sort.by("id").descending());
         Page<Product> page = productRepository.findAllWithSeller(request, of);
         List<Product> list = page.getContent();
 

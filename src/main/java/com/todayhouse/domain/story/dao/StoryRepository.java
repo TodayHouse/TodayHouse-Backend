@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StoryRepository extends JpaRepository<Story, Long>, CustomStoryRepository {
 
@@ -16,4 +17,7 @@ public interface StoryRepository extends JpaRepository<Story, Long>, CustomStory
 
     @Query("select distinct st from Scrap sc inner join sc.story st where sc.story in :stories and sc.user =:user")
     List<Story> findScrapedByStoriesAndUser(@Param("stories") List<Story> stories, @Param("user") User user);
+
+    @Query("select s from Story s inner join fetch s.user where s.id =:storyId")
+    Optional<Story> findByIdWithUser(@Param("storyId") Long storyId);
 }

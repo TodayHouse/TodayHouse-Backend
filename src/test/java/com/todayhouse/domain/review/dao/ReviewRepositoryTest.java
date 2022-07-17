@@ -73,7 +73,7 @@ class ReviewRepositoryTest extends DataJpaBase {
     @DisplayName("Review paging으로 u1의 리뷰 최신순 조회")
     void findAllReviewsLatest() {
         ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(u1.getId(), null, null, false);
-        PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest page = PageRequest.of(0, 2, Sort.by("id").descending());
 
         Page<Review> reviews = reviewRepository.findAllReviews(reviewSearchRequest, page);
 
@@ -98,11 +98,11 @@ class ReviewRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    @DisplayName("Review paging으로 4점 review 최신순 조회")
+    @DisplayName("Review paging으로 4점 review id순 조회")
     void findAllReviewsRating4() {
         ReviewSearchRequest reviewSearchRequest =
                 new ReviewSearchRequest(null, null, "4", null);
-        PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest page = PageRequest.of(0, 2, Sort.by("id").descending());
 
         Page<Review> reviews = reviewRepository.findAllReviews(reviewSearchRequest, page);
 
@@ -113,10 +113,10 @@ class ReviewRepositoryTest extends DataJpaBase {
     }
 
     @Test
-    @DisplayName("Review paging으로 product p1 최신순 조회")
+    @DisplayName("Review paging으로 product p1 id순 조회")
     void findAllReviewsProductP1() {
         ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, p1.getId(), null, null);
-        PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest page = PageRequest.of(0, 2, Sort.by("id").descending());
 
         Page<Review> reviews = reviewRepository.findAllReviews(reviewSearchRequest, page);
 
@@ -170,7 +170,7 @@ class ReviewRepositoryTest extends DataJpaBase {
     @DisplayName("Review Rating split 예외")
     void findAllReviewsSplitException() {
         ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, p1.getId(), "1a1", null);
-        PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest page = PageRequest.of(0, 2, Sort.by("id").descending());
 
         assertThrows(RuntimeException.class, () -> reviewRepository.findAllReviews(reviewSearchRequest, page));
     }
@@ -179,7 +179,7 @@ class ReviewRepositoryTest extends DataJpaBase {
     @DisplayName("페이징으로 조회한 review가 0")
     void findAllReviews() {
         ReviewSearchRequest reviewSearchRequest = new ReviewSearchRequest(null, p1.getId() + 100L, null, null);
-        PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
+        PageRequest page = PageRequest.of(0, 2, Sort.by("id").descending());
 
         Page<Review> reviews = reviewRepository.findAllReviews(reviewSearchRequest, page);
 
