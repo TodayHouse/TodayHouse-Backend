@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReplyDeleteRequest {
-    private  Long storyId;
+    private Long replyId;
 }

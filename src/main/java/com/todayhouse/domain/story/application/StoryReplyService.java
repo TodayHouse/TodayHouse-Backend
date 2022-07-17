@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 public interface StoryReplyService {
     ReplyCreateResponse replyStory(User user, ReplyCreateRequest request);
 
-    void deleteReply(User user, ReplyDeleteRequest request);
+    void deleteReply(User user, Long replyId);
 
-    Page<ReplyGetResponse> findReplies(Long storyId, Pageable pageable);
+    Page<ReplyGetResponse> findReplies(User user, Long storyId, Pageable pageable);
 }
