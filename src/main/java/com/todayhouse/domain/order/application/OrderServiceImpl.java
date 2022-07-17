@@ -86,6 +86,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Long findMyOrderIdByProductId(Long productId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null)
+            return null;
+        Product product = productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
+        Orders orders = orderRepository.findFirstByUserAndProductOrderByIdDesc(user, product).orElse(null);
+        return orders == null ? null : orders.getId();
+    }
+
+    @Override
     public void cancelOrder(Long orderId) {
         Orders orders = orderRepository.findByIdWithProductAndOptions(orderId).orElseThrow(OrderNotFoundException::new);
         checkValidOrder(orders);

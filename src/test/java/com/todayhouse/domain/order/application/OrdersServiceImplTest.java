@@ -309,6 +309,40 @@ class OrdersServiceImplTest {
     }
 
     @Test
+    @DisplayName("productId로 자신의 주문 id 찾기")
+    void findMyOrderIdByProductId(){
+        Long orderId = 10L;
+        Product mockProduct = mock(Product.class);
+        Orders mockOrders = mock(Orders.class);
+
+        User user = getValidUser();
+        when(userRepository.findByEmail("test")).thenReturn(Optional.of(user));
+        when(productRepository.findById(anyLong())).thenReturn(Optional.of(mockProduct));
+        when(orderRepository.findFirstByUserAndProductOrderByIdDesc(any(User.class), any(Product.class))).thenReturn(Optional.of(mockOrders));
+        when(mockOrders.getId()).thenReturn(10L);
+
+        Long findOrderId = orderService.findMyOrderIdByProductId(1L);
+
+        assertThat(findOrderId).isEqualTo(orderId);
+    }
+
+    @Test
+    @DisplayName("주문하지 않은 유저가 주문 id 조회")
+    void findMyOrderIdByProductIdUserNull() {
+        Product mockProduct = mock(Product.class);
+
+        User user = getValidUser();
+        when(userRepository.findByEmail("test")).thenReturn(Optional.of(user));
+        when(productRepository.findById(anyLong())).thenReturn(Optional.of(mockProduct));
+        when(orderRepository.findFirstByUserAndProductOrderByIdDesc(any(User.class), any(Product.class))).thenReturn(Optional.ofNullable(null));
+
+        Long findOrderId = orderService.findMyOrderIdByProductId(1L);
+
+        assertThat(findOrderId).isNull();
+    }
+
+
+    @Test
     @DisplayName("주문 취소")
     void cancelOrder() {
         User user = getValidUser();
