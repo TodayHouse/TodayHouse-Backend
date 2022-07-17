@@ -13,7 +13,7 @@ public class ReplyGetResponse {
     private String content;
     private LocalDateTime createdDate;
     private Writer replyUserDto;
-    private Boolean isMine;
+    private Boolean isMine = false;
 
     public ReplyGetResponse(Long id, String content, LocalDateTime createdDate, User user) {
 
@@ -38,6 +38,9 @@ public class ReplyGetResponse {
     }
 
     public void IsMine(Long userId) {
+        if (userId == null) {
+            return;
+        }
         this.isMine = userId.equals(this.replyUserDto.id);
     }
 }
