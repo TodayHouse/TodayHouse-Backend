@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductResponse {
     private Long id;
+    private Long orderId;
     private Long sellerId;
     private String brand;
     private String title;
@@ -56,6 +57,10 @@ public class ProductResponse {
         this.selectionOptions = Optional.ofNullable(product.getSelectionOptions())
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
                 .map(selectionOption -> new SelectionOptionResponse(selectionOption)).collect(Collectors.toSet());
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
     public void setImages(List<String> images) {
