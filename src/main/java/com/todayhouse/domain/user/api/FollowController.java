@@ -20,7 +20,7 @@ public class FollowController {
     @PostMapping
     public BaseResponse saveFollow(@Valid @RequestBody FollowRequest request) {
         Follow follow = followService.saveFollow(request.getFromId(), request.getToId());
-        return new BaseResponse(follow);
+        return new BaseResponse(follow.getId());
     }
 
     @DeleteMapping

@@ -5,6 +5,7 @@ import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.Follow;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.dto.SimpleUser;
+import com.todayhouse.domain.user.exception.FollowExistException;
 import com.todayhouse.domain.user.exception.InvalidRequestException;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +24,11 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public Follow saveFollow(Long fromId, Long toId) {
+        if(followRepository.existsFollowByFromIdAndToId(fromId, toId))
+            throw new FollowExistException();
         User from = userRepository.findById(fromId).orElseThrow(UserNotFoundException::new);
         checkEmailInvalidation(from.getEmail());
         User to = userRepository.findById(toId).orElseThrow(UserNotFoundException::new);
-
         Follow follow = Follow.builder().from(from).to(to).build();
 
         return followRepository.save(follow);
