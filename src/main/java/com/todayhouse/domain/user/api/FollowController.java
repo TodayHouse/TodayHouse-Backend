@@ -26,7 +26,7 @@ public class FollowController {
     @DeleteMapping
     public BaseResponse deleteFollow(@RequestParam Long fromId, @RequestParam Long toId) {
         followService.deleteFollow(fromId, toId);
-        return new BaseResponse();
+        return new BaseResponse("팔로우가 해제되었습니다.");
     }
 
     @GetMapping("/followers/count/{id}")
