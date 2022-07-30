@@ -32,7 +32,7 @@ class CustomStoryRepositoryImplTest extends DataJpaBase {
     Story s1, s2, s3;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         Seller seller = Seller.builder().brand("test_brand").companyName("test").build();
 
         user1 = userRepository.save(User.builder()
@@ -51,16 +51,16 @@ class CustomStoryRepositoryImplTest extends DataJpaBase {
                 .seller(seller)
                 .build());
 
-        s1 = storyRepository.save(Story.builder().liked(1).title("제목1").content("내용1").category(Story.Category.STORY).user(user1).build());
-        s2 = storyRepository.save(Story.builder().liked(1).title("제목2").content("내용2").category(Story.Category.STORY).user(user1).build());
-        s3 = storyRepository.save(Story.builder().liked(1).title("제목3").content("내용3").category(Story.Category.STORY).user(user2).build());
+        s1 = storyRepository.save(Story.builder().title("제목1").content("내용1").category(Story.Category.STORY).user(user1).build());
+        s2 = storyRepository.save(Story.builder().title("제목2").content("내용2").category(Story.Category.STORY).user(user1).build());
+        s3 = storyRepository.save(Story.builder().title("제목3").content("내용3").category(Story.Category.STORY).user(user2).build());
     }
 
     @Test
     @DisplayName("스토리 작성자 nickname으로 검색")
     void searchConditionSearchNickName() {
         StorySearchRequest storySearchRequest = StorySearchRequest.builder().search("admintes").build();
-        PageRequest pageRequest = PageRequest.of(0,10);
+        PageRequest pageRequest = PageRequest.of(0, 10);
 
         List<Story> stories = storyRepository.searchCondition(storySearchRequest, pageRequest).getContent();
 
@@ -74,7 +74,7 @@ class CustomStoryRepositoryImplTest extends DataJpaBase {
     void searchConditionSearchTitle() {
         StorySearchRequest storySearchRequest1 = StorySearchRequest.builder().search("제목").build();
         StorySearchRequest storySearchRequest2 = StorySearchRequest.builder().search("제목2").build();
-        PageRequest pageRequest = PageRequest.of(0,10);
+        PageRequest pageRequest = PageRequest.of(0, 10);
 
         List<Story> storiesAll = storyRepository.searchCondition(storySearchRequest1, pageRequest).getContent();
         List<Story> stories2 = storyRepository.searchCondition(storySearchRequest2, pageRequest).getContent();
@@ -92,7 +92,7 @@ class CustomStoryRepositoryImplTest extends DataJpaBase {
     @DisplayName("스토리 내용으로 검색")
     void searchConditionSearchContent() {
         StorySearchRequest storySearchRequest = StorySearchRequest.builder().search("제목2").build();
-        PageRequest pageRequest = PageRequest.of(0,10);
+        PageRequest pageRequest = PageRequest.of(0, 10);
 
         List<Story> stories = storyRepository.searchCondition(storySearchRequest, pageRequest).getContent();
 

@@ -26,6 +26,10 @@ public class ProductResponse {
     private int deliveryFee;
     private int discountRate;
     private boolean specialPrice;
+
+    private int likesCount;
+
+    private boolean liked;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> imageUrls = new ArrayList<>();
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -56,6 +60,8 @@ public class ProductResponse {
         this.selectionOptions = Optional.ofNullable(product.getSelectionOptions())
                 .orElseGet(Collections::emptySet).stream().filter(Objects::nonNull)
                 .map(selectionOption -> new SelectionOptionResponse(selectionOption)).collect(Collectors.toSet());
+        this.likesCount = product.getLikesCount();
+
     }
 
     public void setImages(List<String> images) {
@@ -64,5 +70,9 @@ public class ProductResponse {
 
     public void addCategoryPath(String category) {
         this.categoryPath.add(category);
+    }
+
+    public void setLiked(boolean liked) {
+        this.liked = liked;
     }
 }
