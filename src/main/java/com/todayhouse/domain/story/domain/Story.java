@@ -1,16 +1,20 @@
 package com.todayhouse.domain.story.domain;
 
 import com.todayhouse.domain.image.domain.StoryImage;
+import com.todayhouse.domain.likes.domain.LikesStory;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -36,9 +40,6 @@ public class Story extends BaseTimeEntity {
 //    @Column(name = "product_link")
 //    private String productLink;
 
-    @Column(nullable = false)
-    private Integer liked;
-
     private Integer views = 0;
 
     @Column(nullable = false)
@@ -46,6 +47,14 @@ public class Story extends BaseTimeEntity {
     private Category category;
 
     private Integer floorSpace;
+
+    @Formula(
+            ("select count(1) from likes l " +
+                    "where l.story_id = story_id")
+    )
+    @Basic(fetch = FetchType.LAZY)
+    private Integer likesCount;
+
 
     @Enumerated(EnumType.STRING)
     private ResiType resiType;
@@ -66,11 +75,12 @@ public class Story extends BaseTimeEntity {
     @OneToMany(mappedBy = "story", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<StoryReply> storyReplies = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<LikesStory> likesStories = new HashSet<>();
     @Builder
-    public Story(String title, String content, Integer liked, Category category, User user, ResiType resiType, Integer floorSpace, FamilyType familyType, StyleType styleType) {
+    public Story(String title, String content, Category category, User user, ResiType resiType, Integer floorSpace, FamilyType familyType, StyleType styleType) {
         this.title = title;
         this.content = content;
-        this.liked = liked;
         this.category = category;
         this.user = user;
         this.resiType = resiType;
@@ -87,5 +97,9 @@ public class Story extends BaseTimeEntity {
 
     public void increaseView() {
         this.views += 1;
+    }
+
+    public Integer getLikedCount() {
+        return getLikesStories().size();
     }
 }
