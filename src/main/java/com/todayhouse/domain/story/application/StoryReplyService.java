@@ -18,6 +18,6 @@ public interface StoryReplyService {
 
     ReplyCreateResponse replyStory(User user, ReplyCreateRequest request);
 
-    void deleteReply(User user, ReplyDeleteRequest request);
+    void deleteReply(User user, Long replyId);
 
 }

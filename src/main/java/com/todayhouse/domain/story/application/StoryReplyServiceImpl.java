@@ -22,10 +22,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.todayhouse.global.error.BaseResponseStatus.REPLY_NOT_FOUND;
+import static com.todayhouse.global.error.BaseResponseStatus.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -39,11 +41,11 @@ public class StoryReplyServiceImpl implements StoryReplyService {
 
 
     @Override
-    public void deleteReply(User user, ReplyDeleteRequest request) {
-        Optional<StoryReply> byId = replyRepository.findById(request.getStoryId());
-        StoryReply storyReply = byId.orElseThrow(() -> new ReplyNotFoundException(REPLY_NOT_FOUND));
-        user = userRepository.findByEmail(user.getEmail()).orElseThrow(UserNotFoundException::new);
-        if (!user.getId().equals(storyReply.getUser().getId())) {
+    public void deleteReply(User user, Long replyId) {
+        StoryReply storyReply = replyRepository.findById(replyId).orElseThrow(() -> new ReplyNotFoundException(REPLY_NOT_FOUND));
+
+        User user1 = userRepository.findByEmail(user.getEmail()).orElseThrow();
+        if (!user1.getId().equals(storyReply.getUser().getId())) {
             throw new RuntimeException();
         }
         replyRepository.delete(storyReply);

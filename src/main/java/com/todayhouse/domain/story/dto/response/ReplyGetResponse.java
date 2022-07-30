@@ -1,6 +1,7 @@
 package com.todayhouse.domain.story.dto.response;
 
 import com.todayhouse.domain.user.domain.User;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,12 +14,11 @@ public class ReplyGetResponse {
     private String content;
     private LocalDateTime createdDate;
     private Writer replyUserDto;
-
-
-
+    private Boolean isMine;
     private boolean liked;
     private int likesCount;
 
+    @Builder
     public ReplyGetResponse(Long id, String content, LocalDateTime createdDate, User user, int likesCount) {
 
         this.id = id;
@@ -26,6 +26,7 @@ public class ReplyGetResponse {
         this.createdDate = createdDate;
         this.replyUserDto = new Writer(user.getId(), user.getNickname(), user.getProfileImage());
         this.likesCount = likesCount;
+
     }
 
     @Getter
@@ -41,8 +42,10 @@ public class ReplyGetResponse {
             this.profileImage = profileImage;
         }
     }
-
     public void setLiked(boolean liked) {
         this.liked = liked;
+    }
+    public void IsMine(Long userId) {
+        this.isMine = userId.equals(this.replyUserDto.id);
     }
 }
