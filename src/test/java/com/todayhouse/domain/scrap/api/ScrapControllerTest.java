@@ -52,7 +52,7 @@ class ScrapControllerTest extends IntegrationBase {
     void preSet() {
         user1 = userRepository.save(User.builder().build());
         story1 = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content").title("title").liked(0).user(user1)
+                .category(Story.Category.STORY).content("content").title("title").user(user1)
                 .build());
     }
 
@@ -154,7 +154,7 @@ class ScrapControllerTest extends IntegrationBase {
     @DisplayName("스크랩한 스토리 날짜 id 조회")
     void findScrapedStories() throws Exception {
         Story story2 = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content2").title("title2").liked(0).user(user1)
+                .category(Story.Category.STORY).content("content2").title("title2").user(user1)
                 .build());
         scrapRepository.save(Scrap.builder().user(user1).story(story1).build());
         scrapRepository.save(Scrap.builder().user(user1).story(story2).build());

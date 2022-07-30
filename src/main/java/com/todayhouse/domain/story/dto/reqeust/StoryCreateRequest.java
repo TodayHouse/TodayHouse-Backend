@@ -48,7 +48,6 @@ public class StoryCreateRequest {
                 .floorSpace(floorSpace)
                 .resiType(resiType)
                 .styleType(styleType)
-                .liked(0)
                 .category(category)
                 .user(user)
                 .build();

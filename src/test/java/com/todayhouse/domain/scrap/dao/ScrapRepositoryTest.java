@@ -33,10 +33,10 @@ class ScrapRepositoryTest extends DataJpaBase {
         user2 = userRepository.save(User.builder().build());
 
         story1 = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content").title("title1").liked(0).user(user1)
+                .category(Story.Category.STORY).content("content").title("title1").user(user1)
                 .build());
         story2 = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content").title("title2").liked(0).user(user2)
+                .category(Story.Category.STORY).content("content").title("title2").user(user2)
                 .build());
 
         scrap1 = scrapRepository.save(Scrap.builder().user(user1).story(story1).build());
@@ -60,7 +60,7 @@ class ScrapRepositoryTest extends DataJpaBase {
     @DisplayName("상품 id로 스크랩 개수 세기")
     void countByStoryId() {
         Story tmp = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content").title("title").liked(0).user(user1)
+                .category(Story.Category.STORY).content("content").title("title").user(user1)
                 .build());
 
         Long count1 = scrapRepository.countByStory(story1);

@@ -77,7 +77,7 @@ class StoryControllerTest extends IntegrationBase {
                 .build());
 
         jwt = provider.createToken("admin@test.com", Collections.singletonList(Role.USER));
-        s1 = Story.builder().liked(1).title("제목").content("내용").category(Story.Category.STORY).user(user).build();
+        s1 = Story.builder().title("제목").content("내용").category(Story.Category.STORY).user(user).build();
         s1 = storyRepository.save(s1);
     }
 
@@ -163,7 +163,6 @@ class StoryControllerTest extends IntegrationBase {
                                     .familyType(familyType)
                                     .content("내용")
                                     .title("제목")
-                                    .liked(likes++)
                                     .user(byId.orElseThrow())
                                     .build();
                             storyRepository.save(build);
@@ -185,7 +184,7 @@ class StoryControllerTest extends IntegrationBase {
     @Test
     @DisplayName("스토리 조회 시 스크랩 유무 포함")
     void findAllDescWithScrap() throws Exception {
-        Story s2 = Story.builder().liked(1).title("제목2").content("내용").category(Story.Category.STORY).user(user).build();
+        Story s2 = Story.builder().title("제목2").content("내용").category(Story.Category.STORY).user(user).build();
         s2 = storyRepository.save(s2);
         scrapRepository.save(Scrap.builder().user(user).story(s2).build());
 
