@@ -14,9 +14,9 @@ public class ReplyGetResponse {
     private String content;
     private LocalDateTime createdDate;
     private Writer replyUserDto;
-    private Boolean isMine;
     private boolean liked;
     private int likesCount;
+    private boolean isMine;
 
     @Builder
     public ReplyGetResponse(Long id, String content, LocalDateTime createdDate, User user, int likesCount) {
@@ -46,6 +46,9 @@ public class ReplyGetResponse {
         this.liked = liked;
     }
     public void IsMine(Long userId) {
+        if (userId == null) {
+            return;
+        }
         this.isMine = userId.equals(this.replyUserDto.id);
     }
 }

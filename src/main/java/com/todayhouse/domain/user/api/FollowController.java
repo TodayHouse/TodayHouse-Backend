@@ -20,13 +20,13 @@ public class FollowController {
     @PostMapping
     public BaseResponse saveFollow(@Valid @RequestBody FollowRequest request) {
         Follow follow = followService.saveFollow(request.getFromId(), request.getToId());
-        return new BaseResponse(follow);
+        return new BaseResponse(follow.getId());
     }
 
     @DeleteMapping
-    public BaseResponse deleteFollow(@Valid @RequestBody FollowRequest request) {
-        followService.deleteFollow(request.getFromId(), request.getToId());
-        return new BaseResponse();
+    public BaseResponse deleteFollow(@RequestParam Long fromId, @RequestParam Long toId) {
+        followService.deleteFollow(fromId, toId);
+        return new BaseResponse("팔로우가 해제되었습니다.");
     }
 
     @GetMapping("/followers/count/{id}")

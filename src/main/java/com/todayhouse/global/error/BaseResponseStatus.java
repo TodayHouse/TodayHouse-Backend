@@ -29,6 +29,7 @@ public enum BaseResponseStatus {
     INVALID_EMAIL_TOKEN(false, 2016, "유효하지 않은 코드입니다."),
     SELLER_EXIST(false, 2017, "이미 입점한 유저입니다."),
     SELLER_NOT_FOUND(false, 2018, "입점을 하지 않았습니다."),
+    FOLLOW_EXIST(false, 2019, "이미 팔로우 했습니다."),
 
     // product
     POST_PRODUCT_EMPTY_DELIVERY(false, 2100, "배송비를 입력해주세요."),

@@ -4,6 +4,7 @@ import com.todayhouse.domain.category.application.CategoryService;
 import com.todayhouse.domain.category.domain.Category;
 import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.likes.application.LikesProductServiceImpl;
+import com.todayhouse.domain.order.application.OrderService;
 import com.todayhouse.domain.product.application.ProductService;
 import com.todayhouse.domain.product.domain.Product;
 import com.todayhouse.domain.product.dto.request.ProductImageSaveRequest;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 public class ProductController {
     private final FileService fileService;
     private final ImageService imageService;
+    private final OrderService orderService;
     private final ProductService productService;
     private final CategoryService categoryService;
 
@@ -64,11 +66,12 @@ public class ProductController {
     @GetMapping("/{id}")
     public BaseResponse findProductWithImages(@AuthenticationPrincipal User user, @PathVariable Long id) {
         Product product = productService.findByIdWithOptionsAndSeller(id);
+
         List<String> imageUrls = imageService.findProductImageFileNamesByProductId(id).stream().
-                map(fileName -> fileService.changeFileNameToUrl(fileName)).collect(Collectors.toList());
+                map(fileService::changeFileNameToUrl).collect(Collectors.toList());
         ProductResponse response = new ProductResponse(product);
         response.setImages(imageUrls);
-
+        response.setOrderId(orderService.findMyOrderIdByProductId(id));
         List<Category> categoryPath = categoryService.findRootPath(product.getCategory().getName());
         categoryPath.forEach(c -> response.addCategoryPath(c.getName()));
 
@@ -94,6 +97,4 @@ public class ProductController {
         imageService.deleteProductImages(List.of(file));
         return new BaseResponse("삭제되었습니다.");
     }
-
-
 }

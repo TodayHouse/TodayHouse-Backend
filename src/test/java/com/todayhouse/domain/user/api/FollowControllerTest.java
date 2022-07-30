@@ -84,16 +84,14 @@ class FollowControllerTest extends IntegrationBase {
 
     @Test
     void 팔로우_끊기() throws Exception {
-        String url = "http://localhost:8080/follows";
         Long user1Id = userRepository.findByEmail("user1@test").orElse(null).getId();
         Long user2Id = userRepository.findByEmail("user2@test").orElse(null).getId();
-        FollowRequest request = FollowRequest.builder().fromId(user1Id).toId(user2Id).build();// user1, user2
+        String url = "http://localhost:8080/follows?fromId=" + user1Id.toString() + "&toId=" + user2Id.toString();
         String jwt = tokenProvider.createToken("user1@test", Collections.singletonList(Role.USER));
 
         mockMvc.perform(delete(url)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwt)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk());
 
         List<Follow> list = followRepository.findAll();
