@@ -7,12 +7,17 @@ import com.todayhouse.domain.story.dto.response.ReplyGetResponse;
 import com.todayhouse.domain.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 
 
 public interface StoryReplyService {
+    @Transactional(readOnly = true)
+    Page<ReplyGetResponse> findReplies(@AuthenticationPrincipal User user, Long storyId, @PageableDefault Pageable pageable);
+
     ReplyCreateResponse replyStory(User user, ReplyCreateRequest request);
 
     void deleteReply(User user, ReplyDeleteRequest request);
 
-    Page<ReplyGetResponse> findReplies(Long storyId, Pageable pageable);
 }

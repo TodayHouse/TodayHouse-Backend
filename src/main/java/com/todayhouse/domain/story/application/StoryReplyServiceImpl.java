@@ -1,5 +1,7 @@
 package com.todayhouse.domain.story.application;
 
+import com.todayhouse.domain.likes.dao.LikesStoryReplyRepository;
+import com.todayhouse.domain.likes.domain.LikesStoryReply;
 import com.todayhouse.domain.story.dao.StoryReplyRepository;
 import com.todayhouse.domain.story.dao.StoryRepository;
 import com.todayhouse.domain.story.domain.Story;
@@ -16,10 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static com.todayhouse.global.error.BaseResponseStatus.REPLY_NOT_FOUND;
 
@@ -30,6 +34,8 @@ public class StoryReplyServiceImpl implements StoryReplyService {
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
     private final StoryReplyRepository replyRepository;
+
+    private final LikesStoryReplyRepository likesStoryReplyRepository;
 
 
     @Override
@@ -46,9 +52,24 @@ public class StoryReplyServiceImpl implements StoryReplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ReplyGetResponse> findReplies(Long storyId, @PageableDefault Pageable pageable) {
+    public Page<ReplyGetResponse> findReplies(@AuthenticationPrincipal User user, Long storyId, @PageableDefault Pageable pageable) {
         Page<StoryReply> storyReplies = replyRepository.findByStoryId(storyId, pageable);
-        return storyReplies.map(r -> new ReplyGetResponse(r.getId(), r.getContent(), r.getCreatedAt(), r.getUser()));
+        Page<ReplyGetResponse> map = storyReplies.map(r -> new ReplyGetResponse(
+                r.getId(),
+                r.getContent(),
+                r.getCreatedAt(),
+                r.getUser(),
+                r.getLikesStoryReplies().size())
+        );
+        if (user == null) {
+            return map;
+        } else {
+            Set<Long> userLikes = likesStoryReplyRepository.findIdsByUserEmail(user.getEmail());
+            map.forEach(replyGetResponse -> replyGetResponse.setLiked(userLikes.contains(replyGetResponse.getId())));
+        }
+
+        return map;
+
     }
 
     @Override

@@ -1,12 +1,16 @@
 package com.todayhouse.domain.story.domain;
 
+import com.todayhouse.domain.likes.domain.LikesStoryReply;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseTimeEntity;
-import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -36,6 +40,8 @@ public class StoryReply extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "storyReply", cascade = CascadeType.ALL)
+    private Set<LikesStoryReply> likesStoryReplies = new HashSet<>();
 }
 
 

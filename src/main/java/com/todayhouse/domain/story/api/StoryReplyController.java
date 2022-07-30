@@ -33,8 +33,8 @@ public class StoryReplyController {
     }
 
     @GetMapping("/reply")
-    public BaseResponse<PageDto<ReplyGetResponse>> findReplies(@RequestParam Long storyId, Pageable pageable) {
-        return new BaseResponse<>(new PageDto<>(replyService.findReplies(storyId, pageable)));
+    public BaseResponse<PageDto<ReplyGetResponse>> findReplies(@RequestParam Long storyId, @AuthenticationPrincipal User user, Pageable pageable) {
+        return new BaseResponse<>(new PageDto<>(replyService.findReplies(user, storyId, pageable)));
     }
 
 }
