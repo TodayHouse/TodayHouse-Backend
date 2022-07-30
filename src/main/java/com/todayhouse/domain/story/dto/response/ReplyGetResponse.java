@@ -14,12 +14,18 @@ public class ReplyGetResponse {
     private LocalDateTime createdDate;
     private Writer replyUserDto;
 
-    public ReplyGetResponse(Long id, String content, LocalDateTime createdDate, User user) {
+
+
+    private boolean liked;
+    private int likesCount;
+
+    public ReplyGetResponse(Long id, String content, LocalDateTime createdDate, User user, int likesCount) {
 
         this.id = id;
         this.content = content;
         this.createdDate = createdDate;
         this.replyUserDto = new Writer(user.getId(), user.getNickname(), user.getProfileImage());
+        this.likesCount = likesCount;
     }
 
     @Getter
@@ -34,5 +40,9 @@ public class ReplyGetResponse {
             this.nickname = nickname;
             this.profileImage = profileImage;
         }
+    }
+
+    public void setLiked(boolean liked) {
+        this.liked = liked;
     }
 }
