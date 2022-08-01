@@ -61,8 +61,9 @@ public class StoryReplyServiceImpl implements StoryReplyService {
                 r.getContent(),
                 r.getCreatedAt(),
                 r.getUser(),
-                r.getLikesStoryReplies().size())
+                r.getLikesCount())
         );
+
         if (user == null) {
             return map;
         } else {

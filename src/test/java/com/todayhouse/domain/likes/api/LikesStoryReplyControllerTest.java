@@ -141,8 +141,7 @@ public class LikesStoryReplyControllerTest extends IntegrationBase {
     @Test
     @DisplayName("댓글 조회시 좋아요 확인")
     public void checkReply() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/stories/reply/")
-                        .param("storyId", String.valueOf(s1.getId()))
+        mockMvc.perform(get("http://localhost:8080/stories/reply/"+ s1.getId())
                         .contentType("application/json")
                         .header("Authorization", "Bearer " + jwt)
                 )
@@ -156,8 +155,7 @@ public class LikesStoryReplyControllerTest extends IntegrationBase {
     @Test
     @DisplayName("게스트 계정 조회시 좋아요 확인")
     public void checkGuestReply() throws Exception {
-        mockMvc.perform(get("http://localhost:8080/stories/reply/")
-                        .param("storyId", String.valueOf(s1.getId()))
+        mockMvc.perform(get("http://localhost:8080/stories/reply/"+ s1.getId())
                         .contentType("application/json")
                 )
                 .andDo(print())

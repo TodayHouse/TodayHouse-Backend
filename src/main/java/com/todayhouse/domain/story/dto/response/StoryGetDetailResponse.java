@@ -44,6 +44,7 @@ public class StoryGetDetailResponse {
         this.familyType = story.getFamilyType();
         this.styleType = story.getStyleType();
         this.writer = new Writer(story.getUser().getId(), story.getUser().getNickname(), story.getUser().getProfileImage());
+        this.likesCount = story.getLikesCount();
 
     }
 

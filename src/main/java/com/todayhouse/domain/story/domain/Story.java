@@ -48,12 +48,11 @@ public class Story extends BaseTimeEntity {
 
     private Integer floorSpace;
 
-    @Formula(
-            ("select count(1) from likes l " +
-                    "where l.story_id = story_id")
+    @Formula(value = "(select count(1) from likes l " +
+                    "where l.story_id = story_id)"
     )
-    @Basic(fetch = FetchType.LAZY)
-    private Integer likesCount;
+    @Basic(fetch = FetchType.EAGER)
+    private int likesCount;
 
 
     @Enumerated(EnumType.STRING)
@@ -99,7 +98,4 @@ public class Story extends BaseTimeEntity {
         this.views += 1;
     }
 
-    public Integer getLikedCount() {
-        return getLikesStories().size();
-    }
 }

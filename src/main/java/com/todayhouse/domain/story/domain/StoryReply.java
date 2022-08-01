@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -24,9 +25,15 @@ public class StoryReply extends BaseTimeEntity {
 
     private String content;
 
+    @Formula(
+            value = "(select count(1) from likes l where l.story_reply_id = story_reply_id)"
+    )
+    @Basic(fetch = FetchType.LAZY)
+    private int likesCount;
 
     @Builder
     public StoryReply(String content, Story story, User user) {
+
         this.content = content;
         this.story = story;
         this.user = user;

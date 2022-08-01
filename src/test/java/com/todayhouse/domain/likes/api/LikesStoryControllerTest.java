@@ -61,6 +61,8 @@ public class LikesStoryControllerTest extends IntegrationBase {
     Seller seller1;
     @PersistenceContext
     EntityManager em;
+    StoryReply sr2;
+    User user2;
 
     @BeforeEach
     void setup() {
@@ -71,6 +73,13 @@ public class LikesStoryControllerTest extends IntegrationBase {
                 .roles(Collections.singletonList(Role.ADMIN))
                 .seller(seller1)
                 .nickname("admin1")
+                .build());
+        user2 = userRepository.save(User.builder()
+                .authProvider(AuthProvider.LOCAL)
+                .email("admin2@test.com")
+                .roles(Collections.singletonList(Role.ADMIN))
+                .seller(seller1)
+                .nickname("admin2")
                 .build());
 
         jwt = provider.createToken("admin@test.com", Collections.singletonList(Role.USER));
@@ -94,12 +103,26 @@ public class LikesStoryControllerTest extends IntegrationBase {
         em.persist(sr1);
         s1.getStoryReplies().add(sr1);
 
+        sr2 = StoryReply.builder().story(s1)
+                .content("댓글 내용")
+                .user(user)
+                .build();
+        em.persist(sr2);
+        s1.getStoryReplies().add(sr2);
+
         storyRepository.save(s1);
         storyRepository.save(s2);
 
         LikesStory ls1 = new LikesStory(user, s1);
         s1.getLikesStories().add(ls1);
         likesStoryRepository.save(ls1);
+
+        LikesStory ls2 = new LikesStory(user2, s1);
+        s1.getLikesStories().add(ls2);
+        likesStoryRepository.save(ls2);
+
+        em.flush();
+        em.clear();
     }
 
     @Test
@@ -141,7 +164,7 @@ public class LikesStoryControllerTest extends IntegrationBase {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.liked").value(true))
-                .andExpect(jsonPath("$.result.likesCount").value(1));
+                .andExpect(jsonPath("$.result.likesCount").value(2));
     }
 
     @Test
