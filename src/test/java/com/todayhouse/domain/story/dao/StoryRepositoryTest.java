@@ -28,13 +28,13 @@ class StoryRepositoryTest extends DataJpaBase {
     void preSet(){
         user1 = userRepository.save(User.builder().email("test").build());
         story1 = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content1").title("title1").liked(0).user(user1)
+                .category(Story.Category.STORY).content("content1").title("title1").user(user1)
                 .build());
         story2 = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content2").title("title3").liked(0).user(user1)
+                .category(Story.Category.STORY).content("content2").title("title3").user(user1)
                 .build());
         story3 = storyRepository.save(Story.builder()
-                .category(Story.Category.STORY).content("content2").title("title3").liked(0).user(user1)
+                .category(Story.Category.STORY).content("content2").title("title3").user(user1)
                 .build());
     }
 

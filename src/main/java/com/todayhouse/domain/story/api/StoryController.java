@@ -6,6 +6,7 @@ import com.todayhouse.domain.story.dto.reqeust.StorySearchRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryUpdateRequest;
 import com.todayhouse.domain.story.dto.response.StoryGetDetailResponse;
 import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
+import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.global.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,8 +51,8 @@ public class StoryController {
     }
 
     @GetMapping("/{id}")
-    public BaseResponse<StoryGetDetailResponse> findById(@PathVariable Long id) {
-        return new BaseResponse<>(storyService.findById(id));
+    public BaseResponse<StoryGetDetailResponse> findById(@AuthenticationPrincipal User user, @PathVariable Long id) {
+        return new BaseResponse<>(storyService.findById(user, id));
     }
 
     @GetMapping("/user")

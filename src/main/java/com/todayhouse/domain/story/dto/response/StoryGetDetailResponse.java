@@ -15,7 +15,6 @@ public class StoryGetDetailResponse {
     private Long id;
     private String title;
     private String content;
-    private Integer liked;
     private Integer views;
     private List<String> imageUrls;
     private Story.Category category;
@@ -27,12 +26,14 @@ public class StoryGetDetailResponse {
     private FamilyType familyType;
     private StyleType styleType;
     private Writer writer;
+    private Integer likesCount;
+    private boolean liked;
+
 
     public StoryGetDetailResponse(Story story, List<String> imageUrls) {
         this.id = story.getId();
         this.title = story.getTitle();
         this.content = story.getContent();
-        this.liked = story.getLiked();
         this.views = story.getViews();
         this.imageUrls = imageUrls;
         this.category = story.getCategory();
@@ -43,6 +44,7 @@ public class StoryGetDetailResponse {
         this.familyType = story.getFamilyType();
         this.styleType = story.getStyleType();
         this.writer = new Writer(story.getUser().getId(), story.getUser().getNickname(), story.getUser().getProfileImage());
+        this.likesCount = story.getLikesCount();
 
     }
 
@@ -58,5 +60,9 @@ public class StoryGetDetailResponse {
             this.nickname = nickname;
             this.profileImage = profileImage;
         }
+    }
+
+    public void liked(boolean liked) {
+        this.liked = liked;
     }
 }

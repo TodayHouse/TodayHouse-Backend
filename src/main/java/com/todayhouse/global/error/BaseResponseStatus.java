@@ -101,6 +101,12 @@ public enum BaseResponseStatus {
     // image
     NOT_FOUND_IMAGE(false, 3400, "해당하는 이미지를 찾을 수 없습니다."),
 
+    // like
+    LIKES_DUPLICATE_EXCEPTION(false, 3500, "이미 좋아요한 항목입니다."),
+    LIKESTYPE_MISMATCH(false,3501 , "잘못된 좋아요 요청입니다. type을 확인하세요"),
+    LIKES_NOT_FOUND(false, 3502, "좋아요한 기록이 없습니다"),
+    LIKES_DELETE_EXCEPTION(false, 3503, "삭제에 실패했습니다."),
+
     // 4000 : AWS S3 관련 오류
     IMAGE_FILE_IO_EXCEPTION(false, 4000, "이미지파일을 다루는 과정에서 오류가 발생하였습니다."),
     AMAZON_CLIENT_EXCEPTION(false, 4001, "아마존 서버에 업로드하는 과정에서 오류가 발생했습니다."),

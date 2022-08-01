@@ -4,6 +4,7 @@ import com.todayhouse.domain.image.application.ImageService;
 import com.todayhouse.domain.image.dao.StoryImageRepository;
 import com.todayhouse.domain.image.domain.Image;
 import com.todayhouse.domain.image.domain.StoryImage;
+import com.todayhouse.domain.likes.dao.LikesStoryRepository;
 import com.todayhouse.domain.story.dao.StoryRepository;
 import com.todayhouse.domain.story.domain.Story;
 import com.todayhouse.domain.story.dto.reqeust.StoryCreateRequest;
@@ -16,6 +17,8 @@ import com.todayhouse.domain.user.application.CustomUserDetailService;
 import com.todayhouse.domain.user.dao.UserRepository;
 import com.todayhouse.domain.user.domain.User;
 import com.todayhouse.domain.user.exception.UserNotFoundException;
+import com.todayhouse.global.error.BaseException;
+import com.todayhouse.global.error.BaseResponseStatus;
 import com.todayhouse.infra.S3Storage.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,6 +46,8 @@ public class StoryServiceImpl implements StoryService {
     private final StoryRepository storyRepository;
     private final StoryImageRepository storyImageRepository;
     private final CustomUserDetailService customUserDetailService;
+
+    private final LikesStoryRepository likesStoryRepository;
 
     @Override
     public Long saveStory(List<MultipartFile> multipartFile, StoryCreateRequest request) {
@@ -74,12 +79,17 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public StoryGetDetailResponse findById(Long id) {
+    public StoryGetDetailResponse findById(User user, Long id) {
         Story story = getStoryWithUser(id);
         List<String> urls = storyImageRepository.findByStory(story).stream()
                 .map(image -> fileService.changeFileNameToUrl(image.getFileName())).collect(Collectors.toList());
         story.increaseView();
-        return new StoryGetDetailResponse(story, urls);
+        StoryGetDetailResponse storyGetDetailResponse = new StoryGetDetailResponse(story, urls);
+        if (user != null) {
+            storyGetDetailResponse.liked(likesStoryRepository.existsByUser_EmailAndStory_Id(user.getEmail(), id));
+
+        }
+        return storyGetDetailResponse;
     }
 
     private Story getStory(Long id) {
@@ -102,7 +112,7 @@ public class StoryServiceImpl implements StoryService {
     @Override
     @Transactional(readOnly = true)
     public Slice<StoryGetListResponse> findByUserNickname(String nickname, Pageable pageable) {
-        User user = userRepository.findByNickname(nickname).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByNickname(nickname).orElseThrow(() -> new BaseException(BaseResponseStatus.USER_NOT_FOUND));
         Slice<Story> stories = storyRepository.findAllByUser(user, pageable);
         Map<Story, Boolean> scrapedStoriesMap = getScrapedStoriesMap(stories.getContent(), user);
         return stories.map(story -> new StoryGetListResponse(story, imageService.findThumbnailUrl(story), scrapedStoriesMap.getOrDefault(story, false)));

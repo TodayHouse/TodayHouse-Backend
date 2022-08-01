@@ -1,15 +1,16 @@
 package com.todayhouse.domain.product.domain;
 
 import com.todayhouse.domain.category.domain.Category;
+import com.todayhouse.domain.likes.domain.LikesProduct;
 import com.todayhouse.domain.product.dto.request.ProductUpdateRequest;
-import com.todayhouse.domain.product.exception.SellerNotSettingException;
 import com.todayhouse.domain.user.domain.Seller;
 import com.todayhouse.global.common.BaseTimeEntity;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -51,6 +52,13 @@ public class Product extends BaseTimeEntity {
 
     private String selectionOption;
 
+    @Formula(
+            ("select count(1) from likes l " +
+            "where l.product_id = id")
+    )
+    @Basic(fetch = FetchType.LAZY)
+    private Integer likesCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
@@ -64,6 +72,9 @@ public class Product extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SelectionOption> selectionOptions = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<LikesProduct> likesProducts = new HashSet<>();
 
     @Builder
     public Product(String title, String image, int price, int discountRate, int deliveryFee, boolean specialPrice,
@@ -103,5 +114,9 @@ public class Product extends BaseTimeEntity {
 
     public void updateImage(String image) {
         this.image = image;
+    }
+
+    public Integer getLikesCount() {
+        return getLikesProducts().size();
     }
 }

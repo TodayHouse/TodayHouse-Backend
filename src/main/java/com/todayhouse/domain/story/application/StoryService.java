@@ -5,6 +5,7 @@ import com.todayhouse.domain.story.dto.reqeust.StorySearchRequest;
 import com.todayhouse.domain.story.dto.reqeust.StoryUpdateRequest;
 import com.todayhouse.domain.story.dto.response.StoryGetDetailResponse;
 import com.todayhouse.domain.story.dto.response.StoryGetListResponse;
+import com.todayhouse.domain.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -20,7 +21,7 @@ public interface StoryService {
 
     Page<StoryGetListResponse> searchStory(StorySearchRequest request, Pageable pageable);
 
-    StoryGetDetailResponse findById(Long id);
+    StoryGetDetailResponse findById(User user, Long id);
 
     Slice<StoryGetListResponse> findByUser(Pageable pageable);
 

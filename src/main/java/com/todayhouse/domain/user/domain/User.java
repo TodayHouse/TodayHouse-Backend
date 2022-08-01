@@ -1,5 +1,6 @@
 package com.todayhouse.domain.user.domain;
 
+import com.todayhouse.domain.likes.domain.Likes;
 import com.todayhouse.domain.user.dto.request.SellerRequest;
 import com.todayhouse.domain.user.oauth.dto.request.OAuthSignupRequest;
 import lombok.AllArgsConstructor;
@@ -14,10 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -67,6 +65,8 @@ public class User implements UserDetails {
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
+    @OneToMany(mappedBy = "user")
+    private Set<Likes> likes;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
